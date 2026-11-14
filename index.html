@@ -1,435 +1,232 @@
 
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>DAGA TEST</title>
-
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#edf3ff;color:#18345d;font-family:Arial,sans-serif}
-header{background:#fff;padding:18px;border-bottom:2px solid #1769db}
-header h1{margin:0;color:#1769db;letter-spacing:2px}
-header small{color:#7185a5}
-main{max-width:850px;margin:auto;padding:14px}
-.card{background:#fff;border:1px solid #d5e2f5;border-radius:13px;padding:16px;margin:12px 0}
-input,textarea,button{width:100%;padding:13px;margin:6px 0;border-radius:9px;border:1px solid #cbdaf0;background:#f7faff;color:#18345d}
-textarea{min-height:100px;resize:vertical}
-button{background:#1769db;color:white;border:0;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.5}
-nav{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:14px 0}
-nav button{background:#e5efff;color:#1769db;border:1px solid #cbdaf0}
-nav button.active{background:#1769db;color:white}
-.hidden{display:none!important}
-.item{background:#f1f6ff;border:1px solid #d5e2f5;border-radius:10px;padding:15px;margin:9px 0;cursor:pointer}
-.item:active{border-color:#1769db}
-.orange{color:#1769db}
-.muted{color:#7185a5;font-size:13px}
-.tag{display:inline-block;background:#e5efff;color:#1769db;padding:5px 9px;border-radius:20px;font-size:12px}
-.post,.complaint{border-top:1px solid #d5e2f5;padding:12px 0}
-h2{margin-top:4px}
-footer{text-align:center;color:#7185a5;padding:25px;font-size:12px}
-
-#loading{
-position:fixed;inset:0;background:#fff;z-index:9999;
-display:flex;flex-direction:column;align-items:center;
-justify-content:center;color:#1769db
-}
-#loading h1{font-size:34px;letter-spacing:3px}
-.loader{width:190px;height:7px;background:#dce8fb;border-radius:20px;overflow:hidden}
-.loader:after{content:"";display:block;height:100%;width:0;background:#1769db;animation:loading 2s forwards}
-@keyframes loading{to{width:100%}}
+body{margin:0;background:#eef3fb;color:#172b49;font-family:Arial}
+header{background:#1769d2;color:white;padding:20px;text-align:center}
+main{max-width:950px;margin:20px auto;padding:12px}
+.card{background:white;border-radius:14px;padding:18px;margin:12px 0;box-shadow:0 3px 14px #17365b12}
+input,select,textarea,button{width:100%;padding:12px;margin:6px 0;border:1px solid #cbd8e9;border-radius:9px;font-size:15px}
+button{background:#1769d2;color:white;border:0;font-weight:bold;cursor:pointer}
+button.secondary{background:#e5efff;color:#1756a0}
+.hidden{display:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.item{background:#eaf2ff;padding:15px;border-radius:10px;text-align:center;cursor:pointer;font-weight:bold}
+h2{color:#1769d2}
+small{color:#61738b}
 </style>
 </head>
-
 <body>
-
-<div id="loading">
-<h1>DAGA TEST</h1>
-<p>Загрузка форума...</p>
-<div class="loader"></div>
-</div>
-
 <header>
 <h1>DAGA TEST</h1>
-<small>BLACK RUSSIA • FORUM</small>
+<p>Форум игрового сообщества</p>
 </header>
 
 <main>
-
-<section class="card" id="auth">
-<h2>Вход на форум</h2>
-<input id="nick" placeholder="Игровой ник">
-<input id="email" type="email" placeholder="Gmail">
-<input id="password" type="password" placeholder="Пароль форума">
+<section id="auth" class="card">
+<h2>Вход / Регистрация</h2>
+<input id="nick" placeholder="Ваш ник" maxlength="20">
+<input id="pass" type="password" placeholder="Пароль">
 <button onclick="register()">Регистрация</button>
-<button onclick="login()">Войти</button>
-<p id="authMessage" class="muted"></p>
+<button class="secondary" onclick="login()">Войти</button>
+<p id="authMsg"></p>
 </section>
 
-<section id="app" class="hidden">
+<section id="forum" class="hidden">
+<div class="card">
+<h2 id="welcome"></h2>
+<button class="secondary" onclick="logout()">Выйти</button>
+</div>
 
-<section class="card">
-<div class="muted">ТВОЙ ПРОФИЛЬ</div>
-<h3 id="profileName">Игрок</h3>
-<span class="tag" id="profileTitle">Игрок</span>
-<button onclick="logout()">Выйти из аккаунта</button>
-</section>
+<div class="card">
+<h2>Государство</h2>
+<div id="stateList" class="grid"></div>
+</div>
 
-<nav>
-<button class="active" onclick="openTab('home',this)">Главная</button>
-<button onclick="openTab('state',this)">Государство</button>
-<button onclick="openTab('crime',this)">Криминал</button>
-<button onclick="openTab('forum',this)">Форум</button>
-<button onclick="openTab('complaints',this)">Жалобы</button>
-<button id="developerButton" class="hidden" onclick="openTab('developer',this)">Разработчик</button>
-</nav>
+<div class="card">
+<h2>ОПГ</h2>
+<div id="crimeList" class="grid"></div>
+</div>
 
-<section id="home" class="tab card">
-<h2 class="orange">Добро пожаловать!</h2>
-<p>Форум сообщества DAGA TEST.</p>
-<p class="muted">Выбери нужный раздел в меню.</p>
-</section>
+<div id="orgPage" class="card hidden">
+<h2 id="orgTitle"></h2>
+<div id="orgContent"></div>
+<button class="secondary" onclick="closeOrg()">Назад</button>
+</div>
 
-<section id="state" class="tab card hidden">
-<h2 class="orange">Государственные организации</h2>
-<div id="stateList"></div>
-</section>
+<div class="card">
+<h2>Заявление на повышение</h2>
+<select id="applicationOrg"></select>
+<textarea id="applicationText" placeholder="Напишите заявление"></textarea>
+<button onclick="sendApplication()">Отправить на рассмотрение</button>
+</div>
 
-<section id="crime" class="tab card hidden">
-<h2 class="orange">Криминальные организации</h2>
-<div id="crimeList"></div>
-</section>
+<div class="card">
+<h2>Мои заявления</h2>
+<div id="myApplications">Пока нет заявлений</div>
+</div>
 
-<section id="organization" class="tab card hidden">
-<button onclick="backOrganizations()">← Назад</button>
-<h2 id="orgName" class="orange"></h2>
-<p>Информация организации</p>
-<div class="item">Правила организации</div>
-<div class="item">Руководство и состав</div>
-<div class="item">Ранги и должности</div>
-<div class="item">Новости и объявления</div>
-<div class="item">Заявления на вступление и повышение</div>
-</section>
+<div id="adminPanel" class="card hidden">
+<h2>Администрация</h2>
+<div id="applications"></div>
+</div>
 
-<section id="forum" class="tab card hidden">
-<h2 class="orange">Общий форум</h2>
-<textarea id="postText" placeholder="Напиши сообщение..."></textarea>
-<button onclick="publishPost()">Опубликовать</button>
-<div id="posts"></div>
-</section>
-
-<section id="complaints" class="tab card hidden">
-<h2 class="orange">Жалобы</h2>
-<p class="muted">Опиши ситуацию и приложи ссылку на доказательства, если они есть.</p>
-<input id="targetNick" placeholder="Ник нарушителя">
-<input id="complaintSubject" placeholder="Тема жалобы">
-<textarea id="complaintText" placeholder="Подробное описание"></textarea>
-<input id="evidence" placeholder="Ссылка на доказательства (необязательно)">
-<button onclick="sendComplaint()">Отправить жалобу</button>
-<p id="complaintMessage" class="muted"></p>
-<h3>Мои жалобы</h3>
-<div id="myComplaints"></div>
-</section>
-
-<section id="developer" class="tab card hidden">
-<h2 class="orange">Панель разработчика</h2>
-<p>Wells_ohhotnik — Главный разработчик</p>
-<p class="muted">Здесь отображаются жалобы для рассмотрения.</p>
-<div id="allComplaints"></div>
-</section>
-
+<div id="developerPanel" class="card hidden">
+<h2>Панель разработчика</h2>
+<p>Wells_Ohhotnik — Разработчик</p>
+<p>Назначение настоящих прав выполняется через защищённую систему Firebase.</p>
+</div>
 </section>
 </main>
 
-<footer>DAGA TEST • COMMUNITY FORUM</footer>
-
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
-
 <script>
-const firebaseConfig = {
-apiKey: "AIzaSyArqx-dZ_RCj34CWV92WibEgJQ1USkXr2M",
-authDomain: "forum-148a4.firebaseapp.com",
-databaseURL: "https://forum-148a4-default-rtdb.firebaseio.com",
-projectId: "forum-148a4",
-storageBucket: "forum-148a4.firebasestorage.app",
-messagingSenderId: "1054277351501",
-appId: "1:1054277351501:web:653af5526d39489e5e0404",
-measurementId: "G-D6JYX90THH"
-};
+const DEVELOPER_UID = "oEfrMISFDeSgODsdlswvxwH7RK62";
 
-firebase.initializeApp(firebaseConfig);
-const auth=firebase.auth();
-const db=firebase.database();
+const stateOrgs = ["УМВД","ГИБДД","СМИ","ЦБ","Армия"];
+const crimeOrgs = ["Лыткарино","Арзамас","Батыровка"];
 
-const DEVELOPER_UID="oEfrMISFDeSgODsdlswvxwH7RK62";
-let currentProfile=null;
-let isDeveloper=false;
-let previousOrgTab="state";
+const adminRanks = [
+"Младший модератор",
+"Модератор",
+"Старший модератор",
+"Младший администратор",
+"Администратор",
+"Старший администратор",
+"Куратор",
+"Технический специалист",
+"Заместитель главной администрации",
+"Главный администратор",
+"Заместитель разработчика",
+"Разработчик"
+];
 
-const stateOrgs=["УМВД","ГИБДД","Армия","ЦБ","СМИ","ФСИН"];
-const crimeOrgs=["Лыткарино","Арзамас","Батыровка"];
+let users = JSON.parse(localStorage.getItem("daga_users") || "{}");
+let apps = JSON.parse(localStorage.getItem("daga_apps") || "[]");
+let current = null;
 
-function showMessage(id,text){
-document.getElementById(id).textContent=text;
+function save(){
+ localStorage.setItem("daga_users",JSON.stringify(users));
+ localStorage.setItem("daga_apps",JSON.stringify(apps));
 }
 
-async function register(){
-const nick=document.getElementById("nick").value.trim();
-const email=document.getElementById("email").value.trim();
-const password=document.getElementById("password").value;
-
-if(!nick||!email||password.length<6){
-showMessage("authMessage","Заполни ник, Gmail и пароль минимум из 6 символов.");
-return;
+function register(){
+ let n=nick.value.trim();
+ let p=pass.value;
+ if(!/^[a-zA-Z0-9_]{3,20}$/.test(n)){
+  authMsg.textContent="Ник: 3–20 латинских букв, цифр или _";
+  return;
+ }
+ if(p.length<6){authMsg.textContent="Пароль минимум 6 символов";return}
+ let key=n.toLowerCase();
+ if(users[key]){authMsg.textContent="Этот ник уже занят";return}
+ users[key]={nick:n,password:p,role:"player"};
+ save();
+ authMsg.textContent="Регистрация успешна. Теперь войдите.";
 }
 
-try{
-const result=await auth.createUserWithEmailAndPassword(email,password);
-await db.ref("users/"+result.user.uid).set({
-nick:nick,title:"Игрок",createdAt:Date.now()
-});
-showMessage("authMessage","Аккаунт создан!");
-}catch(e){
-showMessage("authMessage",e.message);
-}
-}
-
-async function login(){
-try{
-await auth.signInWithEmailAndPassword(
-document.getElementById("email").value.trim(),
-document.getElementById("password").value
-);
-}catch(e){
-showMessage("authMessage","Не удалось войти: "+e.message);
-}
+function login(){
+ let key=nick.value.trim().toLowerCase();
+ let p=pass.value;
+ if(!users[key] || users[key].password!==p){
+  authMsg.textContent="Неверный ник или пароль";return;
+ }
+ current=key;
+ showForum();
 }
 
-function logout(){auth.signOut();}
-
-function openTab(id,button){
-document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));
-document.getElementById(id).classList.remove("hidden");
-document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
-if(button)button.classList.add("active");
+function showForum(){
+ auth.classList.add("hidden");
+ forum.classList.remove("hidden");
+ welcome.textContent="Добро пожаловать, "+users[current].nick;
+ stateList.innerHTML="";
+ crimeList.innerHTML="";
+ [...stateOrgs].forEach(o=>addOrg(stateList,o));
+ [...crimeOrgs].forEach(o=>addOrg(crimeList,o));
+ applicationOrg.innerHTML=[...stateOrgs,...crimeOrgs]
+  .map(o=>`<option>${o}</option>`).join("");
+ let role=users[current].role;
+ adminPanel.classList.toggle("hidden",!["admin","developer"].includes(role));
+ developerPanel.classList.toggle("hidden",role!=="developer");
+ renderApplications();
+ renderMine();
 }
 
-function makeOrgCards(){
-const state=document.getElementById("stateList");
-const crime=document.getElementById("crimeList");
-state.innerHTML="";
-crime.innerHTML="";
-stateOrgs.forEach(name=>addOrgCard(state,name,"state"));
-crimeOrgs.forEach(name=>addOrgCard(crime,name,"crime"));
+function addOrg(parent,name){
+ let div=document.createElement("div");
+ div.className="item";
+ div.textContent=name;
+ div.onclick=()=>openOrg(name);
+ parent.appendChild(div);
 }
 
-function addOrgCard(parent,name,type){
-const item=document.createElement("div");
-item.className="item";
-const title=document.createElement("b");
-title.textContent=(type==="state"?"🏛️ ":"🛡️ ")+name;
-const hint=document.createElement("div");
-hint.className="muted";
-hint.textContent="Открыть страницу организации →";
-item.append(title,hint);
-item.onclick=()=>openOrganization(name,type);
-parent.appendChild(item);
+function openOrg(name){
+ orgPage.classList.remove("hidden");
+ orgTitle.textContent=name;
+ let isState=stateOrgs.includes(name);
+ orgContent.innerHTML=isState
+ ? "<h3>Младший состав</h3><p>Участники младшего состава</p><h3>Старший состав</h3><p>Участники старшего состава</p>"
+ : "<h3>Состав организации</h3><p>Участники "+name+"</p>";
+}
+function closeOrg(){orgPage.classList.add("hidden")}
+
+function sendApplication(){
+ let text=applicationText.value.trim();
+ if(!text){alert("Напишите заявление");return}
+ apps.push({
+  id:Date.now(),user:current,
+  org:applicationOrg.value,
+  text,status:"На рассмотрении"
+ });
+ save();applicationText.value="";
+ renderApplications();renderMine();
+ alert("Заявление отправлено на рассмотрение");
 }
 
-function openOrganization(name,type){
-previousOrgTab=type;
-document.getElementById("orgName").textContent=name;
-document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));
-document.getElementById("organization").classList.remove("hidden");
+function renderMine(){
+ let mine=apps.filter(a=>a.user===current);
+ myApplications.innerHTML=mine.length
+ ?mine.map(a=>`<p><b>${a.org}</b> — ${a.status}</p>`).join("")
+ :"Пока нет заявлений";
 }
 
-function backOrganizations(){
-document.getElementById("organization").classList.add("hidden");
-document.getElementById(previousOrgTab).classList.remove("hidden");
+function renderApplications(){
+ if(!["admin","developer"].includes(users[current].role))return;
+ applications.innerHTML="";
+ apps.forEach(a=>{
+  let div=document.createElement("div");
+  div.className="card";
+  let info=document.createElement("p");
+  info.textContent=a.user+" / "+a.org+" / "+a.text+" / "+a.status;
+  div.appendChild(info);
+  if(a.status==="На рассмотрении"){
+   ["Одобрено","Отклонено"].forEach(status=>{
+    let b=document.createElement("button");
+    b.textContent=status;
+    b.onclick=()=>changeStatus(a.id,status);
+    div.appendChild(b);
+   });
+  }
+  applications.appendChild(div);
+ });
 }
 
-async function publishPost(){
-const text=document.getElementById("postText").value.trim();
-if(!text)return;
-try{
-await db.ref("posts").push({
-uid:auth.currentUser.uid,
-nick:currentProfile.nick,
-text:text,
-createdAt:Date.now()
-});
-document.getElementById("postText").value="";
-}catch(e){
-alert("Не удалось опубликовать. Проверь правила Firebase.");
-}
+function changeStatus(id,status){
+ if(!["admin","developer"].includes(users[current].role))return;
+ let a=apps.find(x=>x.id===id);
+ if(a){a.status=status;save();renderApplications();renderMine()}
 }
 
-function loadPosts(){
-db.ref("posts").limitToLast(40).on("value",snap=>{
-const box=document.getElementById("posts");
-box.innerHTML="";
-snap.forEach(child=>{
-const p=child.val();
-const div=document.createElement("div");
-div.className="post";
-const name=document.createElement("b");
-name.textContent=(p.nick||"Игрок")+" ";
-const body=document.createElement("div");
-body.textContent=p.text||"";
-const date=document.createElement("div");
-date.className="muted";
-date.textContent=p.createdAt?new Date(p.createdAt).toLocaleString("ru-RU"):"";
-div.append(name,body,date);
-box.prepend(div);
-});
-});
+function logout(){
+ current=null;
+ forum.classList.add("hidden");
+ auth.classList.remove("hidden");
 }
 
-async function sendComplaint(){
-const target=document.getElementById("targetNick").value.trim();
-const subject=document.getElementById("complaintSubject").value.trim();
-const description=document.getElementById("complaintText").value.trim();
-const evidence=document.getElementById("evidence").value.trim();
-
-if(!target||!subject||!description){
-showMessage("complaintMessage","Заполни ник, тему и описание.");
-return;
-}
-
-try{
-await db.ref("complaints").push({
-uid:auth.currentUser.uid,
-author:currentProfile.nick,
-target:target,
-subject:subject,
-description:description,
-evidence:evidence,
-status:"На рассмотрении",
-createdAt:Date.now()
-});
-document.getElementById("targetNick").value="";
-document.getElementById("complaintSubject").value="";
-document.getElementById("complaintText").value="";
-document.getElementById("evidence").value="";
-showMessage("complaintMessage","Жалоба отправлена!");
-}catch(e){
-showMessage("complaintMessage","Ошибка отправки. Проверь правила Firebase.");
-}
-}
-
-function loadMyComplaints(uid){
-db.ref("complaints").orderByChild("uid").equalTo(uid).on("value",snap=>{
-const box=document.getElementById("myComplaints");
-box.innerHTML="";
-snap.forEach(child=>{
-const c=child.val();
-const div=document.createElement("div");
-div.className="complaint";
-const title=document.createElement("b");
-title.textContent=c.subject||"Жалоба";
-const details=document.createElement("div");
-details.textContent="На игрока: "+(c.target||"не указан");
-const status=document.createElement("span");
-status.className="tag";
-status.textContent=c.status||"На рассмотрении";
-div.append(title,details,status);
-box.prepend(div);
-});
-});
-}
-
-function loadAllComplaints(){
-db.ref("complaints").on("value",snap=>{
-const box=document.getElementById("allComplaints");
-box.innerHTML="";
-snap.forEach(child=>{
-const c=child.val();
-const div=document.createElement("div");
-div.className="complaint";
-const info=document.createElement("p");
-info.textContent=(c.subject||"Жалоба")+" — "+(c.author||"Игрок")+" → "+(c.target||"");
-const desc=document.createElement("p");
-desc.textContent=c.description||"";
-const status=document.createElement("p");
-status.className="tag";
-status.textContent=c.status||"На рассмотрении";
-
-const approve=document.createElement("button");
-approve.textContent="Одобрить";
-approve.onclick=()=>setComplaintStatus(child.key,"Одобрено");
-
-const reject=document.createElement("button");
-reject.textContent="Отказать";
-reject.onclick=()=>setComplaintStatus(child.key,"Отказано");
-
-div.append(info,desc,status,approve,reject);
-box.append(div);
-});
-});
-}
-
-async function setComplaintStatus(id,status){
-if(!isDeveloper)return;
-try{
-await db.ref("complaints/"+id+"/status").set(status);
-}catch(e){
-alert("Нет разрешения. Проверь правила Firebase.");
-}
-}
-
-auth.onAuthStateChanged(async user=>{
-const authBox=document.getElementById("auth");
-const app=document.getElementById("app");
-
-if(!user){
-authBox.classList.remove("hidden");
-app.classList.add("hidden");
-return;
-}
-
-try{
-const snap=await db.ref("users/"+user.uid).get();
-currentProfile=snap.val();
-
-if(!currentProfile){
-await auth.signOut();
-showMessage("authMessage","Профиль не найден. Зарегистрируйся заново.");
-return;
-}
-
-const staffSnap=await db.ref("staff/"+user.uid).get();
-const staff=staffSnap.val();
-
-isDeveloper=(user.uid===DEVELOPER_UID && staff?.role==="developer");
-
-document.getElementById("profileName").textContent=currentProfile.nick||"Игрок";
-document.getElementById("profileTitle").textContent=
-isDeveloper?"Главный разработчик":(currentProfile.title||"Игрок");
-
-document.getElementById("developerButton").classList.toggle("hidden",!isDeveloper);
-
-authBox.classList.add("hidden");
-app.classList.remove("hidden");
-
-makeOrgCards();
-loadPosts();
-loadMyComplaints(user.uid);
-if(isDeveloper)loadAllComplaints();
-
-}catch(e){
-showMessage("authMessage","Ошибка базы данных. Проверь настройки Firebase.");
-}
-});
-
-setTimeout(()=>{
-document.getElementById("loading").classList.add("hidden");
-},2200);
 </script>
-
 </body>
 </html>
