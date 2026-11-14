@@ -1,0 +1,185 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DAGA TEST</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#edf3ff;color:#18345d}
+button,input{font:inherit}
+button{border:0;border-radius:10px;padding:13px;background:#1769db;color:white;cursor:pointer}
+input{width:100%;padding:13px;margin:8px 0;border:1px solid #c9d9f4;border-radius:10px}
+header{background:white;padding:18px;color:#1769db;font-size:23px;font-weight:bold;box-shadow:0 2px 12px #ccd8ec}
+.page{max-width:650px;margin:25px auto;padding:18px}
+.card{background:white;padding:22px;border-radius:16px;box-shadow:0 5px 20px #d5e1f4;margin-bottom:15px}
+.center{text-align:center}
+.hidden{display:none!important}
+#loading{position:fixed;inset:0;background:#fff;display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:10}
+.logo{font-size:35px;font-weight:bold;color:#1769db}
+.bar{width:210px;height:8px;background:#dce8fb;border-radius:20px;margin-top:20px;overflow:hidden}
+.progress{height:100%;width:0;background:#1769db;animation:load 2s forwards}
+@keyframes load{to{width:100%}}
+.avatar{width:100px;height:100px;border-radius:50%;object-fit:cover;background:#dce8fb}
+.section{padding:15px;background:#f2f6ff;border-radius:10px;margin:9px 0}
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="logo">DAGA TEST</div>
+  <p>Загрузка форума...</p>
+  <div class="bar"><div class="progress"></div></div>
+</div>
+
+<header>DAGA TEST</header>
+
+<div class="page">
+
+<section id="auth" class="card center hidden">
+  <h2>Добро пожаловать!</h2>
+  <p>Войди или создай аккаунт</p>
+  <input id="nick" placeholder="Твой ник">
+  <input id="password" type="password" placeholder="Пароль">
+  <button onclick="register()">Регистрация</button>
+  <button onclick="login()" style="background:#e8f0ff;color:#1769db">Войти</button>
+  <p id="message"></p>
+</section>
+
+<section id="forum" class="hidden">
+  <div class="card">
+    <h2>Главная форума</h2>
+    <p>Добро пожаловать, <b id="welcome"></b>!</p>
+    <button onclick="showProfile()">Мой профиль</button>
+    <button onclick="logout()" style="background:#e34d5b">Выйти</button>
+  </div>
+
+  <div class="card">
+    <h3>Государственные организации</h3>
+    <div class="section">УМВД</div>
+    <div class="section">ГИБДД</div>
+    <div class="section">Армия</div>
+    <div class="section">ЦБ</div>
+    <div class="section">СМИ</div>
+    <div class="section">ФСИН</div>
+  </div>
+
+  <div class="card">
+    <h3>Криминальные организации</h3>
+    <div class="section">ОПГ Лыткарино</div>
+    <div class="section">ОПГ Арзамас</div>
+    <div class="section">ОПГ Батыровка</div>
+  </div>
+
+  <div class="card">
+    <h3>Другие разделы</h3>
+    <div class="section">Жалобы</div>
+    <div class="section">Общий форум</div>
+    <div class="section">Администрация</div>
+  </div>
+</section>
+
+<section id="profile" class="card center hidden">
+  <h2>Мой профиль</h2>
+  <img id="avatar" class="avatar" alt="Фото профиля">
+  <p id="profileNick"></p>
+  <input type="file" id="photo" accept="image/*">
+  <button onclick="savePhoto()">Сохранить фото</button>
+  <p><button onclick="backForum()">Назад на форум</button></p>
+</section>
+
+</div>
+
+<script>
+const USERS_KEY="daga_test_users";
+let currentUser=null;
+
+function users(){
+  try{return JSON.parse(localStorage.getItem(USERS_KEY)||"{}")}
+  catch{return {}}
+}
+
+function show(id){
+  ["auth","forum","profile"].forEach(x=>
+    document.getElementById(x).classList.add("hidden")
+  );
+  document.getElementById(id).classList.remove("hidden");
+}
+
+function register(){
+  const n=document.getElementById("nick").value.trim();
+  const p=document.getElementById("password").value;
+  const db=users();
+
+  if(n.length<3||p.length<6){
+    message("Ник от 3 символов, пароль от 6 символов");
+    return;
+  }
+  if(db[n.toLowerCase()]){
+    message("Такой ник уже занят");
+    return;
+  }
+
+  db[n.toLowerCase()]={nick:n,password:p,photo:""};
+  localStorage.setItem(USERS_KEY,JSON.stringify(db));
+  currentUser=n.toLowerCase();
+  openForum();
+}
+
+function login(){
+  const n=document.getElementById("nick").value.trim().toLowerCase();
+  const p=document.getElementById("password").value;
+  const db=users();
+
+  if(!db[n]||db[n].password!==p){
+    message("Неверный ник или пароль");
+    return;
+  }
+  currentUser=n;
+  openForum();
+}
+
+function message(t){
+  document.getElementById("message").textContent=t;
+}
+
+function openForum(){
+  document.getElementById("welcome").textContent=users()[currentUser].nick;
+  show("forum");
+}
+
+function showProfile(){
+  const u=users()[currentUser];
+  document.getElementById("profileNick").textContent=u.nick;
+  document.getElementById("avatar").src=u.photo||"";
+  show("profile");
+}
+
+function savePhoto(){
+  const file=document.getElementById("photo").files[0];
+  if(!file)return alert("Выбери фотографию");
+  if(!file.type.startsWith("image/"))return alert("Нужна фотография");
+  if(file.size>2*1024*1024)return alert("Фото должно быть до 2 МБ");
+
+  const reader=new FileReader();
+  reader.onload=()=>{
+    const db=users();
+    db[currentUser].photo=reader.result;
+    localStorage.setItem(USERS_KEY,JSON.stringify(db));
+    document.getElementById("avatar").src=reader.result;
+    alert("Фото сохранено");
+  };
+  reader.readAsDataURL(file);
+}
+
+function backForum(){openForum()}
+function logout(){currentUser=null;show("auth")}
+
+setTimeout(()=>{
+  document.getElementById("loading").classList.add("hidden");
+  show("auth");
+},2200);
+</script>
+</body>
+    </html>
