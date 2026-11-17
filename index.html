@@ -1,249 +1,514 @@
-<!DOCTYPE html>
-<html lang="kk">
+
+<!doctype html>
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ТҮН - БЫЛАЙ + ЖАЛПАҚ</title>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>ЛАПОЧКА — 3D Horror</title>
 <style>
-*{box-sizing:border-box;touch-action:manipulation}
-body{background:#0a0000;color:#fff;font-family:sans-serif;text-align:center;margin:0;padding:0}
-button{background:#ff4757;color:#fff;border:none;padding:15px;border-radius:14px;font-size:18px;width:100%;margin:6px 0;cursor:pointer;font-weight:bold}
-button.green{background:#2ed573} button.blue{background:#1e90ff}
-input{padding:14px;border-radius:14px;border:1px solid #444;background:#1e1e35;color:#fff;font-size:18px;margin:6px 0;text-align:center;width:100%}
-.card{background:#1e1e35;padding:14px;border-radius:16px;width:100%;max-width:360px;margin:10px auto;text-align:left;border:1px solid #444}
-/* ✅ СУРЕТТЕГІДЕЙ - ҚАРА ҚЫЗЫЛ ФОН */
-#menu{background:radial-gradient(circle at top, #2a0000 0%, #000 70%)}
-#loader{position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center}
-#loader h1{font-size:50px;color:#ff0000;text-shadow:0 0 20px red;animation:flicker .8s infinite}
-@keyframes flicker{0%{opacity:1}20%{opacity:.2}40%{opacity:1}60%{opacity:.1}80%{opacity:1}100%{opacity:.8}}
-.loadBar{width:80%;max-width:300px;height:12px;background:#222;border-radius:10px;overflow:hidden;margin:15px 0}
-#loadFill{height:100%;width:0%;background:red}
-#menu{position:fixed;inset:0;z-index:9998;display:none;overflow-y:auto;padding:15px;padding-bottom:100px}
-/* ✅ СУРЕТТЕГІДЕЙ - СҰР КНОПКАЛАР */
-.genderBtn{padding:14px;border-radius:14px;border:2px solid #555;background:#2a2a2a;color:#fff;font-size:17px;width:100%;margin:5px 0;cursor:pointer}
-.genderBtn.sel{background:#1e90ff!important;border-color:#fff!important;box-shadow:0 0 15px #1e90ff}
-.genderBtn.girlSel{background:#ff69b4!important;border-color:#fff!important;box-shadow:0 0 15px #ff69b4}
-.colorDot{width:48px;height:48px;border-radius:50%;display:inline-block;margin:4px;cursor:pointer;border:3px solid transparent;box-shadow:0 3px 10px rgba(0,0,0,.5)}
-.colorDot.sel{border-color:#fff!important;transform:scale(1.15);box-shadow:0 0 15px #fff}
-.playerBtn{width:55px;height:55px;border-radius:50%;background:#222;border:2px solid #555;color:#fff;font-size:18px;display:inline-flex;justify-content:center;align-items:center;margin:4px;cursor:pointer}
-.playerBtn.sel{background:#ff4757;border-color:#fff}
-#mainGame{position:fixed;inset:0;display:none;background:#111;overflow-y:auto;padding:10px}
-#fp{width:100%;max-width:400px;height:260px;background:#000;border-radius:15px;border:2px solid #333}
-/* ✅ ЖАЛПАҚ ЭКРАН - БЫЛАЙ! */
-@media (orientation: landscape){
-  #menu{padding:10px}
-  #menu .card{max-width:700px}
-  #menu h1{font-size:28px;margin:2px}
-  #fp{max-width:700px;height:360px}
-  #mainGame .card{max-width:760px}
-  #mainGame .card button{width:48%;display:inline-block;margin:4px 1%}
-  #joyBase{width:110px;height:110px}
-}
-@media (orientation: landscape) and (max-height:500px){
-  #fp{max-width:55vw;height:55vh;float:left;margin-right:12px}
-  #minimap{width:55vw!important;height:40px!important;float:left}
-}
-#joyBase{width:130px;height:130px;background:rgba(255,255,255,.15);border:2px solid #fff;border-radius:50%;position:relative;margin:10px auto;touch-action:none}
-#joyKnob{position:absolute;top:50%;left:50%;width:55px;height:55px;background:#fff;border-radius:50%;transform:translate(-50%,-50%)}
-.skin{font-size:32px;padding:8px;cursor:pointer;border:2px solid transparent;border-radius:12px;display:inline-block}
-.skin.sel{border-color:#ff4757;background:#444}
-#voteScreen{position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:9990;display:none;flex-direction:column;justify-content:center;align-items:center;padding:10px}
-#chatBox{width:100%;max-width:340px;height:120px;background:#111;border:1px solid #444;border-radius:12px;overflow-y:auto;padding:8px;text-align:left;font-size:13px}
-#jumpscare{position:fixed;inset:0;background:#000;z-index:10000;display:none;justify-content:center;align-items:center;flex-direction:column}
-#roleReveal{position:fixed;inset:0;background:rgba(0,0,0,.97);z-index:9995;display:none;flex-direction:column;justify-content:center;align-items:center;padding:20px}
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #030406; font-family: Arial, sans-serif; }
+  canvas { display: block; }
+  #hud { position: fixed; inset: 0; pointer-events: none; color: #f4edf5; }
+  #topbar { position: absolute; top: 14px; left: 14px; right: 14px; display: flex; justify-content: space-between; gap: 12px; font-size: 13px; letter-spacing: 1px; text-shadow: 0 2px 8px #000; }
+  .pill { padding: 9px 12px; border: 1px solid #ffffff30; border-radius: 10px; background: #080a10a8; backdrop-filter: blur(5px); }
+  #crosshair { position: absolute; left: 50%; top: 50%; width: 7px; height: 7px; margin: -3px; border: 1px solid #fff9; border-radius: 50%; box-shadow: 0 0 8px #fff8; }
+  #hint { position: absolute; left: 50%; bottom: 25px; transform: translateX(-50%); padding: 9px 13px; border-radius: 8px; background: #05060bcc; color: #eee; font-size: 13px; text-align: center; max-width: 90%; }
+  #overlay { position: fixed; inset: 0; display: grid; place-items: center; padding: 22px; background: radial-gradient(ellipse at center, #191222e8, #020306f5 75%); color: white; z-index: 5; }
+  #panel { width: min(520px, 100%); padding: 28px 24px; text-align: center; border: 1px solid #f3c9ff44; border-radius: 20px; background: linear-gradient(145deg, #191322f2, #080a12f2); box-shadow: 0 18px 70px #000b, 0 0 35px #d36aff20; }
+  h1 { margin: 0 0 8px; color: #ffd5f4; font-size: clamp(34px, 8vw, 54px); letter-spacing: 5px; text-shadow: 0 0 22px #f09cff80; }
+  #subtitle { color: #c9b7d3; margin: 0 0 18px; }
+  #instructions { color: #ded8e5; font-size: 14px; line-height: 1.6; text-align: left; margin: 18px auto; max-width: 390px; }
+  button { border: 0; border-radius: 12px; padding: 13px 23px; background: linear-gradient(135deg, #f19bd8, #a77bff); color: #160d20; font-weight: 800; font-size: 16px; cursor: pointer; box-shadow: 0 7px 24px #c77aff55; }
+  #roomInput { width: min(300px, 100%); display: block; margin: 0 auto 12px; padding: 12px 14px; border-radius: 10px; border: 1px solid #e8a9e755; background: #080812; color: white; font-size: 16px; text-align: center; outline: none; }
+  #roomInfo { color: #cbbbd8; font-size: 12px; margin: 10px 0 0; }
+  button:active { transform: scale(.98); }
+  #message { min-height: 22px; margin-top: 14px; color: #ffc9ee; font-size: 13px; }
+  #mobile { position: fixed; inset: auto 0 16px 0; display: none; justify-content: space-between; align-items: end; padding: 0 18px; z-index: 3; pointer-events: none; }
+  .pad { display: grid; grid-template-columns: repeat(3, 48px); grid-template-rows: repeat(2, 48px); gap: 5px; pointer-events: auto; }
+  .pad button, #lookBtn { width: 48px; height: 48px; padding: 0; border: 1px solid #ffffff55; color: white; background: #14101dcc; box-shadow: none; font-size: 19px; touch-action: none; }
+  .pad .up { grid-column: 2; grid-row: 1; }
+  .pad .left { grid-column: 1; grid-row: 2; }
+  .pad .down { grid-column: 2; grid-row: 2; }
+  .pad .right { grid-column: 3; grid-row: 2; }
+  #rightControls { display: flex; gap: 8px; pointer-events: auto; }
+  #lookBtn { width: 58px; height: 58px; border-radius: 50%; font-size: 11px; }
+  #flashBtn { width: 58px; height: 58px; border-radius: 50%; padding: 0; font-size: 20px; border: 1px solid #ffffff55; color: white; background: #14101dcc; box-shadow: none; touch-action: none; }
+  @media (pointer: coarse) { #mobile { display: flex; } #hint { bottom: 150px; } #crosshair { opacity: .55; } }
 </style>
 </head>
 <body>
-<div id="loader"><div style="font-size:60px">👁️</div><h1>ТҮН</h1><p>БЫЛАЙ + ЖАЛПАҚ</p><div class="loadBar"><div id="loadFill"></div></div><div id="loadText">Загрузка... 0%</div><p id="creepyText" style="color:red"></p></div>
-
-<div id="menu">
-<div style="font-size:40px">👁️🔦</div>
-<h1 style="text-shadow:0 0 30px red;margin:5px">ТҮН</h1>
-<div style="color:#ff4757">БЫЛАЙ • ЖАЛПАҚ • 1+3+4</div>
-
-<div style="max-width:360px;margin:10px auto;display:flex;gap:6px">
-<button style="background:#1e90ff" onclick="goLandscape()">📱↔️ ЖАЛПАҚ ҚЫЛУ!</button>
-<button style="background:#333" onclick="goPortrait()">📱 Тік</button>
+<div id="hud">
+  <div id="topbar">
+    <div class="pill">ЛАПОЧКА <span style="color:#f4a9e5">•</span> НОЧЬ 01</div>
+    <div class="pill">ЗВЁЗДЫ: <span id="count">0</span>/3</div>
+    <div class="pill">ОНЛАЙН: <span id="playersCount">0</span></div>
+  </div>
+  <div id="crosshair"></div>
+  <div id="hint">Найди 3 светящиеся звезды и выберись из дома.</div>
 </div>
 
-<div style="background:#2a2a1a;border:2px solid #eccc68;border-radius:14px;padding:12px;max-width:360px;margin:10px auto;text-align:left">
-<b>📏 ЕРЕЖЕ:</b> 8 адам = <b>1 Импостер + 3 Рөл + 4 Без способностей</b> ✅
-<p style="font-size:12px;color:#eccc68;margin:5px 0 0" id="currentRuleText">Қазір: 8 адам = 1 + 3 + 4</p>
+<div id="mobile">
+  <div class="pad">
+    <button class="up" data-move="forward">▲</button>
+    <button class="left" data-move="left">◀</button>
+    <button class="down" data-move="back">▼</button>
+    <button class="right" data-move="right">▶</button>
+  </div>
+  <div id="rightControls">
+    <button id="flashBtn" aria-label="Фонарик">🔦</button>
+  </div>
 </div>
 
-<div class="card" style="border:3px solid #2ed573">
-<h3 style="text-align:center;margin:0">👤 АТЫҢ + 🎮 ОНЛАЙН</h3>
-<input id="myNameInput" placeholder="АТЫҢДЫ ЖАЗ" maxlength="12" style="text-transform:none">
-<button style="background:#2ed573;font-size:22px;padding:18px" onclick="createRoom()">🏠 БӨЛМЕ ҚҰРУ</button>
-<input id="joinCodeInput" placeholder="TUN-1234" style="text-transform:uppercase">
-<button style="background:#1e90ff" onclick="joinRoom()">🚪 КОДПЕН КІРУ</button>
-<p id="myCodeText" style="text-align:center;color:#2ed573;font-weight:bold;font-size:18px"></p>
-<p id="connStatus" style="text-align:center;color:#888;font-size:12px"></p>
+<div id="overlay">
+  <div id="panel">
+    <h1 id="panelTitle">ЛАПОЧКА</h1>
+    <p id="subtitle">Она просто хочет поиграть…</p>
+    <div id="instructions">
+      <b>ЗАДАНИЕ</b><br>
+      Найди в тёмном доме 3 светящиеся звезды. Затем доберись до красной двери. Игроки с одинаковым кодом комнаты видят друг друга.<br><br>
+      <b>УПРАВЛЕНИЕ</b><br>
+      Компьютер: WASD — ходить, мышь — смотреть, F — фонарик, Esc — пауза.<br>
+      Телефон: кнопки движения внизу, проводи пальцем по экрану, чтобы осматриваться.
+    </div>
+    <input id="roomInput" maxlength="20" value="LAPOCHKA1" autocomplete="off" spellcheck="false" aria-label="Код комнаты">
+    <button id="startBtn">ВОЙТИ В ОНЛАЙН</button>
+    <div id="roomInfo">Введи одинаковый код комнаты, чтобы встретиться с друзьями.</div>
+    <div id="message">Подключение требует включённой анонимной авторизации Firebase.</div>
+  </div>
 </div>
 
-<div class="card" id="lobbyCard" style="display:none;border:3px solid yellow">
-<h3 style="text-align:center">🏠 ЛОББИ - <span id="roomCodeShow"></span></h3><p style="text-align:center" id="lobbyStatus"></p><div id="playerList"></div><p style="text-align:center;font-size:13px;color:#eccc68" id="lobbyRuleText"></p>
-<button style="background:#2ed573;font-size:26px;padding:20px;border:3px solid white" onclick="startOnlineGame()">▶️ БАСТАУ!</button>
-<button style="background:#333" onclick="copyCode()">📋 Кодты көшіру</button>
-</div>
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js';
+import { getDatabase, ref, set, onValue, onDisconnect } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-database.js';
+import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js';
 
-<!-- ✅ СУРЕТТЕГІ БӨЛІМ - ТҮЗЕТІЛДІ! -->
-<div class="card">
-<h3 style="text-align:center">⚧️ Жынысың?</h3>
-<!-- ✅ ID қостым - енді шатаспайды! -->
-<button id="boyBtn" class="genderBtn sel" onclick="selectGender('boy',this)">👦 Ұл - Шалбар</button>
-<button id="girlBtn" class="genderBtn" onclick="selectGender('girl',this)">👧 Қыз - Юбка</button>
+const firebaseConfig = {
+  apiKey: "AIzaSyA4sTKOzeU59xkRmvexYh3VxKzMGmNRgOs",
+  authDomain: "karatel-test-1806a.firebaseapp.com",
+  databaseURL: "https://karatel-test-1806a-default-rtdb.firebaseio.com",
+  projectId: "karatel-test-1806a",
+  storageBucket: "karatel-test-1806a.firebasestorage.app",
+  messagingSenderId: "448237119572",
+  appId: "1:448237119572:web:b26c39d70555d39c04e5c1",
+  measurementId: "G-2B1ZH4LV4E"
+};
 
-<h3 style="text-align:center">🎨 Сенің түсің?</h3>
-<div style="text-align:center">
-<span class="colorDot sel" style="background:#ff4757" onclick="selectColor(this,'#ff4757','Қызыл')"></span>
-<span class="colorDot" style="background:#1e90ff" onclick="selectColor(this,'#1e90ff','Көк')"></span>
-<span class="colorDot" style="background:#2ed573" onclick="selectColor(this,'#2ed573','Жасыл')"></span>
-<span class="colorDot" style="background:#ffa502" onclick="selectColor(this,'#ffa502','Сары')"></span>
-<span class="colorDot" style="background:#a55eea" onclick="selectColor(this,'#a55eea','Күлгін')"></span>
-<span class="colorDot" style="background:#ff69b4" onclick="selectColor(this,'#ff69b4','Қызғылт')"></span>
-</div>
-<!-- ✅ ОСЫ ЖЕР ТҮЗЕТІЛДІ! Енді Қыз бассаң - Қыз деп шығады! -->
-<p style="text-align:center" id="myCharPreview">👦 Ұл • Қызыл Шалбар</p>
+const firebaseApp = initializeApp(firebaseConfig);
+const database = getDatabase(firebaseApp);
+const auth = getAuth(firebaseApp);
+let currentUid = null;
+let currentRoom = null;
+let localPlayerRef = null;
+let roomListener = null;
+let publishTimer = null;
+const remotePlayers = new Map();
 
-<h3 style="text-align:center">👥 Қанша адам?</h3>
-<div style="text-align:center"><span class="playerBtn" onclick="selectPlayers(4,this)">4</span><span class="playerBtn" onclick="selectPlayers(5,this)">5</span><span class="playerBtn" onclick="selectPlayers(6,this)">6</span><span class="playerBtn" onclick="selectPlayers(7,this)">7</span><span class="playerBtn sel" onclick="selectPlayers(8,this)">8</span><span class="playerBtn" onclick="selectPlayers(10,this)">10</span><span class="playerBtn" onclick="selectPlayers(12,this)">12</span></div>
-<p style="text-align:center;font-size:13px;color:#eccc68" id="rulePreview"></p>
-</div>
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x05050a);
+scene.fog = new THREE.FogExp2(0x090811, 0.045);
 
-<div class="card" style="border:2px solid #eccc68;background:#2a2a1a">
-<h3 style="text-align:center">⚖️ СУДЬЯ ЕРЕЖЕСІ - 1 РЕТ!</h3>
-<p style="font-size:13px;line-height:1.7">Дұрыс тапсаң +1 рет!<br>Қате тапсаң - өзің шығасың!</p>
-<p style="font-size:13px;line-height:1.7">😈 Импостер - 1 ғана! • ⭐ 3 Рөл Рандом • 🧑 4 Без способностей</p>
-</div>
+const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 90);
+camera.position.set(0, 1.65, 8);
 
-<div class="card">
-<button style="background:#1e90ff;font-size:24px;padding:20px;border:3px solid white" onclick="enterGame()">▶️ БАСТАУ - Боттармен!</button>
-<button style="background:#ffa502;color:black" onclick="goLandscape()">📱↔️ ЖАЛПАҚ ЭКРАНДА ОЙНАУ!</button>
-</div>
-</div>
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
 
-<div id="roleReveal"><div style="font-size:60px">🎲</div><h2>РОЛ ТАҢДАЛУДА...</h2><div id="rollingText" style="font-size:50px;margin:15px">🎲</div></div>
+scene.add(new THREE.HemisphereLight(0x9a8bb8, 0x17111c, 0.42));
+const moon = new THREE.DirectionalLight(0x9c91c9, 0.35);
+moon.position.set(-5, 9, 4);
+moon.castShadow = true;
+scene.add(moon);
 
-<div id="mainGame">
-<h2>🌑 ТҮН - ЖАЛПАҚ <span id="screenModeText">📱 Тік</span></h2>
-<div style="text-align:center"><button style="width:auto;padding:8px 14px;font-size:13px;background:#1e90ff" onclick="goLandscape()">📱↔️ Жалпақ</button> <button style="width:auto;padding:8px 14px;font-size:13px;background:#333" onclick="goPortrait()">📱 Тік</button> <button style="width:auto;padding:8px 14px;font-size:13px;background:#2ed573" onclick="toggleFullscreen()">⛶ Толық экран</button></div>
-<div class="card" style="text-align:center">
-<h2 id="roleTitle">🎲 ...</h2><p id="roleDesc" style="color:#ccc"></p><p id="posText">📍 Каюта</p>
-<p>🌐 Бөлме: <span id="hudRoomCode">-</span> | 👥 <span id="playerCountText">0</span></p>
-<canvas id="fp" width="800" height="520"></canvas>
-<canvas id="minimap" width="800" height="100" style="width:100%;height:100px;background:#111;border-radius:10px"></canvas>
-<div id="killBox" style="display:none;border:2px solid red;border-radius:12px;padding:10px;margin:8px 0">🔪 KILL: <span id="killTimerText">20 сек</span><div style="height:8px;background:#333;border-radius:10px;margin-top:5px"><div id="killFill" style="height:100%;width:100%;background:red"></div></div></div>
-<div id="judgeBox" style="display:none;color:#eccc68">⚖️ Судья: <span id="judgeCharges">1 рет</span></div>
-<div id="roleBox" style="display:none;color:#2ed573">⭐ Қабілет: <span id="roleAbilityText">Дайын!</span></div>
-<div id="noAbilityBox" style="display:none;color:#888;border:1px solid #555;border-radius:12px;padding:8px;margin:8px 0">🧑 Сен Без способностейсің! Тек задания!</div>
-<p>🕹️ Джойстик - тарт та жүр!</p><div id="joyBase"><div id="joyKnob"></div></div>
-<div style="display:flex;gap:5px"><button class="blue" onclick="turn(-1)">↩️ Солға</button><button class="blue" onclick="turn(1)">↪️ Оңға</button></div>
-<button style="background:#8b0000" onclick="killAction()">🔪 KILL - 20 сек!</button>
-<button style="background:#eccc68;color:black" onclick="useRoleAbility()">⭐ ҚАБІЛЕТ</button>
-<button style="background:#ffa502" onclick="openVote()">🗳️ ЖИНАЛЫС</button>
-<button style="background:#3742fa" onclick="useVent()">🕳️ VENT</button>
-<div id="impBox" style="display:none;border:2px solid red;border-radius:12px;padding:10px;margin:8px 0"><h3>😈 ВНЕШКА!</h3><div><span class="skin" onclick="selectVneshka(this,'🧑‍🚀')">🧑‍🚀</span><span class="skin" onclick="selectVneshka(this,'👩‍🚀')">👩‍🚀</span><span class="skin" onclick="selectVneshka(this,'🤖')">🤖</span><span class="skin" onclick="selectVneshka(this,'👽')">👽</span><span class="skin" onclick="selectVneshka(this,'🐱')">🐱</span><span class="skin" onclick="selectVneshka(this,'🦖')">🦖</span></div><button onclick="shapeshift()">😈 ВНЕШКА АУЫСТЫРУ!</button><p id="shiftMsg"></p></div>
-<button style="background:#ffe600;color:black" onclick="toggleFlash()">🔦 Фонарик</button>
-<p id="flashStatus">Фонарик: Қосулы | 🔋 <span id="batteryText">100%</span></p>
-<h3>Задания</h3><p id="taskText"></p><button class="green" onclick="doTask()">🔧 Задания істеу</button><p id="taskMsg"></p><p>Задания: <b id="doneText">0 / 3</b></p>
-<button onclick="location.reload()">🔄 Қайта бастау</button>
-</div>
-</div>
+const flashlight = new THREE.SpotLight(0xffe8cf, 65, 23, Math.PI / 7, 0.45, 1.4);
+flashlight.position.set(0, 0, 0);
+flashlight.castShadow = true;
+camera.add(flashlight);
+const flashlightTarget = new THREE.Object3D();
+flashlightTarget.position.set(0, 0, -1);
+camera.add(flashlightTarget);
+flashlight.target = flashlightTarget;
+camera.add(new THREE.PointLight(0xffd9b0, 1.1, 4));
+scene.add(camera);
 
-<div id="voteScreen"><h2>🗳️ ЖИНАЛЫС</h2><div id="chatBox"></div><div style="width:100%;max-width:340px;display:flex;gap:5px"><input id="chatInput" placeholder="💬 Жаз..." style="text-transform:none"><button onclick="sendChat()" style="width:30%">Жібер</button></div><div id="voteList" style="width:100%;max-width:340px"></div><button style="background:#eccc68;color:black;max-width:340px" onclick="voteFor('СКИП')">⏭️ СКИП</button><button style="background:#333;max-width:340px" onclick="closeVote()">❌ Жабу</button></div>
-<div id="jumpscare"><h1 style="font-size:100px">😈</h1><p style="color:red" id="jumpscareText">ИМПОСТЕР СЕНІ ҰСТАДЫ!</p><button style="max-width:300px" onclick="location.reload()">🔄 ҚАЙТА ОЙНАУ</button></div>
+const mat = (color, roughness=0.9, metalness=0) => new THREE.MeshStandardMaterial({ color, roughness, metalness });
+const wallMat = mat(0x292431), floorMat = mat(0x28212b), ceilingMat = mat(0x17151e);
+const woodMat = mat(0x4a3036), trimMat = mat(0x80616b), blackMat = mat(0x08070d);
+const pinkMat = new THREE.MeshStandardMaterial({ color: 0xe9a4cf, roughness: .55 });
+const eyeMat = new THREE.MeshStandardMaterial({ color: 0xffd5ef, emissive: 0xff4fc8, emissiveIntensity: 2.6 });
+const starMat = new THREE.MeshStandardMaterial({ color: 0xffdf80, emissive: 0xffa51b, emissiveIntensity: 2.8, metalness: .3, roughness: .3 });
 
-<script>
-let db=null;
-try{ const firebaseConfig={apiKey:"AIzaSyA4sTKOzeU59xkRmvexYh3VxKzMGmNRgOs",authDomain:"karatel-test-1806a.firebaseapp.com",databaseURL:"https://karatel-test-1806a-default-rtdb.firebaseio.com",projectId:"karatel-test-1806a",storageBucket:"karatel-test-1806a.firebasestorage.app",messagingSenderId:"448237119572",appId:"1:448237119572:web:b26c39d70555d39c04e5c1"}; firebase.initializeApp(firebaseConfig); db=firebase.database(); }catch(e){}
-function goLandscape(){ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); try{ if(screen.orientation && screen.orientation.lock) screen.orientation.lock('landscape').catch(()=>{}); }catch(e){} let t=document.getElementById('screenModeText'); if(t) t.innerText='📱↔️ Жалпақ!'; alert('📱↔️ Телефонды БҮЙІРІНЕН ұста! Жалпақ болады!'); }
-function goPortrait(){ try{ if(screen.orientation && screen.orientation.unlock) screen.orientation.unlock(); }catch(e){} if(document.exitFullscreen && document.fullscreenElement) document.exitFullscreen().catch(()=>{}); let t=document.getElementById('screenModeText'); if(t) t.innerText='📱 Тік'; }
-function toggleFullscreen(){ if(document.fullscreenElement){ document.exitFullscreen(); } else if(document.documentElement.requestFullscreen){ document.documentElement.requestFullscreen(); } }
-window.addEventListener('orientationchange', ()=>{ setTimeout(()=>{ let isLand=window.innerWidth>window.innerHeight; let t=document.getElementById('screenModeText'); if(t) t.innerText=isLand?'📱↔️ Жалпақ!':'📱 Тік'; draw(); },300); });
-window.addEventListener('resize', ()=>{ let isLand=window.innerWidth>window.innerHeight; let t=document.getElementById('screenModeText'); if(t) t.innerText=isLand?'📱↔️ Жалпақ!':'📱 Тік'; });
-let progress=0;
-let loadTimer=setInterval(()=>{ progress+=Math.floor(Math.random()*15)+5; if(progress>100) progress=100; document.getElementById('loadFill').style.width=progress+'%'; document.getElementById('loadText').innerText='Загрузка... '+progress+'%'; if(progress>=100){ clearInterval(loadTimer); setTimeout(()=>{ document.getElementById('loader').style.display='none'; document.getElementById('menu').style.display='block'; updateRuleText(); updateChar(); },500); } },300);
-let myId='p'+Math.floor(Math.random()*1000000), myGender='boy', myColorHex='#ff4757', myColorName='Қызыл', roomCode='', isHost=false, onlineMode=false, myRole='', myRoleObj=null, players={}, totalPlayers=8, selectedVneshka='';
-const ALL_ROLES=[
-{id:'Импостер',icon:'😈',name:'ИМПОСТЕР',desc:'Өлтір! KILL 20 сек!',btn:'🔪 KILL'},
-{id:'Судья',icon:'⚖️',name:'СУДЬЯ',desc:'1 РЕТ! Дұрыс +1, Қате - өзің шығасың!',btn:'⚖️ Шығару'},
-{id:'Детектив',icon:'🕵️',name:'ДЕТЕКТИВ',desc:'Тексер!',btn:'🔍 Тексер'},
-{id:'Инженер',icon:'🔧',name:'ИНЖЕНЕР',desc:'Вент + Жөндеу',btn:'🔧 Жөндеу'},
-{id:'Трекер',icon:'📍',name:'ТРЕКЕР',desc:'Бақыла!',btn:'📍 Бақыла'},
-{id:'Паника',icon:'😱',name:'ПАНИКА',desc:'Бәрінің орны көрінеді!',btn:'😱 Паника'},
-{id:'Полиция',icon:'👮',name:'ПОЛИЦИЯ',desc:'Қама!',btn:'👮 Қама'},
-{id:'Тірі',icon:'🧑',name:'ТІРІ - БЕЗ СПОСОБОВ',desc:'Қабілетің ЖОҚ! Тек 3 задания!',btn:'🔧 Задания'},
-{id:'Доктор',icon:'🩺',name:'ДОКТОР',desc:'Өлгенді ТІРІЛТЕСІҢ!',btn:'🩺 Тірілт'},
-{id:'Призрак',icon:'👻',name:'ПРИЗРАК',desc:'Өлсең де жүресің!',btn:'👻 Жоғал'},
-{id:'Шериф',icon:'🤠',name:'ШЕРИФ',desc:'Ат! Қате - өзің өлесің!',btn:'🤠 Ат!'},
-{id:'Клоун',icon:'🎭',name:'КЛОУН',desc:'Өзің шықсаң жеңесің!',btn:'🎭 Күлдір'},
-{id:'Вампир',icon:'🧛',name:'ВАМПИР',desc:'Түнде шағасың!',btn:'🧛 Шағу'},
-];
-function calcDistribution(n){ let imposter=1; let special=Math.max(1, Math.floor(n/2)-1); if(n<=4) special=1; let plain=n-imposter-special; if(plain<0) plain=0; return {imposter,special,plain}; }
-function updateRuleText(){ let d=calcDistribution(totalPlayers); let txt=totalPlayers+' адам = '+d.imposter+' Импостер + '+d.special+' Рөл + '+d.plain+' Без способностей'; let el=document.getElementById('currentRuleText'); if(el) el.innerText='Қазір: '+txt; let el2=document.getElementById('rulePreview'); if(el2) el2.innerText='📏 '+txt; let el3=document.getElementById('lobbyRuleText'); if(el3) el3.innerText='📏 '+txt; return d; }
-function shuffle(arr){ let a=[...arr]; for(let i=a.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
-function getRandomRoles(count){ let d=calcDistribution(count); let result=[]; result.push(ALL_ROLES[0]); let specialPool=ALL_ROLES.filter(r=>r.id!=='Импостер' && r.id!=='Тірі'); specialPool=shuffle(specialPool); for(let i=0;i<d.special;i++){ result.push(specialPool[i]); } for(let i=0;i<d.plain;i++){ result.push(ALL_ROLES.find(r=>r.id==='Тірі')); } return shuffle(result); }
-// ✅ ТҮЗЕТІЛДІ! Енді Қыз бассаң - Қыз болады!
-function selectGender(g,el){
-  myGender=g;
-  // Барлығын өшіреміз
-  document.getElementById('boyBtn').classList.remove('sel');
-  document.getElementById('boyBtn').classList.remove('girlSel');
-  document.getElementById('girlBtn').classList.remove('sel');
-  document.getElementById('girlBtn').classList.remove('girlSel');
-  // Таңдалғанға ғана қосамыз
-  if(g==='boy'){ el.classList.add('sel'); }
-  else { el.classList.add('girlSel'); }
-  updateChar();
-  console.log('Жыныс:',g);
+function box(w,h,d, material,x,y,z, cast=true, receive=true) {
+  const mesh = new THREE.Mesh(new THREE.BoxGeometry(w,h,d), material);
+  mesh.position.set(x,y,z); mesh.castShadow=cast; mesh.receiveShadow=receive; scene.add(mesh); return mesh;
 }
-function selectColor(el,hex,name){ myColorHex=hex; myColorName=name; document.querySelectorAll('.colorDot').forEach(d=>d.classList.remove('sel')); el.classList.add('sel'); updateChar(); }
-// ✅ ТҮЗЕТІЛДІ! Енді дұрыс көрсетеді!
-function updateChar(){
-  let genderText = myGender==='boy' ? '👦 Ұл' : '👧 Қыз';
-  let cloth = myGender==='boy' ? 'Шалбар' : 'Юбка';
-  document.getElementById('myCharPreview').innerText = genderText + ' • ' + myColorName + ' ' + cloth;
-  console.log('Preview:', genderText, myColorName, cloth);
+
+// Main room and corridor-like side areas
+box(28,.25,28,floorMat,0,-.15,0);
+box(28,.25,28,ceilingMat,0,3.65,0,false);
+box(28,3.8,.35,wallMat,0,1.75,-14);
+box(28,3.8,.35,wallMat,0,1.75,14);
+box(.35,3.8,28,wallMat,-14,1.75,0);
+box(.35,3.8,28,wallMat,14,1.75,0);
+
+// Interior partitions leave gaps to move through the house
+box(9,3.5,.28,wallMat,-9.5,1.65,-4);
+box(9,3.5,.28,wallMat,9.5,1.65,-4);
+box(.28,3.5,8,wallMat,-5,1.65,8);
+box(.28,3.5,8,wallMat,5,1.65,8);
+box(7,3.5,.28,wallMat,0,1.65,3.5);
+box(5,3.5,.28,wallMat,-9,1.65,5.8);
+box(5,3.5,.28,wallMat,9,1.65,5.8);
+
+// Decorative beams, skirting and scattered furniture
+for (let z=-11; z<=11; z+=5.5) {
+  box(27,.13,.18,trimMat,0,.12,z,false);
 }
-function selectPlayers(n,el){ totalPlayers=n; document.querySelectorAll('.playerBtn').forEach(b=>b.classList.remove('sel')); el.classList.add('sel'); updateRuleText(); }
-function makeCode(){ return 'TUN-'+Math.floor(1000+Math.random()*9000); }
-function roomRef(){ return db.ref('rooms/'+roomCode); }
-function createRoom(){ let name=getName(); isHost=true; roomCode=makeCode(); onlineMode=true; document.getElementById('myCodeText').innerText='✅ Код: '+roomCode; document.getElementById('connStatus').innerText='✅ Бөлме құрылды!'; document.getElementById('roomCodeShow').innerText=roomCode; document.getElementById('hudRoomCode').innerText=roomCode; if(!db){ alert('⚠️ Firebase жоқ!'); return; } roomRef().set({host:myId,status:'lobby'}); roomRef().child('players/'+myId).set({name:name,gender:myGender,color:myColorHex,colorName:myColorName,x:1,y:1,role:''}); listenRoom(); showLobby(); alert('✅ Бөлме құрылды!\nКод: '+roomCode); }
-function getName(){ let v=document.getElementById('myNameInput').value.trim(); return v?v:'Ойыншы'+Math.floor(Math.random()*100); }
-function joinRoom(){ let name=getName(); let code=document.getElementById('joinCodeInput').value.trim().toUpperCase(); if(!code){ alert('Код жаз!'); return; } if(!code.startsWith('TUN-')) code='TUN-'+code; roomCode=code; isHost=false; onlineMode=true; if(!db){ alert('⚠️ Firebase жоқ!'); return; } roomRef().once('value',snap=>{ if(!snap.exists()){ alert('❌ Бөлме табылмады!'); return; } roomRef().child('players/'+myId).set({name:name,gender:myGender,color:myColorHex,colorName:myColorName,x:1,y:1,role:''}); listenRoom(); showLobby(); alert('✅ Қосылдың!'); }); }
-function showLobby(){ document.getElementById('lobbyCard').style.display='block'; document.getElementById('roomCodeShow').innerText=roomCode; updateRuleText(); document.getElementById('lobbyCard').scrollIntoView({behavior:'smooth'}); }
-function copyCode(){ if(navigator.clipboard) navigator.clipboard.writeText(roomCode); alert('📋 '+roomCode); }
-function listenRoom(){ roomRef().child('players').on('value',snap=>{ players=snap.val()||{}; let list=Object.values(players); document.getElementById('playerList').innerHTML=list.map(p=>`<div style="padding:7px;background:#111;border-radius:10px;margin:4px">${p.gender==='girl'?'👧':'👦'} ${p.name} <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${p.color}"></span> ${p.colorName||''}</div>`).join(''); document.getElementById('lobbyStatus').innerText='👥 '+list.length+' адам'; document.getElementById('playerCountText').innerText=list.length; let d=calcDistribution(list.length); let lt=document.getElementById('lobbyRuleText'); if(lt) lt.innerText='📏 '+list.length+' = '+d.imposter+' + '+d.special+' + '+d.plain; }); roomRef().child('status').on('value',snap=>{ if(snap.val()==='started' && document.getElementById('mainGame').style.display!=='block'){ startGameUI(); } }); roomRef().child('roles/'+myId).on('value',snap=>{ if(snap.val()){ let o=ALL_ROLES.find(r=>r.id===snap.val()); if(o){ myRoleObj=o; myRole=o.id; } } }); roomRef().child('chat').limitToLast(1).on('child_added',snap=>{ let m=snap.val(); if(m && m.from!==myId) addChat(m.name,m.text,false); }); roomRef().child('events').limitToLast(1).on('child_added',snap=>{ let e=snap.val(); if(!e||e.from===myId) return; if(e.type==='kill'&&e.target===getName()){ if(myRole==='Призрак'){ alert('👻 Сен Призраксың!'); } else document.getElementById('jumpscare').style.display='flex'; } }); }
-function startOnlineGame(){ if(!roomCode){ alert('Алдымен БӨЛМЕ ҚҰРУ!'); return; } if(!isHost){ alert('Хост БАСТАУ басу керек!'); return; } let ids=Object.keys(players); let randomRoles=getRandomRoles(ids.length); ids.forEach((id,i)=>{ roomRef().child('roles/'+id).set(randomRoles[i].id); roomRef().child('players/'+id+'/role').set(randomRoles[i].id); }); roomRef().child('status').set('started'); startGameUI(); }
-function enterGame(){ document.getElementById('menu').style.display='none'; showRandomReveal(()=>{ let roles=getRandomRoles(totalPlayers); myRoleObj=roles[0]; myRole=myRoleObj.id; let botNames=['Айя','Нұрлан','Аружан','Дима','Алина','Ерлан','Малика','Айдос','Сая','Нұра']; let botGenders=['girl','boy','girl','boy','girl','boy','girl','boy','girl','boy']; players={}; roles.forEach((r,i)=>{ let key=i===0?'me':'bot'+i; players[key]={name:i===0?getName():botNames[i-1]||'Бот'+i, gender:i===0?myGender:botGenders[i-1]||'boy', color:i===0?myColorHex:'#1e90ff', role:r.id}; }); myId='me'; roomCode='ОФЛАЙН'; document.getElementById('hudRoomCode').innerText='ОФЛАЙН'; document.getElementById('mainGame').style.display='block'; startGameUI(); }); }
-function showRandomReveal(cb){ document.getElementById('roleReveal').style.display='flex'; let icons=ALL_ROLES.map(r=>r.icon); let idx=0; let roll=setInterval(()=>{ document.getElementById('rollingText').innerText=icons[idx%icons.length]; idx++; },100); setTimeout(()=>{ clearInterval(roll); document.getElementById('roleReveal').style.display='none'; cb(); },2000); }
-function startGameUI(){ document.getElementById('menu').style.display='none'; document.getElementById('mainGame').style.display='block'; window.scrollTo(0,0); if(!myRoleObj) myRoleObj=getRandomRoles(1)[0]; myRole=myRoleObj.id; document.getElementById('roleTitle').innerText=myRoleObj.icon+' СЕН: '+myRoleObj.name; document.getElementById('roleDesc').innerText=myRoleObj.desc; document.getElementById('roleBox').style.display='block'; document.getElementById('roleAbilityText').innerText=myRoleObj.btn+' дайын!'; if(myRole==='Судья') document.getElementById('judgeBox').style.display='block'; if(myRole==='Тірі') document.getElementById('noAbilityBox').style.display='block'; if(myRole==='Импостер'||myRole==='Вампир'){ document.getElementById('impBox').style.display='block'; document.getElementById('killBox').style.display='block'; startKillTimer(); } px=Math.floor(Math.random()*3)+1; py=Math.floor(Math.random()*2)+1; draw(); initJoystick(); if(!onlineMode){ let d=calcDistribution(totalPlayers); alert('🎲 '+totalPlayers+' = '+d.imposter+' + '+d.special+' + '+d.plain+'\n\n'+myRoleObj.icon+' СЕН: '+myRoleObj.name+'!\n'+myRoleObj.desc); } }
-let px=1, py=1, dir=0, flash=true, battery=100, tasksDone=0, killCooldown=0, judgeCharges=1, doctorUsed=false, ghostMode=false;
-let map=[[0,0,0,0,0,0],[0,2,1,1,3,0],[0,1,0,1,1,0],[0,1,1,1,4,0],[0,0,0,0,0,0]];
-let roomNames={2:'Каюта 🛏️',3:'Двигатель ⚙️',4:'Лаборатория 🧪',1:'Коридор 🚶'};
-let dirs=['Алға ⬆️','Оңға ➡️','Артқа ⬇️','Солға ⬅️'];
-function draw(){ let c=document.getElementById('fp'); if(!c) return; let ctx=c.getContext('2d'); let W=c.width, H=c.height; ctx.fillStyle='#000'; ctx.fillRect(0,0,W,H); let ahead=getAhead(); if(ahead===0){ ctx.fillStyle='#2a2a4a'; ctx.fillRect(W*0.12,20,W*0.76,H-40); ctx.fillStyle='#444'; ctx.fillRect(W*0.3,H*0.27,W*0.4,H*0.5); ctx.fillStyle='white'; ctx.font='20px sans-serif'; ctx.fillText('🧱 ҚАБЫРҒА',W/2-70,H/2); } else { let room=map[py][px]; ctx.fillStyle=room===2?'#1a1a3a':room===3?'#3a2a1a':room===4?'#1a3a2a':'#111'; ctx.fillRect(0,0,W,H); ctx.fillStyle='#222'; ctx.fillRect(0,H*0.7,W,H*0.3); if(flash){ let g=ctx.createRadialGradient(W/2,H/2,20,W/2,H/2,300); g.addColorStop(0,'rgba(255,255,200,0.35)'); g.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g; ctx.fillRect(0,0,W,H); } ctx.fillStyle='white'; ctx.font='26px sans-serif'; ctx.fillText(roomNames[room]||'Коридор',W/2-90,H*0.38); ctx.font='15px sans-serif'; ctx.fillText('🌑 ТҮН - Фонарикпен көріп тұрсың',W/2-110,H*0.5); if(room===3) ctx.fillText('🔩 Винттер осында!',W/2-80,H*0.6); if(room===4) ctx.fillText('💡 Лампочка осында!',W/2-80,H*0.6); if(room===2) ctx.fillText('⌨️ Код осында!',W/2-80,H*0.6); } if(!flash){ ctx.fillStyle='rgba(0,0,0,0.9)'; ctx.fillRect(0,0,W,H); ctx.fillStyle='white'; ctx.font='20px sans-serif'; ctx.fillText('🌑 Толық қараңғы...',W/2-100,H/2); } let m=document.getElementById('minimap'); let mc=m.getContext('2d'); let mw=m.width, mh=m.height; mc.fillStyle='#111'; mc.fillRect(0,0,mw,mh); for(let y=0;y<map.length;y++) for(let x=0;x<map[0].length;x++){ if(map[y][x]===0) mc.fillStyle='#333'; else if(map[y][x]===2) mc.fillStyle='#1e90ff'; else if(map[y][x]===3) mc.fillStyle='#ffa502'; else if(map[y][x]===4) mc.fillStyle='#2ed573'; else mc.fillStyle='#555'; mc.fillRect(x*(mw/map[0].length)+10,y*(mh/map.length)+5,(mw/map[0].length)-10,(mh/map.length)-6); } mc.fillStyle=myColorHex; mc.beginPath(); mc.arc(px*(mw/map[0].length)+30,py*(mh/map.length)+12,8,0,Math.PI*2); mc.fill(); document.getElementById('posText').innerText='📍 '+roomNames[map[py][px]]+' | 🧭 '+dirs[dir]; let room=map[py][px]; document.getElementById('taskText').innerText=room===2?'Каюта — Код!':room===3?'Двигатель — Винт!':room===4?'Лаб — Лампочка!':'Коридор — бөлмеге кір!'; }
-function getAhead(){ let dx=[0,1,0,-1], dy=[-1,0,1,0]; let nx=px+dx[dir], ny=py+dy[dir]; if(ny<0||ny>=map.length||nx<0||nx>=map[0].length) return 0; return map[ny][nx]; }
-function move(d){ let dx=0, dy=0; if(d==='up'){ if(dir===0) dy=-1; if(dir===1) dx=1; if(dir===2) dy=1; if(dir===3) dx=-1; } if(d==='down'){ if(dir===0) dy=1; if(dir===1) dx=-1; if(dir===2) dy=-1; if(dir===3) dx=1; } if(d==='left'){ if(dir===0) dx=-1; if(dir===1) dy=-1; if(dir===2) dx=1; if(dir===3) dy=1; } if(d==='right'){ if(dir===0) dx=1; if(dir===1) dy=1; if(dir===2) dx=-1; if(dir===3) dy=-1; } let nx=px+dx, ny=py+dy; if(map[ny] && map[ny][nx]!==0){ px=nx; py=ny; draw(); } else { document.getElementById('taskMsg').innerText='🧱 Қабырға!'; } }
-function turn(v){ dir=(dir+v+4)%4; draw(); }
-function toggleFlash(){ flash=!flash; document.getElementById('flashStatus').innerText='Фонарик: '+(flash?'Қосулы 🔦':'Өшірулі 🌑')+' | 🔋 '+battery+'%'; draw(); }
-function selectVneshka(el,e){ document.querySelectorAll('.skin').forEach(s=>s.classList.remove('sel')); el.classList.add('sel'); selectedVneshka=e; }
-function shapeshift(){ document.getElementById('shiftMsg').innerText='✅ Внешка ауысты: '+selectedVneshka+'!'; if(onlineMode && db) roomRef().child('events').push({type:'shape',name:getName(),skin:selectedVneshka,from:myId}); }
-function doTask(){ let room=map[py][px]; if(room===1){ document.getElementById('taskMsg').innerText='❌ Коридорда задания жоқ!'; return; } tasksDone++; document.getElementById('doneText').innerText=tasksDone+' / 3'; document.getElementById('taskMsg').innerText='✅ '+roomNames[room]+' бітті!'; if(tasksDone>=3) alert('🎉 Жеңдің! Таң атып қалды! ☀️'); }
-function startKillTimer(){ setInterval(()=>{ if(killCooldown>0){ killCooldown--; document.getElementById('killTimerText').innerText=killCooldown+' сек күт!'; document.getElementById('killFill').style.width=(killCooldown/20*100)+'%'; if(killCooldown===0){ document.getElementById('killTimerText').innerText='✅ Дайын!'; document.getElementById('killFill').style.width='100%'; } } },1000); }
-function killAction(){ if(myRole!=='Импостер' && myRole!=='Вампир'){ alert('❌ KILL тек Импостер + Вампир! Сен: '+myRole); return; } if(killCooldown>0){ alert('⏳ Күт! '+killCooldown+' сек!'); return; } let t=prompt('🔪 Кімді өлтіресің? '+Object.values(players).map(p=>p.name).join(', ')); if(!t) return; if(onlineMode && db) roomRef().child('events').push({type:'kill',name:getName(),target:t,from:myId}); killCooldown=20; document.getElementById('killTimerText').innerText='⏳ 20 сек күт!'; alert((myRole==='Вампир'?'🧛 Шақтың!':'🔪 Өлтірдің!')+' 20 сек күт!'); }
-function useRoleAbility(){ if(myRole==='Тірі'){ alert('🧑 Сен Без способностейсің! Тек задания!'); return; } if(myRole==='Судья'){ if(judgeCharges<=0){ alert('❌ Судья бітті!'); return; } let n=prompt('⚖️ СУДЬЯ - 1 РЕТ!\nКімді шығарасың? '+Object.values(players).map(p=>p.name).join(', ')); if(!n) return; let target=Object.values(players).find(p=>p.name===n); judgeCharges--; document.getElementById('judgeCharges').innerText=judgeCharges+' рет'; if(target && target.role==='Импостер'){ judgeCharges++; document.getElementById('judgeCharges').innerText=judgeCharges+' рет'; alert('✅ ДҰРЫС! '+n+' - ИМПОСТЕР! +1 рет!'); } else { alert('❌ ҚАТЕ! '+n+' бейкүнә! Сен өзің шығасың!'); document.getElementById('jumpscare').style.display='flex'; } } else if(myRole==='Детектив'){ let n=prompt('🕵️ Кімді тексересің? '+Object.values(players).map(p=>p.name).join(', ')); if(!n) return; let t=Object.values(players).find(p=>p.name===n); alert('🕵️ '+n+' — '+(t&&t.role==='Импостер'?'😈 ИМПОСТЕР!':'🧑 Таза')); } else if(myRole==='Инженер'){ tasksDone=Math.min(3,tasksDone+1); document.getElementById('doneText').innerText=tasksDone+' / 3'; alert('🔧 Жөндеді! +1!'); } else if(myRole==='Паника'){ alert('😱 ПАНИКА!'); } else if(myRole==='Полиция'){ let n=prompt('👮 Кімді қамайсың? '+Object.values(players).map(p=>p.name).join(', ')); if(n) alert('👮 '+n+' 20 сек қамалды!'); } else if(myRole==='Трекер'){ let n=prompt('📍 Кімді бақылайсың? '+Object.values(players).map(p=>p.name).join(', ')); if(n) alert('📍 Бақылауда: '+n); } else if(myRole==='Доктор'){ if(doctorUsed){ alert('❌ Доктор 1 рет қана!'); return; } let n=prompt('🩺 Кімді ТІРІЛТЕСІҢ? '+Object.values(players).map(p=>p.name).join(', ')); if(!n) return; doctorUsed=true; alert('🩺 '+n+' ТІРІЛДІ! ❤️'); } else if(myRole==='Призрак'){ ghostMode=!ghostMode; alert(ghostMode?'👻 Призрак!':'👻 Көрінетін болдың!'); draw(); } else if(myRole==='Шериф'){ let n=prompt('🤠 Кімді АТАСЫҢ? '+Object.values(players).map(p=>p.name).join(', ')); if(!n) return; let t=Object.values(players).find(p=>p.name===n); if(t && (t.role==='Импостер'||t.role==='Вампир')){ alert('✅ ДҰРЫС! '+n+' - '+t.role+'!'); } else { alert('❌ ҚАТЕ! Шериф өзі өледі!'); document.getElementById('jumpscare').style.display='flex'; } } else if(myRole==='Клоун'){ alert('🎭 Клоун!'); openVote(); } else if(myRole==='Вампир'){ killAction(); } else if(myRole==='Импостер'){ alert('😈 KILL бас!'); } }
-function useVent(){ if(myRole!=='Импостер' && myRole!=='Инженер' && myRole!=='Призрак'){ alert('❌ Вентке тек Импостер + Инженер + Призрак!'); return; } px=1; py=3; draw(); alert('🕳️ Вентпен секірдің!'); }
-function initJoystick(){ let base=document.getElementById('joyBase'), knob=document.getElementById('joyKnob'), last=0; function h(e){ let touch=e.touches[0]; let r=base.getBoundingClientRect(); let dx=touch.clientX-(r.left+r.width/2), dy=touch.clientY-(r.top+r.height/2); let d=Math.sqrt(dx*dx+dy*dy), max=45; if(d>max){ dx=dx/d*max; dy=dy/d*max; } knob.style.transform=`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; let now=Date.now(); if(now-last<300) return; if(Math.abs(dx)<18 && Math.abs(dy)<18) return; last=now; if(Math.abs(dy)>Math.abs(dx)){ if(dy<-18) move('up'); else if(dy>18) move('down'); } else { if(dx<-18) move('left'); else if(dx>18) move('right'); } } base.addEventListener('touchstart',e=>{ h(e); }); base.addEventListener('touchmove',e=>{ h(e); e.preventDefault(); }); base.addEventListener('touchend',()=>{ knob.style.transform='translate(-50%,-50%)'; }); }
-function addChat(n,t,me){ let box=document.getElementById('chatBox'); let d=document.createElement('div'); d.style.cssText='padding:6px;background:'+(me?'#1e90ff':'#1e1e35')+';border-radius:10px;margin:4px;text-align:left'; d.innerHTML='<b>'+n+':</b> '+t; box.appendChild(d); box.scrollTop=box.scrollHeight; }
-function sendChat(){ let inp=document.getElementById('chatInput'); let t=inp.value.trim(); if(!t) return; addChat(getName(),t,true); if(onlineMode && db) roomRef().child('chat').push({name:getName(),text:t,from:myId}); inp.value=''; }
-function openVote(){ document.getElementById('voteScreen').style.display='flex'; document.getElementById('chatBox').innerHTML=''; let list=document.getElementById('voteList'); list.innerHTML=''; Object.values(players).forEach(p=>{ let b=document.createElement('button'); b.innerText='🗳️ '+p.name+'-ға дауыс'; b.onclick=()=>voteFor(p.name); list.appendChild(b); }); }
-function voteFor(n){ addChat(getName(),'Мен '+n+'-ға дауыс бердім!',true); if(onlineMode && db) roomRef().child('chat').push({name:getName(),text:'Мен '+n+'-ға дауыс бердім!',from:myId}); }
-function closeVote(){ document.getElementById('voteScreen').style.display='none'; }
-document.getElementById('chatInput').addEventListener('keydown',e=>{ if(e.key==='Enter') sendChat(); });
+for (let x=-11; x<=11; x+=5.5) {
+  box(.18,.13,27,trimMat,x,.12,0,false);
+}
+box(3.5,.8,1.2,woodMat,-9,.4,-9);
+box(1.5,1.8,.18,trimMat,-9,1.3,-9.5);
+box(2.4,.7,1.1,woodMat,9,.35,-9);
+box(1.2,1.4,1.2,blackMat,9, .7,8);
+box(2.2,.55,1.2,woodMat,-9,.28,9);
+box(.9,1.7,.9,blackMat,10,.85,-1);
+box(1.4,.35,1.4,woodMat,-10,.18,0);
+
+// Wall lights with a weak eerie glow
+for (const p of [[-12,2.7,-10],[12,2.7,-10],[-12,2.7,10],[12,2.7,10],[0,2.7,-12]]) {
+  const lamp = new THREE.PointLight(0xb88bd5, 2.1, 7);
+  lamp.position.set(...p); scene.add(lamp);
+  const bulb = new THREE.Mesh(new THREE.SphereGeometry(.11,12,8), new THREE.MeshBasicMaterial({color:0xd9a9ff}));
+  bulb.position.set(...p); scene.add(bulb);
+}
+
+// Exit door at the far end
+const door = new THREE.Group();
+const doorPanel = new THREE.Mesh(new THREE.BoxGeometry(2.1,2.9,.22), new THREE.MeshStandardMaterial({color:0x4b101d, emissive:0x5b0615, emissiveIntensity:.35, roughness:.7}));
+doorPanel.castShadow=true; door.add(doorPanel);
+const doorFrame = new THREE.Mesh(new THREE.BoxGeometry(2.45,3.15,.16), trimMat);
+doorFrame.position.z=-.15; door.add(doorFrame);
+const knob = new THREE.Mesh(new THREE.SphereGeometry(.09,12,10), starMat);
+knob.position.set(.72,-.1,.16); door.add(knob);
+door.position.set(0,1.35,-13.65); scene.add(door);
+const exitGlow = new THREE.PointLight(0xff244e, 2.4, 5); exitGlow.position.set(0,2,-12.4); scene.add(exitGlow);
+
+// A little creepy-cute plush creature
+const monster = new THREE.Group();
+const body = new THREE.Mesh(new THREE.SphereGeometry(.55,24,18), pinkMat);
+body.scale.set(.9,1.15,.75); body.position.y=.58; body.castShadow=true; monster.add(body);
+const head = new THREE.Mesh(new THREE.SphereGeometry(.62,24,18), pinkMat);
+head.position.y=1.35; head.castShadow=true; monster.add(head);
+for (const side of [-1,1]) {
+  const ear = new THREE.Mesh(new THREE.SphereGeometry(.2,16,12), pinkMat);
+  ear.scale.set(.55,1.8,.55); ear.position.set(side*.36,2.02,0); ear.rotation.z=side*-.22; monster.add(ear);
+  const eye = new THREE.Mesh(new THREE.SphereGeometry(.105,16,12), eyeMat);
+  eye.position.set(side*.23,1.42,.53); monster.add(eye);
+  const pupil = new THREE.Mesh(new THREE.SphereGeometry(.035,10,8), blackMat);
+  pupil.position.set(side*.23,1.42,.625); monster.add(pupil);
+}
+const nose = new THREE.Mesh(new THREE.SphereGeometry(.09,12,10), mat(0x6d263e));
+nose.scale.set(1,.7,.6); nose.position.set(0,1.2,.59); monster.add(nose);
+const mouth = new THREE.Mesh(new THREE.TorusGeometry(.12,.025,6,16,Math.PI), mat(0x4b1c32));
+mouth.position.set(0,1.08,.59); mouth.rotation.z=Math.PI; monster.add(mouth);
+const monsterGlow = new THREE.PointLight(0xff69c9, 1.5, 4); monsterGlow.position.set(0,1.4,0); monster.add(monsterGlow);
+monster.position.set(-8,0,-8); scene.add(monster);
+
+// Collectible glowing stars
+const starPositions = [[-10,1.1,8],[10,1.1,1],[7,1.1,-10]];
+const collectibles = [];
+for (const pos of starPositions) {
+  const group = new THREE.Group();
+  const star = new THREE.Mesh(new THREE.OctahedronGeometry(.38,0), starMat);
+  star.scale.set(1,1.25,.35); group.add(star);
+  const glow = new THREE.PointLight(0xffbd48,1.6,3); group.add(glow);
+  group.position.set(...pos); scene.add(group); collectibles.push(group);
+}
+
+// Controls and game state
+const keys = {};
+const touchMove = { forward:false, back:false, left:false, right:false };
+let yaw = 0, pitch = 0, isPlaying = false, isOver = false, collected = 0;
+let flashlightOn = true, lastTime = 0, touchLook = null;
+const countEl = document.getElementById('count');
+const hintEl = document.getElementById('hint');
+const overlay = document.getElementById('overlay');
+const panelTitle = document.getElementById('panelTitle');
+const subtitle = document.getElementById('subtitle');
+const instructions = document.getElementById('instructions');
+const startBtn = document.getElementById('startBtn');
+const message = document.getElementById('message');
+const roomInput = document.getElementById('roomInput');
+const roomInfo = document.getElementById('roomInfo');
+const playersCountEl = document.getElementById('playersCount');
+
+function beep(freq=620, duration=.12) {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator(), gain = ctx.createGain();
+    osc.type='sine'; osc.frequency.value=freq; gain.gain.setValueAtTime(.08,ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+duration);
+    osc.connect(gain); gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime+duration);
+    osc.onended=()=>ctx.close();
+  } catch(e) {}
+}
+
+
+function makeRemotePlayer() {
+  const group = new THREE.Group();
+  const body = new THREE.Mesh(
+    new THREE.CapsuleGeometry(.28, .65, 4, 8),
+    new THREE.MeshStandardMaterial({ color: 0x9c79d8, roughness: .8 })
+  );
+  body.position.y = .72;
+  body.castShadow = true;
+  group.add(body);
+  const head = new THREE.Mesh(
+    new THREE.SphereGeometry(.23, 14, 10),
+    new THREE.MeshStandardMaterial({ color: 0xffc6e9, roughness: .7 })
+  );
+  head.position.y = 1.42;
+  group.add(head);
+  const glow = new THREE.PointLight(0xc58bff, .45, 2.5);
+  glow.position.y = 1.3;
+  group.add(glow);
+  scene.add(group);
+  return group;
+}
+
+function stopRoomSync() {
+  if (publishTimer) clearInterval(publishTimer);
+  publishTimer = null;
+  if (roomListener) roomListener();
+  roomListener = null;
+  remotePlayers.forEach(player => scene.remove(player));
+  remotePlayers.clear();
+}
+
+async function connectRoom() {
+  const room = roomInput.value.trim().toUpperCase();
+  if (!/^[A-Z0-9_-]{3,20}$/.test(room)) {
+    throw new Error('Код комнаты: 3–20 символов, только латиница и цифры.');
+  }
+  message.textContent = 'Подключаемся к Firebase…';
+  const credential = await signInAnonymously(auth);
+  currentUid = credential.user.uid;
+  currentRoom = room;
+  stopRoomSync();
+
+  localPlayerRef = ref(database, `rooms/${room}/players/${currentUid}`);
+  await set(localPlayerRef, {
+    x: camera.position.x, z: camera.position.z, yaw, name: 'Игрок',
+    updatedAt: Date.now()
+  });
+  await onDisconnect(localPlayerRef).remove();
+
+  const playersRef = ref(database, `rooms/${room}/players`);
+  roomListener = onValue(playersRef, snapshot => {
+    const players = snapshot.val() || {};
+    const activeIds = new Set(Object.keys(players).filter(id => id !== currentUid));
+    for (const [id, playerData] of Object.entries(players)) {
+      if (id === currentUid) continue;
+      let avatar = remotePlayers.get(id);
+      if (!avatar) {
+        avatar = makeRemotePlayer();
+        remotePlayers.set(id, avatar);
+      }
+      avatar.position.set(Number(playerData.x) || 0, 0, Number(playerData.z) || 0);
+      avatar.rotation.y = Number(playerData.yaw) || 0;
+    }
+    for (const [id, avatar] of remotePlayers) {
+      if (!activeIds.has(id)) {
+        scene.remove(avatar);
+        remotePlayers.delete(id);
+      }
+    }
+    playersCountEl.textContent = String(Object.keys(players).length);
+  }, error => {
+    message.textContent = 'Ошибка чтения комнаты: ' + error.message;
+  });
+
+  publishTimer = setInterval(() => {
+    if (!localPlayerRef || !isPlaying) return;
+    set(localPlayerRef, {
+      x: camera.position.x, z: camera.position.z, yaw,
+      name: 'Игрок', updatedAt: Date.now()
+    }).catch(err => {
+      message.textContent = 'Ошибка синхронизации: ' + err.message;
+    });
+  }, 140);
+
+  roomInfo.textContent = `Комната: ${room} — отправь этот код друзьям.`;
+  message.textContent = 'Онлайн подключён!';
+}
+
+function startGame() {
+  if (isOver) location.reload();
+  isPlaying=true; overlay.style.display='none';
+  camera.position.set(0,1.65,8); yaw=0; pitch=0; collected=0; countEl.textContent='0';
+  monster.position.set(-8,0,-8);
+  if (matchMedia('(pointer:fine)').matches) renderer.domElement.requestPointerLock?.();
+  lastTime=performance.now();
+}
+startBtn.addEventListener('click', async () => {
+  startBtn.disabled = true;
+  try {
+    await connectRoom();
+    startGame();
+  } catch (err) {
+    message.textContent = 'Не удалось подключиться: ' + (err?.message || err);
+    roomInfo.textContent = 'Проверь Firebase Authentication и правила Realtime Database.';
+  } finally {
+    startBtn.disabled = false;
+  }
+});
+
+document.addEventListener('pointerlockchange', () => {
+  if (!document.pointerLockElement && isPlaying && matchMedia('(pointer:fine)').matches) {
+    // Keep the game running; click the screen to resume mouse look.
+    hintEl.textContent='Нажми на экран, чтобы продолжить осматриваться.';
+  }
+});
+renderer.domElement.addEventListener('click', () => {
+  if (isPlaying && matchMedia('(pointer:fine)').matches && !document.pointerLockElement) renderer.domElement.requestPointerLock?.();
+});
+document.addEventListener('mousemove', e => {
+  if (!isPlaying || !document.pointerLockElement) return;
+  yaw -= e.movementX * .0022;
+  pitch -= e.movementY * .0022;
+  pitch = THREE.MathUtils.clamp(pitch,-1.25,1.25);
+});
+renderer.domElement.addEventListener('touchstart', e => {
+  if (!isPlaying) return;
+  const t=e.changedTouches[0]; touchLook={x:t.clientX,y:t.clientY};
+}, {passive:true});
+renderer.domElement.addEventListener('touchmove', e => {
+  if (!isPlaying || !touchLook) return;
+  const t=e.changedTouches[0];
+  yaw -= (t.clientX-touchLook.x)*.006;
+  pitch -= (t.clientY-touchLook.y)*.006;
+  pitch=THREE.MathUtils.clamp(pitch,-1.25,1.25);
+  touchLook={x:t.clientX,y:t.clientY};
+}, {passive:true});
+renderer.domElement.addEventListener('touchend',()=>touchLook=null,{passive:true});
+
+document.addEventListener('keydown', e => {
+  keys[e.code]=true;
+  if (e.code==='KeyF') toggleFlashlight();
+  if (e.code==='Escape' && isPlaying && !document.pointerLockElement) {
+    // no forced pause; mouse can be re-locked by tapping/clicking
+  }
+});
+document.addEventListener('keyup', e => keys[e.code]=false);
+
+document.querySelectorAll('[data-move]').forEach(btn => {
+  const k=btn.dataset.move;
+  const down=e=>{e.preventDefault();touchMove[k]=true;};
+  const up=e=>{e.preventDefault();touchMove[k]=false;};
+  btn.addEventListener('pointerdown',down);
+  btn.addEventListener('pointerup',up);
+  btn.addEventListener('pointerleave',up);
+  btn.addEventListener('pointercancel',up);
+});
+function toggleFlashlight() {
+  flashlightOn=!flashlightOn;
+  flashlight.intensity=flashlightOn?65:0;
+  camera.children.find(o=>o.isPointLight).intensity=flashlightOn?1.1:0;
+  document.getElementById('flashBtn').style.opacity=flashlightOn?'1':'.45';
+}
+document.getElementById('flashBtn').addEventListener('click',toggleFlashlight);
+
+function finish(win) {
+  isPlaying=false; isOver=true;
+  if (publishTimer) clearInterval(publishTimer);
+  publishTimer = null;
+  if (localPlayerRef) set(localPlayerRef, null).catch(() => {});
+  if (document.pointerLockElement) document.exitPointerLock();
+  overlay.style.display='grid';
+  panelTitle.textContent=win?'ТЫ ВЫБРАЛАСЬ!':'ЛАПОЧКА НАШЛА ТЕБЯ';
+  subtitle.textContent=win?'Дверь захлопнулась за спиной. Но кто-то всё ещё шепчет…':'В темноте раздался тихий смешок…';
+  instructions.innerHTML=win?'Ты собрала все 3 звезды и нашла выход.<br><br>Но кажется, эта история ещё не закончена.':'Попробуй ещё раз. Собирай звёзды и не позволяй Лапочке подойти слишком близко.';
+  startBtn.textContent='ИГРАТЬ СНОВА';
+  message.textContent='';
+  beep(win?880:150,.3);
+}
+
+const clock = new THREE.Clock();
+function update(dt, time) {
+  if (!isPlaying) return;
+  camera.rotation.order='YXZ';
+  camera.rotation.y=yaw; camera.rotation.x=pitch;
+
+  let forward=(keys.KeyW||keys.ArrowUp||touchMove.forward)?1:0;
+  let back=(keys.KeyS||keys.ArrowDown||touchMove.back)?1:0;
+  let left=(keys.KeyA||keys.ArrowLeft||touchMove.left)?1:0;
+  let right=(keys.KeyD||keys.ArrowRight||touchMove.right)?1:0;
+  const move = new THREE.Vector3(right-left,0,back-forward);
+  if (move.lengthSq()>0) {
+    move.normalize().applyAxisAngle(new THREE.Vector3(0,1,0),yaw);
+    const speed=3.1*dt;
+    const nx=camera.position.x+move.x*speed, nz=camera.position.z+move.z*speed;
+    // Keep player inside the house; simple collision against outer walls.
+    if (Math.abs(nx)<12.9) camera.position.x=nx;
+    if (Math.abs(nz)<12.9) camera.position.z=nz;
+  }
+  camera.position.y=1.65 + (move.lengthSq()>0 ? Math.sin(time*.012)*.025 : 0);
+
+  collectibles.forEach((item,i)=>{
+    if (!item.visible) return;
+    item.rotation.y += dt*1.7; item.rotation.z=Math.sin(time*.002+i)*.12;
+    if (camera.position.distanceTo(item.position)<1.15) {
+      item.visible=false; collected++; countEl.textContent=String(collected);
+      hintEl.textContent=collected===3?'Все звёзды собраны! Ищи красную дверь.':`Звезда найдена: ${collected}/3`;
+      beep(700+collected*130,.16);
+    }
+  });
+
+  // The plush slowly follows the player.
+  const toPlayer=new THREE.Vector3(camera.position.x-monster.position.x,0,camera.position.z-monster.position.z);
+  const distance=toPlayer.length();
+  if (distance>1.65) {
+    toPlayer.normalize();
+    const chaseSpeed=distance<5?1.45:0.95;
+    monster.position.addScaledVector(toPlayer,chaseSpeed*dt);
+    monster.rotation.y=Math.atan2(toPlayer.x,toPlayer.z);
+  } else {
+    finish(false); return;
+  }
+  monster.position.y=Math.sin(time*.004)*.06;
+  monster.children[0].rotation.z=Math.sin(time*.006)*.04;
+
+  const doorDistance=Math.hypot(camera.position.x, camera.position.z+13.65);
+  if (doorDistance<2.0) {
+    if (collected>=3) finish(true);
+    else hintEl.textContent=`Дверь заперта. Нужно ещё звёзд: ${3-collected}`;
+  } else if (collected===3) {
+    hintEl.textContent='Все звёзды собраны! Красная дверь находится в конце дома.';
+  } else {
+    hintEl.textContent='Найди 3 светящиеся звезды и выберись из дома.';
+  }
+}
+
+function animate(now) {
+  requestAnimationFrame(animate);
+  const dt=Math.min(clock.getDelta(),.05);
+  update(dt,now);
+  renderer.render(scene,camera);
+}
+requestAnimationFrame(animate);
+
+addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight);
+});
 </script>
 </body>
-  </html>
+</html>
