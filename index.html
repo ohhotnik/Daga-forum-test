@@ -1,889 +1,225 @@
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>ЛАПОЧКА — Horror Online</title>
-
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;overflow:hidden;background:#050508;
- color:white;font-family:Arial,sans-serif;
- touch-action:none;
-}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#08090d;color:#f4f4f4;font-family:Arial,sans-serif}
 button,input{font:inherit}
-#menu{
- position:fixed;inset:0;z-index:10;
- background:radial-gradient(#241018,#050508 75%);
- display:flex;align-items:center;justify-content:center;
- padding:20px;
-}
-.panel{
- width:100%;max-width:400px;padding:25px;
- background:#111117;border:1px solid #63212f;
- border-radius:18px;box-shadow:0 0 35px #000;
-}
-h1{text-align:center;color:#ff304d;letter-spacing:5px}
-.subtitle{text-align:center;color:#999;font-size:12px}
-input,button{
- width:100%;padding:14px;margin:7px 0;
- border:0;border-radius:9px;
-}
-input{background:#292932;color:white}
-button{
- background:#c92340;color:white;font-weight:bold;
-}
-button.secondary{background:#34343f}
-button:disabled{opacity:.4}
 #game{position:fixed;inset:0}
-#hud{
- position:fixed;inset:0;pointer-events:none;
-}
-#top{
- position:absolute;top:15px;left:12px;right:12px;
- display:flex;justify-content:space-between;
- text-shadow:0 2px 5px black;
-}
-.hudbox{
- background:#0009;padding:10px;border-radius:8px;
-}
-#role{
- position:absolute;top:70px;width:100%;
- text-align:center;color:#ff5267;
- font-weight:bold;text-shadow:0 2px 5px black;
-}
-#joystick{
- position:absolute;left:25px;bottom:35px;
- width:125px;height:125px;border-radius:50%;
- background:#ffffff20;border:2px solid #ffffff55;
- pointer-events:auto;touch-action:none;
-}
-#stick{
- position:absolute;left:37px;top:37px;
- width:48px;height:48px;border-radius:50%;
- background:#ffffff99;
-}
-#flash{
- position:absolute;right:25px;bottom:45px;
- width:72px;height:72px;border-radius:50%;
- background:#d42b45;border:2px solid #ff8798;
- pointer-events:auto;
-}
-#leave{
- position:absolute;right:12px;top:65px;
- width:auto;padding:10px 15px;
- pointer-events:auto;background:#292932;
-}
-#message{
- position:fixed;bottom:12px;left:0;right:0;
- text-align:center;color:white;
- text-shadow:0 2px 5px black;
- pointer-events:none;
-}
-#lookArea{
- position:absolute;right:0;top:100px;
- width:55%;height:55%;
- pointer-events:auto;
-}
-[hidden]{display:none!important}
+#menu{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(circle at 50% 30%,#29202b 0,#101116 45%,#050609 100%)}
+.panel{width:min(440px,100%);padding:25px;border:1px solid #59404b;border-radius:18px;background:#101116ed;box-shadow:0 18px 70px #000b}
+h1{margin:0 0 6px;text-align:center;letter-spacing:4px;color:#ff657e;font-size:32px}
+.sub{text-align:center;color:#aaa;margin:0 0 22px;font-size:13px}
+input{width:100%;padding:14px;margin:7px 0;border:1px solid #444;background:#090a0e;color:white;border-radius:10px;outline:none}
+input:focus{border-color:#ff657e}
+button{width:100%;padding:14px;margin:7px 0;border:0;border-radius:10px;background:#a52c4b;color:white;font-weight:bold;cursor:pointer}
+button.secondary{background:#292b34;color:#eee}
+button:disabled{opacity:.45}
+#status{min-height:20px;color:#ff9aaa;text-align:center;font-size:13px;margin-top:8px}
+#hud{position:fixed;z-index:2;inset:0;pointer-events:none;display:none}
+#roomLabel{position:absolute;top:14px;left:14px;padding:9px 12px;background:#0009;border-radius:9px;font-size:13px}
+#role{position:absolute;top:14px;right:14px;padding:9px 12px;background:#0009;border-radius:9px}
+#hint{position:absolute;left:50%;top:58px;transform:translateX(-50%);font-size:12px;color:#ddd;background:#0008;padding:8px 12px;border-radius:8px;white-space:nowrap}
+#joystick{position:absolute;left:22px;bottom:25px;width:120px;height:120px;border-radius:50%;background:#ffffff18;border:2px solid #ffffff55;pointer-events:auto;touch-action:none}
+#stick{position:absolute;width:48px;height:48px;left:34px;top:34px;border-radius:50%;background:#ff657eaa;border:2px solid #fff8}
+#look{position:absolute;right:0;bottom:0;width:58%;height:68%;pointer-events:auto;touch-action:none}
+#flash{position:absolute;right:20px;bottom:28px;width:62px;height:62px;border-radius:50%;pointer-events:auto;background:#e6dba8;color:#222}
+#exit{position:absolute;right:20px;top:65px;width:auto;padding:9px 13px;pointer-events:auto;background:#333}
+#crosshair{position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 5px #fff}
+@media(min-width:700px){#joystick{width:140px;height:140px}#stick{left:44px;top:44px}}
 </style>
 </head>
-
 <body>
-
-<section id="menu">
-<div class="panel">
-<h1>ЛАПОЧКА</h1>
-<p class="subtitle">MULTIPLAYER HORROR</p>
-
-<input id="nickname" maxlength="20"
-placeholder="Твой игровой ник">
-
-<button id="create">СОЗДАТЬ КОМНАТУ</button>
-
-<p class="subtitle">ИЛИ ВВЕДИ КОД</p>
-
-<input id="roomCode" maxlength="6"
-placeholder="КОД КОМНАТЫ">
-
-<button class="secondary" id="join">ВОЙТИ В КОМНАТУ</button>
-
-<p id="menuMessage" class="subtitle"></p>
+<div id="game"></div>
+<div id="menu">
+ <div class="panel">
+  <h1>ЛАПОЧКА</h1><p class="sub">HORROR ONLINE · TEST BUILD</p>
+  <input id="nick" maxlength="16" placeholder="Твой ник" autocomplete="off">
+  <button id="create">Создать комнату</button>
+  <input id="roomCode" maxlength="6" placeholder="Код комнаты">
+  <button id="join" class="secondary">Войти в комнату</button>
+  <div id="status">Подключение к Firebase…</div>
+ </div>
 </div>
-</section>
-
-<div id="game" hidden></div>
-
-<div id="hud" hidden>
- <div id="top">
-  <div class="hudbox" id="roomLabel">КОМНАТА</div>
-  <div class="hudbox" id="playersLabel">0 / 8</div>
- </div>
-
- <div id="role">ОЖИДАНИЕ</div>
-
- <button id="leave">ВЫЙТИ</button>
-
- <div id="lookArea"></div>
-
- <div id="joystick">
-  <div id="stick"></div>
- </div>
-
- <button id="flash">☼</button>
-
- <div id="message">Найди выход...</div>
+<div id="hud">
+ <div id="roomLabel">Комната: —</div><div id="role">Ожидание</div>
+ <div id="hint">Левый джойстик — движение · Правая часть экрана — обзор</div>
+ <button id="exit">Выйти</button><div id="crosshair"></div>
+ <div id="joystick"><div id="stick"></div></div>
+ <button id="flash">СВЕТ</button><div id="look"></div>
 </div>
 
 <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getDatabase, ref, get, set, update, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
 
-import * as THREE from
-"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js";
-
-import {initializeApp} from
-"https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-
-import {
- getDatabase,ref,get,runTransaction,
- onValue,update,remove,onDisconnect
-} from
-"https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
-
-import {
- getAuth,signInAnonymously
-} from
-"https://www.gstatic.com/firebasejs/11.6.0/firebase-auth.js";
-
-
-// FIREBASE CONFIG
-
-const firebaseConfig={
- apiKey:"AIzaSyAMCgVPoPd_NS9ahlCp5Ka9YNT2dk-viwg",
- authDomain:"lapochka-76772.firebaseapp.com",
- databaseURL:"https://lapochka-76772-default-rtdb.europe-west1.firebasedatabase.app",
- projectId:"lapochka-76772",
- storageBucket:"lapochka-76772.firebasestorage.app",
- messagingSenderId:"146260614860",
- appId:"1:3b8177d3ab5bd714b6ec69",
- measurementId:"G-5Z6XZKECD7"
+/* ВАЖНО: вставь сюда точный firebaseConfig из Firebase Console → Project settings → Your apps.
+   Не придумывай appId. Остальные значения тоже должны совпадать с твоим проектом. */
+const firebaseConfig = {
+  apiKey: "AIzaSyAMCgVPoPd_NS9ahlCp5Ka9YNT2dk-viwg",
+  authDomain: "lapochka-76772.firebaseapp.com",
+  databaseURL: "https://lapochka-76772-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "lapochka-76772",
+  storageBucket: "lapochka-76772.firebasestorage.app",
+  messagingSenderId: "146260614860",
+  appId: "1:146260614860:web:3b8177d3ab5bd714b6ec69"
 };
 
-const app=initializeApp(firebaseConfig);
-const db=getDatabase(app);
-const auth=getAuth(app);
-
-let uid=null;
-let roomCode=null;
-let myRole=null;
-let roomListener=null;
-let players={};
-let scene,camera,renderer;
-let localPlayer;
-let playerObjects={};
-let yaw=0;
-let pitch=0;
-let flashlight;
-let flashOn=true;
-let lastSync=0;
-let running=false;
-
-const $=id=>document.getElementById(id);
-
-function say(t){
- $("message").textContent=t;
-}
-function menuSay(t){
- $("menuMessage").textContent=t;
-}
-
-try{
- const user=await signInAnonymously(auth);
- uid=user.user.uid;
- menuSay("Firebase подключён");
-}catch(e){
- menuSay("Ошибка Firebase: "+e.message);
-}
-
-
-// RANDOM ROOM CODE
-
-function makeCode(){
- const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
- const arr=new Uint8Array(6);
- crypto.getRandomValues(arr);
- return [...arr].map(x=>chars[x%chars.length]).join("");
-}
-
-
-// CREATE ROOM
-
-async function createRoom(){
-
- if(!uid)return menuSay("Нет подключения Firebase");
-
- const name=$("nickname").value.trim();
- if(!name)return menuSay("Введи ник");
-
- $("create").disabled=true;
-
- try{
-
-  for(let i=0;i<10;i++){
-
-   const code=makeCode();
-   const roomRef=ref(db,"rooms/"+code);
-
-   const result=await runTransaction(roomRef,room=>{
-
-    if(room!==null)return;
-
-    return {
-     status:"waiting",
-     maxPlayers:8,
-     monsterId:null,
-     createdAt:Date.now(),
-     players:{
-      [uid]:{
-       name,
-       role:"waiting",
-       x:0,
-       z:0,
-       rot:0,
-       joinedAt:Date.now()
-      }
-     }
-    };
-   });
-
-   if(result.committed){
-    await onDisconnect(
-     ref(db,"rooms/"+code+"/players/"+uid)
-    ).remove();
-
-    enterGame(code);
-    return;
-   }
-  }
-
-  menuSay("Не удалось создать комнату");
-
- }catch(e){
-  menuSay(e.message);
- }finally{
-  $("create").disabled=false;
- }
-}
-
-
-// JOIN ROOM
-
-async function joinRoom(){
-
- if(!uid)return menuSay("Нет Firebase");
-
- const name=$("nickname").value.trim();
- const code=$("roomCode").value.trim().toUpperCase();
-
- if(!name||!code)return menuSay("Введи ник и код");
-
- $("join").disabled=true;
-
- try{
-
-  const roomRef=ref(db,"rooms/"+code);
-
-  const result=await runTransaction(roomRef,room=>{
-
-   if(!room||room.status!=="waiting")return;
-
-   const p=room.players||{};
-
-   if(p[uid]||Object.keys(p).length>=8)return;
-
-   p[uid]={
-    name,
-    role:"waiting",
-    x:0,
-    z:0,
-    rot:0,
-    joinedAt:Date.now()
-   };
-
-   room.players=p;
-
-   if(Object.keys(p).length===8){
-
-    const ids=Object.keys(p);
-    const monster=ids[
-     Math.floor(Math.random()*ids.length)
-    ];
-
-    ids.forEach(id=>{
-     p[id].role=id===monster?"monster":"survivor";
-    });
-
-    room.monsterId=monster;
-    room.status="playing";
-    room.startedAt=Date.now();
-   }
-
-   return room;
-  });
-
-  if(!result.committed){
-   menuSay("Комната не найдена, заполнена или игра началась");
-   return;
-  }
-
-  await onDisconnect(
-   ref(db,"rooms/"+code+"/players/"+uid)
-  ).remove();
-
-  enterGame(code);
-
- }catch(e){
-  menuSay("Ошибка: "+e.message);
- }finally{
-  $("join").disabled=false;
- }
-}
-
-
-// GAME ENTRY
-
-function enterGame(code){
-
- roomCode=code;
- $("menu").hidden=true;
- $("game").hidden=false;
- $("hud").hidden=false;
-
- $("roomLabel").textContent="КОМНАТА "+code;
-
- start3D();
-
- if(roomListener)roomListener();
-
- roomListener=onValue(
-  ref(db,"rooms/"+code),
-  snap=>{
-
-   if(!snap.exists()){
-    say("Комната закрыта");
-    return;
-   }
-
-   const room=snap.val();
-   players=room.players||{};
-
-   $("playersLabel").textContent=
-    Object.keys(players).length+" / 8";
-
-   const me=players[uid];
-
-   if(!me){
-    say("Ты покинул комнату");
-    return;
-   }
-
-   myRole=me.role;
-
-   $("role").textContent=
-    myRole==="monster"?"ТЫ — МОНСТР":
-    myRole==="survivor"?"ТЫ — ВЫЖИВШИЙ":
-    "ОЖИДАНИЕ ИГРОКОВ";
-
-   if(room.status==="playing"){
-    say(myRole==="monster"?
-     "Найди всех выживших!":
-     "Найди выход и выживи!");
-   }else{
-    say("Ожидание восьми игроков...");
-   }
-
-   syncOtherPlayers();
-  }
- );
-
-}
-
-
-// 3D SCENE
-
-function start3D(){
-
- if(running)return;
- running=true;
-
- const container=$("game");
-
- scene=new THREE.Scene();
- scene.background=new THREE.Color(0x050509);
- scene.fog=new THREE.FogExp2(0x08080d,0.055);
-
- camera=new THREE.PerspectiveCamera(
-  75,innerWidth/innerHeight,0.1,100
- );
-
+const $ = id => document.getElementById(id);
+const status = msg => $("status").textContent = msg;
+let app, auth, db, myUid=null, currentRoom=null, myNick="", myRole="survivor";
+let roomListener=null, playersListener=null, lastSend=0, started=false;
+let scene,camera,renderer,player,flashLight,remoteMeshes={};
+let yaw=0,pitch=0, moveX=0,moveY=0, flashlightOn=true;
+const keys={};
+const playerPos={x:0,y:1,z:0};
+
+function makeWorld(){
+ scene=new THREE.Scene(); scene.background=new THREE.Color(0x08090d); scene.fog=new THREE.Fog(0x08090d,8,34);
+ camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,100);
+ renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight);
+ $("game").appendChild(renderer.domElement);
+ scene.add(new THREE.HemisphereLight(0x8790a8,0x17131b,1.2));
+ const ambient=new THREE.AmbientLight(0x667080,.35);scene.add(ambient);
+ const floor=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshStandardMaterial({color:0x25252a,roughness:1}));
+ floor.rotation.x=-Math.PI/2;floor.position.y=0;scene.add(floor);
+ const grid=new THREE.GridHelper(80,40,0x37313b,0x24232b);grid.position.y=.01;scene.add(grid);
+ const wallMat=new THREE.MeshStandardMaterial({color:0x34313a,roughness:1});
+ function wall(x,y,z,w,h,d){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallMat);m.position.set(x,y,z);scene.add(m)}
+ // Простая тестовая планировка коридоров и комнат
+ wall(0,2,-12,30,4,1);wall(0,2,12,30,4,1);wall(-15,2,0,1,4,24);wall(15,2,0,1,4,24);
+ wall(-5,2,-5,1,4,14);wall(5,2,5,1,4,14);wall(0,2,2,10,4,1);
+ for(let i=0;i<7;i++){const lamp=new THREE.PointLight(0x9ca6c8,.45,8);lamp.position.set(-10+i*3,3.4,(i%2?5:-5));scene.add(lamp)}
+ player=new THREE.Group();
+ const body=new THREE.Mesh(new THREE.CapsuleGeometry(.35,.8,4,8),new THREE.MeshStandardMaterial({color:0x6b91a8}));
+ body.position.y=.8;player.add(body);scene.add(player);
+ flashLight=new THREE.SpotLight(0xffefc5,3,18,Math.PI/7,.45,1.2);flashLight.position.set(0,0,0);flashLight.target.position.set(0,0,-1);camera.add(flashLight);camera.add(flashLight.target);scene.add(camera);
  camera.position.set(0,1.65,0);
-
- renderer=new THREE.WebGLRenderer({
-  antialias:true
- });
-
- renderer.setSize(innerWidth,innerHeight);
- renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
- renderer.shadowMap.enabled=true;
-
- container.appendChild(renderer.domElement);
-
- const ambient=new THREE.HemisphereLight(
-  0x777788,0x111111,0.65
- );
- scene.add(ambient);
-
- const light=new THREE.PointLight(0xff3344,2,12);
- light.position.set(0,3,0);
- scene.add(light);
-
- // FLOOR
-
- const floor=new THREE.Mesh(
-  new THREE.PlaneGeometry(40,40),
-  new THREE.MeshStandardMaterial({
-   color:0x292932,roughness:1
-  })
- );
-
- floor.rotation.x=-Math.PI/2;
- floor.position.y=0;
- floor.receiveShadow=true;
- scene.add(floor);
-
- // CEILING
-
- const ceiling=new THREE.Mesh(
-  new THREE.PlaneGeometry(40,40),
-  new THREE.MeshStandardMaterial({
-   color:0x111119,side:THREE.DoubleSide
-  })
- );
-
- ceiling.rotation.x=Math.PI/2;
- ceiling.position.y=4;
- scene.add(ceiling);
-
- // WALLS
-
- const wallMaterial=new THREE.MeshStandardMaterial({
-  color:0x34343e,roughness:0.9
- });
-
- function wall(x,y,z,w,h,d){
-
-  const mesh=new THREE.Mesh(
-   new THREE.BoxGeometry(w,h,d),
-   wallMaterial
-  );
-
-  mesh.position.set(x,y,z);
-  mesh.castShadow=true;
-  mesh.receiveShadow=true;
-  scene.add(mesh);
- }
-
- wall(0,2,-20,40,4,1);
- wall(0,2,20,40,4,1);
- wall(-20,2,0,1,4,40);
- wall(20,2,0,1,4,40);
-
- // INTERIOR WALLS
-
- wall(-7,2,-8,1,4,14);
- wall(7,2,8,1,4,14);
- wall(0,2,5,12,4,0.5);
- wall(-12,2,0,0.5,4,12);
- wall(12,2,0,0.5,4,12);
-
- // PILLARS
-
- for(let x=-15;x<=15;x+=10){
-  for(let z=-15;z<=15;z+=10){
-
-   const pillar=new THREE.Mesh(
-    new THREE.BoxGeometry(0.7,4,0.7),
-    wallMaterial
-   );
-
-   pillar.position.set(x,2,z);
-   scene.add(pillar);
-  }
- }
-
- // RED EXIT MARKER
-
- const exitLight=new THREE.PointLight(0xff001e,3,8);
- exitLight.position.set(0,2,-18);
- scene.add(exitLight);
-
- const exit=new THREE.Mesh(
-  new THREE.BoxGeometry(3,3,0.2),
-  new THREE.MeshStandardMaterial({
-   color:0x770d21,
-   emissive:0x33000a
-  })
- );
-
- exit.position.set(0,1.5,-19.3);
- scene.add(exit);
-
- // FLASHLIGHT
-
- flashlight=new THREE.SpotLight(
-  0xffffff,65,25,Math.PI/7,0.45,1
- );
-
- camera.add(flashlight);
- flashlight.position.set(0,0,0);
- flashlight.target.position.set(0,0,-1);
- camera.add(flashlight.target);
- scene.add(camera);
-
- // LOCAL PLAYER POSITION
-
- localPlayer={
-  x:0,z:0
- };
-
- camera.position.set(0,1.65,0);
-
+ addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
  animate();
 }
-
-
-// OTHER PLAYERS
-
-function makePlayer(id,p){
-
- const group=new THREE.Group();
-
- const material=new THREE.MeshStandardMaterial({
-  color:p.role==="monster"?0xaa1028:0x466c9c,
-  roughness:0.8
- });
-
- const body=new THREE.Mesh(
-  new THREE.CapsuleGeometry(0.35,0.8,4,8),
-  material
- );
-
- body.position.y=0.9;
- group.add(body);
-
- const head=new THREE.Mesh(
-  new THREE.SphereGeometry(0.24,12,10),
-  material
- );
-
- head.position.y=1.65;
- group.add(head);
-
- group.userData.playerId=id;
- scene.add(group);
-
- playerObjects[id]=group;
-
-}
-
-function syncOtherPlayers(){
-
- if(!scene)return;
-
- Object.entries(players).forEach(([id,p])=>{
-
-  if(id===uid)return;
-
-  if(!playerObjects[id]){
-   makePlayer(id,p);
-  }
-
-  const object=playerObjects[id];
-
-  object.position.set(
-   Number(p.x)||0,0,Number(p.z)||0
-  );
-
-  object.rotation.y=Number(p.rot)||0;
-
-  const body=object.children[0];
-
-  if(body){
-   body.material.color.set(
-    p.role==="monster"?0xc20e30:0x466c9c
-   );
-  }
- });
-
- Object.keys(playerObjects).forEach(id=>{
-  if(!players[id]){
-   scene.remove(playerObjects[id]);
-   delete playerObjects[id];
-  }
- });
-
-}
-
-
-// JOYSTICK
-
-let joyX=0;
-let joyY=0;
-let joyActive=false;
-
-const joystick=$("joystick");
-const stick=$("stick");
-
-joystick.addEventListener("pointerdown",e=>{
- joyActive=true;
- joystick.setPointerCapture(e.pointerId);
- moveJoy(e);
-});
-
-joystick.addEventListener("pointermove",e=>{
- if(joyActive)moveJoy(e);
-});
-
-function moveJoy(e){
-
- const rect=joystick.getBoundingClientRect();
- const cx=rect.left+rect.width/2;
- const cy=rect.top+rect.height/2;
-
- let dx=e.clientX-cx;
- let dy=e.clientY-cy;
-
- const max=40;
- const len=Math.hypot(dx,dy);
-
- if(len>max){
-  dx=dx/len*max;
-  dy=dy/len*max;
- }
-
- joyX=dx/max;
- joyY=dy/max;
-
- stick.style.transform=
-  `translate(${dx}px,${dy}px)`;
-}
-
-function stopJoy(){
- joyActive=false;
- joyX=0;
- joyY=0;
- stick.style.transform="translate(0,0)";
-}
-
-joystick.addEventListener("pointerup",stopJoy);
-joystick.addEventListener("pointercancel",stopJoy);
-
-
-// CAMERA LOOK
-
-let lookActive=false;
-let lookX=0;
-let lookY=0;
-
-$("lookArea").addEventListener("pointerdown",e=>{
- lookActive=true;
- lookX=e.clientX;
- lookY=e.clientY;
- $("lookArea").setPointerCapture(e.pointerId);
-});
-
-$("lookArea").addEventListener("pointermove",e=>{
-
- if(!lookActive)return;
-
- const dx=e.clientX-lookX;
- const dy=e.clientY-lookY;
-
- lookX=e.clientX;
- lookY=e.clientY;
-
- yaw-=dx*0.006;
- pitch-=dy*0.005;
-
- pitch=Math.max(-1.2,Math.min(1.2,pitch));
-
-});
-
-$("lookArea").addEventListener("pointerup",()=>{
- lookActive=false;
-});
-
-$("lookArea").addEventListener("pointercancel",()=>{
- lookActive=false;
-});
-
-
-// KEYBOARD
-
-const keys={};
-
-addEventListener("keydown",e=>keys[e.key.toLowerCase()]=true);
-addEventListener("keyup",e=>keys[e.key.toLowerCase()]=false);
-
-
-// FLASHLIGHT
-
-$("flash").onclick=()=>{
-
- flashOn=!flashOn;
- flashlight.visible=flashOn;
-
- $("flash").textContent=flashOn?"☼":"◉";
-};
-
-
-// MOVEMENT AND RENDER
-
-let previous=performance.now();
-
-function animate(now=performance.now()){
-
- if(!running)return;
-
+function animate(){
  requestAnimationFrame(animate);
-
- const dt=Math.min((now-previous)/1000,0.05);
- previous=now;
-
- const forward=
-  -joyY+
-  (keys["w"]||keys["arrowup"]?1:0)-
-  (keys["s"]||keys["arrowdown"]?1:0);
-
- const side=
-  joyX+
-  (keys["d"]||keys["arrowright"]?1:0)-
-  (keys["a"]||keys["arrowleft"]?1:0);
-
- const speed=myRole==="monster"?4.5:3.5;
-
- const fx=-Math.sin(yaw);
- const fz=-Math.cos(yaw);
- const sx=Math.cos(yaw);
- const sz=-Math.sin(yaw);
-
- const vx=(fx*forward+sx*side)*speed*dt;
- const vz=(fz*forward+sz*side)*speed*dt;
-
- if(localPlayer){
-
-  localPlayer.x+=vx;
-  localPlayer.z+=vz;
-
-  localPlayer.x=Math.max(-18,Math.min(18,localPlayer.x));
-  localPlayer.z=Math.max(-18,Math.min(18,localPlayer.z));
-
-  camera.position.set(
-   localPlayer.x,1.65,localPlayer.z
-  );
-
-  camera.rotation.order="YXZ";
-  camera.rotation.y=yaw;
-  camera.rotation.x=pitch;
- }
-
- if(roomCode && localPlayer && now-lastSync>150){
-
-  lastSync=now;
-
-  update(
-   ref(db,"rooms/"+roomCode+"/players/"+uid),
-   {
-    x:localPlayer.x,
-    z:localPlayer.z,
-    rot:yaw
-   }
-  ).catch(()=>{});
- }
-
+ if(!started){renderer.render(scene,camera);return}
+ const speed=.085;
+ const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
+ const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
+ const dir=forward.multiplyScalar(-moveY).add(right.multiplyScalar(moveX));
+ if(dir.lengthSq()>0){dir.normalize().multiplyScalar(speed);playerPos.x+=dir.x;playerPos.z+=dir.z}
+ playerPos.x=Math.max(-13,Math.min(13,playerPos.x));playerPos.z=Math.max(-10,Math.min(10,playerPos.z));
+ camera.position.set(playerPos.x,1.65,playerPos.z);
+ camera.rotation.order="YXZ";camera.rotation.y=yaw;camera.rotation.x=pitch;
+ player.position.set(playerPos.x,0,playerPos.z);
+ const now=Date.now();
+ if(currentRoom && myUid && now-lastSend>120){lastSend=now;update(ref(db,`rooms/${currentRoom}/players/${myUid}`),{x:playerPos.x,z:playerPos.z,yaw,nick:myNick,role:myRole,online:true}).catch(()=>{})}
+ Object.entries(remoteMeshes).forEach(([id,obj])=>{const data=obj.userData.remote;if(data){obj.position.x+=(data.x-obj.position.x)*.25;obj.position.z+=(data.z-obj.position.z)*.25}});
  renderer.render(scene,camera);
 }
-
-
-// LEAVE ROOM
-
-$("leave").onclick=async()=>{
-
- running=false;
-
- if(roomListener){
-  roomListener();
-  roomListener=null;
- }
-
+function makeRemote(id,data){
+ if(id===myUid)return;
+ let obj=remoteMeshes[id];
+ if(!obj){obj=new THREE.Mesh(new THREE.CapsuleGeometry(.32,.75,4,8),new THREE.MeshStandardMaterial({color:data.role==="monster"?0xb32136:0x7c9cad}));obj.position.y=.8;scene.add(obj);remoteMeshes[id]=obj}
+ obj.userData.remote=data;obj.position.x=data.x||0;obj.position.z=data.z||0;
+}
+function clearRemotes(){Object.values(remoteMeshes).forEach(o=>scene.remove(o));remoteMeshes={}}
+async function connect(){
  try{
-  await remove(
-   ref(db,"rooms/"+roomCode+"/players/"+uid)
-  );
-
-  await runTransaction(
-   ref(db,"rooms/"+roomCode),
-   room=>{
-    if(!room)return;
-    if(Object.keys(room.players||{}).length===0){
-     return null;
-    }
-    return room;
-   }
-  );
-
- }catch(e){
-  console.error(e);
- }
-
- if(renderer){
-  renderer.dispose();
-  renderer.domElement.remove();
- }
-
- $("game").hidden=true;
- $("hud").hidden=true;
- $("menu").hidden=false;
-
- roomCode=null;
- players={};
- playerObjects={};
- localPlayer=null;
- scene=null;
- roomListener=null;
-
-};
-
-
-// RESIZE
-
-addEventListener("resize",()=>{
-
- if(!camera||!renderer)return;
-
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
-
- renderer.setSize(innerWidth,innerHeight);
-});
-
-
-// BUTTONS
-
-$("create").onclick=createRoom;
-$("join").onclick=joinRoom;
-
+  if(firebaseConfig.appId.startsWith("ВСТАВЬ")) throw new Error("Нужно вставить точный appId из настроек Firebase.");
+  app=initializeApp(firebaseConfig);auth=getAuth(app);db=getDatabase(app);
+  const cred=await signInAnonymously(auth);myUid=cred.user.uid;
+  status("Firebase подключён. Введи ник и создай комнату.");
+ }catch(e){status("Ошибка Firebase: "+e.message)}
+}
+async function createRoom(){
+ if(!db||!myUid)return status("Сначала исправь Firebase config и обнови страницу.");
+ myNick=$("nick").value.trim().slice(0,16);if(!myNick)return status("Введи ник.");
+ try{
+  let code=Math.random().toString(36).slice(2,8).toUpperCase();
+  const roomRef=ref(db,`rooms/${code}`);
+  await set(roomRef,{host:myUid,status:"waiting",createdAt:Date.now(),players:{[myUid]:{nick:myNick,x:0,z:0,role:"survivor",online:true}}});
+  currentRoom=code;await onDisconnect(ref(db,`rooms/${code}/players/${myUid}`)).remove();
+  enterGame();watchRoom();status("");
+ }catch(e){status("Не удалось создать комнату: "+e.message)}
+}
+async function joinRoom(){
+ if(!db||!myUid)return status("Сначала исправь Firebase config и обнови страницу.");
+ myNick=$("nick").value.trim().slice(0,16);const code=$("roomCode").value.trim().toUpperCase();
+ if(!myNick)return status("Введи ник.");if(!/^[A-Z0-9]{6}$/.test(code))return status("Введи 6-значный код комнаты.");
+ try{
+  const roomRef=ref(db,`rooms/${code}`),snap=await get(roomRef);
+  if(!snap.exists())return status("Комната не найдена.");
+  const data=snap.val(),count=Object.keys(data.players||{}).length;
+  if(count>=8)return status("Комната заполнена (максимум 8 игроков).");
+  if(data.status==="playing")return status("Игра уже началась.");
+  currentRoom=code;
+  await set(ref(db,`rooms/${code}/players/${myUid}`),{nick:myNick,x:0,z:0,role:"survivor",online:true});
+  await onDisconnect(ref(db,`rooms/${code}/players/${myUid}`)).remove();
+  enterGame();watchRoom();status("");
+ }catch(e){status("Не удалось войти: "+e.message)}
+}
+function enterGame(){
+ $("menu").style.display="none";$("hud").style.display="block";$("roomLabel").textContent="Комната: "+currentRoom;
+ started=true;playerPos.x=0;playerPos.z=0;
+}
+function watchRoom(){
+ if(roomListener)roomListener();if(playersListener)playersListener();
+ roomListener=onValue(ref(db,`rooms/${currentRoom}`),snap=>{
+  const data=snap.val();if(!data)return;
+  $("role").textContent=data.status==="playing"?(myRole==="monster"?"РОЛЬ: МОНСТР":"РОЛЬ: ВЫЖИВШИЙ"):"Ожидание игроков";
+  const players=data.players||{};
+  if(data.status==="playing"&&players[myUid]?.role)myRole=players[myUid].role;
+  if(data.status==="waiting"&&Object.keys(players).length>=2&&data.host===myUid){
+   $("role").textContent="Игроков: "+Object.keys(players).length+" · Нажми СТАРТ";
+   showStartButton();
+  }
+ });
+ playersListener=onValue(ref(db,`rooms/${currentRoom}/players`),snap=>{
+  const players=snap.val()||{};Object.entries(players).forEach(([id,p])=>makeRemote(id,p));
+  Object.keys(remoteMeshes).forEach(id=>{if(!players[id]){scene.remove(remoteMeshes[id]);delete remoteMeshes[id]}});
+ });
+}
+function showStartButton(){
+ if($("startGame"))return;
+ const b=document.createElement("button");b.id="startGame";b.textContent="СТАРТ (от 2 игроков)";
+ b.style.cssText="position:absolute;top:105px;left:50%;transform:translateX(-50%);width:auto;pointer-events:auto;padding:12px 18px";
+ $("hud").appendChild(b);b.onclick=startGame;
+}
+async function startGame(){
+ const snap=await get(ref(db,`rooms/${currentRoom}`));if(!snap.exists())return;
+ const data=snap.val();if(data.host!==myUid)return;
+ const ids=Object.keys(data.players||{});if(ids.length<2)return;
+ const monster=ids[Math.floor(Math.random()*ids.length)];
+ const updates={status:"playing"};
+ ids.forEach(id=>updates[`players/${id}/role`]=id===monster?"monster":"survivor");
+ await update(ref(db,`rooms/${currentRoom}`),updates);
+ $("startGame")?.remove();
+}
+async function leaveGame(){
+ if(currentRoom&&myUid){try{await remove(ref(db,`rooms/${currentRoom}/players/${myUid}`))}catch{}}
+ if(roomListener)roomListener();if(playersListener)playersListener();
+ currentRoom=null;started=false;clearRemotes();$("hud").style.display="none";$("menu").style.display="flex";$("role").textContent="Ожидание";
+}
+$("create").onclick=createRoom;$("join").onclick=joinRoom;$("exit").onclick=leaveGame;
+$("flash").onclick=()=>{flashlightOn=!flashlightOn;flashLight.visible=flashlightOn;$("flash").textContent=flashlightOn?"СВЕТ":"СВЕТ OFF"};
+addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=true;updateKeys()});
+addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=false;updateKeys()});
+function updateKeys(){moveX=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);moveY=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)}
+const joy=$("joystick"),stick=$("stick");let joyPointer=null;
+joy.addEventListener("pointerdown",e=>{joyPointer=e.pointerId;joy.setPointerCapture(e.pointerId);moveJoy(e)});
+joy.addEventListener("pointermove",e=>{if(e.pointerId===joyPointer)moveJoy(e)});
+function moveJoy(e){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=42,len=Math.hypot(dx,dy);if(len>max){dx=dx/len*max;dy=dy/len*max}stick.style.transform=`translate(${dx}px,${dy}px)`;moveX=dx/max;moveY=dy/max}
+function resetJoy(){joyPointer=null;stick.style.transform="";moveX=0;moveY=0}
+joy.addEventListener("pointerup",resetJoy);joy.addEventListener("pointercancel",resetJoy);
+let lookPointer=null,lastX=0,lastY=0;
+$("look").addEventListener("pointerdown",e=>{lookPointer=e.pointerId;lastX=e.clientX;lastY=e.clientY;$("look").setPointerCapture(e.pointerId)});
+$("look").addEventListener("pointermove",e=>{if(e.pointerId!==lookPointer)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;yaw-=dx*.006;pitch=Math.max(-1.1,Math.min(1.1,pitch-dy*.006)});
+$("look").addEventListener("pointerup",()=>lookPointer=null);$("look").addEventListener("pointercancel",()=>lookPointer=null);
+makeWorld();connect();
 </script>
 </body>
 </html>
