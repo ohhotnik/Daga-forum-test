@@ -1,127 +1,201 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="kk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>DAGA TEST — Форум</title>
-<style>
-:root{--bg:#101114;--panel:#191b20;--panel2:#20232a;--line:#30343d;--red:#e04444;--text:#f2f3f5;--muted:#a5aab4}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:15px Arial,sans-serif}
-header{background:#17191e;border-bottom:1px solid var(--line);padding:18px max(16px,calc((100% - 1100px)/2));display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
-.logo{font-size:24px;font-weight:800;letter-spacing:1px}.logo b{color:var(--red)}
-nav{display:flex;gap:8px;flex-wrap:wrap}button,.btn{border:1px solid var(--line);background:var(--panel2);color:var(--text);padding:10px 13px;border-radius:8px;cursor:pointer}
-button:hover,.btn:hover{border-color:var(--red)}.primary{background:var(--red);border-color:var(--red);color:white}
-main{max-width:1100px;margin:24px auto;padding:0 16px}.hero{padding:25px;background:linear-gradient(120deg,#272a32,#191b20);border:1px solid var(--line);border-radius:14px;margin-bottom:18px}
-h1{margin:0 0 8px;font-size:28px}.muted{color:var(--muted)}.layout{display:grid;grid-template-columns: minmax(0,2fr) minmax(240px,1fr);gap:16px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:17px;margin-bottom:14px}
-.panel h2{font-size:18px;margin:0 0 13px}.item{padding:13px 0;border-top:1px solid var(--line)}.item:first-of-type{border-top:0}
-.item strong{display:block;margin-bottom:5px}.tag{display:inline-block;color:#ffb3b3;background:#482528;padding:4px 8px;border-radius:20px;font-size:12px;margin-right:5px}
-input,textarea,select{width:100%;background:#111318;border:1px solid var(--line);border-radius:8px;color:var(--text);padding:11px;margin:6px 0 12px;font:inherit}
-textarea{min-height:110px;resize:vertical}.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1}
-section.page{display:none}section.page.active{display:block}.notice{font-size:13px;color:var(--muted);line-height:1.5}
-footer{text-align:center;color:var(--muted);padding:28px 16px}
-.rank{border-left:3px solid var(--red);padding:8px 10px;background:#202229;margin:7px 0;border-radius:4px}
-.profile{display:flex;gap:12px;align-items:center}.avatar{width:48px;height:48px;border-radius:50%;background:#383d48;display:grid;place-items:center;font-weight:bold}
-@media(max-width:750px){.layout{grid-template-columns:1fr}header{align-items:flex-start}.logo{width:100%}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hide & Seek 8 Players</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0b1020;
+      color: white;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .screen {
+      width: min(1000px, 100%);
+      text-align: center;
+    }
+    .box {
+      background: #1a2438;
+      border-radius: 15px;
+      padding: 24px;
+      box-shadow: 0 18px 40px rgba(0,0,0,0.25);
+    }
+    input, button, select {
+      width: 100%;
+      padding: 12px 14px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+    input, select {
+      background: #dbeafe;
+      color: #0f172a;
+    }
+    button {
+      background: #38bdf8;
+      color: #062033;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    canvas {
+      width: 100%;
+      max-width: 980px;
+      height: auto;
+      border: 4px solid white;
+      background: #08101d;
+      border-radius: 12px;
+      margin-top: 18px;
+    }
+  </style>
 </head>
 <body>
-<header>
-  <div class="logo">DAGA <b>TEST</b></div>
-  <nav>
-    <button onclick="showPage('home')">Главная</button>
-    <button onclick="showPage('sections')">Разделы</button>
-    <button onclick="showPage('team')">Администрация</button>
-    <button onclick="showPage('profile')">Профиль</button>
-    <button onclick="showPage('account')">Войти</button>
-  </nav>
-</header>
-<main>
-  <div class="hero">
-    <h1>Форум DAGA TEST</h1>
-    <div class="muted">Игровое сообщество • Новости • Общение • Помощь</div>
-    <p>Добро пожаловать на форум DAGA TEST. Выберите раздел или создайте тему.</p>
-    <div class="row"><button class="primary" onclick="showPage('sections')">Открыть разделы</button><button onclick="showPage('account')">Регистрация / вход</button></div>
+  <div class="screen">
+    <div id="setup" class="box">
+      <h1>8 Player Hide & Seek</h1>
+      <input id="playerName" placeholder="Сіздің атыңыз" value="Игрок 1">
+      <select id="roleSelect">
+        <option value="hunter">Іздеуші</option>
+        <option value="runner">Тығылған</option>
+      </select>
+      <button id="startBtn">Ойынды бастау</button>
+    </div>
+
+    <div id="gameBox" style="display:none">
+      <canvas id="gameCanvas" width="980" height="560"></canvas>
+    </div>
   </div>
 
-  <section id="home" class="page active">
-    <div class="layout">
-      <div>
-        <div class="panel"><h2>Последние темы</h2><div id="topicList"><div class="item"><strong>Добро пожаловать на DAGA TEST!</strong><span class="muted">Системная тема • Новости</span></div></div></div>
-        <div class="panel"><h2>Создать тему</h2>
-          <label>Раздел</label><select id="topicSection"><option>Новости и обновления</option><option>Вопросы и помощь</option><option>Общение игроков</option><option>Жалобы на игроков</option><option>Жалобы на администрацию</option><option>Заявки в администрацию</option><option>Повышения и понижения</option><option>Технический раздел</option></select>
-          <label>Заголовок</label><input id="topicTitle" placeholder="Название темы">
-          <label>Сообщение</label><textarea id="topicText" placeholder="Напишите сообщение..."></textarea>
-          <button class="primary" onclick="createTopic()">Опубликовать тему</button>
-        </div>
-      </div>
-      <aside>
-        <div class="panel"><h2>Информация</h2><p><span class="tag">DAGA TEST</span><span class="tag">1 сервер</span></p><p class="muted">Форум игрового сообщества.</p><p>Темы: <b id="topicCount">1</b></p></div>
-        <div class="panel"><h2>Быстрые ссылки</h2><div class="item"><a href="#" onclick="showPage('rules');return false">Правила форума</a></div><div class="item"><a href="#" onclick="showPage('team');return false">Состав администрации</a></div><div class="item"><a href="#" onclick="showPage('sections');return false">Все разделы</a></div></div>
-      </aside>
-    </div>
-  </section>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-  <section id="sections" class="page">
-    <div class="panel"><h2>Игровой сервер</h2><div class="item"><strong>DAGA TEST</strong><span class="muted">Единый сервер сообщества</span></div></div>
-    <div class="layout">
-      <div>
-        <div class="panel"><h2>Государственные организации</h2>
-          <div class="item"><strong>ГИБДД</strong><span class="muted">Новости, наборы, отчёты и вопросы организации</span></div>
-          <div class="item"><strong>Министерство внутренних дел</strong></div><div class="item"><strong>Армия</strong></div><div class="item"><strong>Правительство</strong></div><div class="item"><strong>Больница</strong></div><div class="item"><strong>Средства массовой информации</strong></div>
-        </div>
-        <div class="panel"><h2>Криминальные организации</h2>
-          <div class="item"><strong>ОПГ «Лыткарино»</strong></div><div class="item"><strong>ОПГ «Арзамас»</strong></div><div class="item"><strong>ОПГ «Батыровка»</strong></div>
-        </div>
-        <div class="panel"><h2>Общие разделы</h2>
-          <div class="item"><strong>Новости и обновления</strong><span class="muted">Объявления проекта и изменения</span></div>
-          <div class="item"><strong>Правила форума</strong><span class="muted">Правила общения и публикаций</span></div>
-          <div class="item"><strong>Вопросы и помощь</strong><span class="muted">Помощь игрокам</span></div>
-          <div class="item"><strong>Общение игроков</strong><span class="muted">Свободное общение</span></div>
-          <div class="item"><strong>Мероприятия и конкурсы</strong><span class="muted">Игровые события</span></div>
-        </div>
-      </div>
-      <div>
-        <div class="panel"><h2>Обращения</h2><div class="item"><strong>Жалобы на игроков</strong></div><div class="item"><strong>Жалобы на администрацию</strong></div><div class="item"><strong>Заявки в администрацию</strong></div><div class="item"><strong>Повышения и понижения</strong></div></div>
-        <div class="panel"><h2>Технический раздел</h2><div class="item"><strong>Сообщить об ошибке</strong></div><div class="item"><strong>Предложения по улучшению</strong></div><div class="item"><strong>Помощь по форуму</strong></div></div>
-      </div>
-    </div>
-  </section>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA4sTKOzeU59xkRmvexYh3VxKzMGmNRgOs",
+      authDomain: "karatel-test-1806a.firebaseapp.com",
+      databaseURL: "https://karatel-test-1806a-default-rtdb.firebaseio.com",
+      projectId: "karatel-test-1806a",
+      storageBucket: "karatel-test-1806a.firebasestorage.app",
+      messagingSenderId: "448237119572",
+      appId: "1:448237119572:web:b26c39d70555d39c04e5c1",
+      measurementId: "G-2B1ZH4LV4E"
+    };
 
-  <section id="rules" class="page"><div class="panel"><h2>Правила форума</h2>
-    <ol><li>Уважайте участников и администрацию.</li><li>Не публикуйте оскорбления, спам и угрозы.</li><li>Не размещайте чужие личные данные.</li><li>Публикуйте темы в подходящих разделах.</li><li>Не выдавайте себя за администрацию.</li><li>Следуйте решениям модерации и используйте жалобы для обжалования.</li></ol>
-  </div></section>
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-  <section id="team" class="page"><div class="panel"><h2>Иерархия администрации</h2>
-    <div class="rank">1. Младший модератор</div><div class="rank">2. Модератор</div><div class="rank">3. Старший модератор</div><div class="rank">4. Администратор</div><div class="rank">5. Старший администратор</div><div class="rank">6. Заместитель главного администратора</div><div class="rank">7. Главный администратор</div><div class="rank">8. Куратор</div><div class="rank">9. Технический специалист</div><div class="rank">10. Разработчик</div>
-    <p class="notice">Назначение рангов и права доступа в этой версии демонстрационные. Реальные защищённые роли требуют серверной проверки.</p>
-  </div></section>
+    const setup = document.getElementById("setup");
+    const gameBox = document.getElementById("gameBox");
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
 
-  <section id="profile" class="page"><div class="panel"><h2>Профиль</h2><div id="profileInfo" class="profile"><div class="avatar">?</div><div><b>Гость</b><div class="muted">Войдите, чтобы увидеть локальный профиль</div></div></div><label>О себе</label><textarea id="about" placeholder="Расскажите немного о себе"></textarea><button onclick="saveAbout()">Сохранить описание</button></div></section>
+    const keys = {};
+    let myId = null;
+    let myRole = "hunter";
+    let players = {};
+    let gameStarted = false;
 
-  <section id="account" class="page"><div class="panel"><h2>Регистрация / вход</h2>
-    <label>Имя пользователя</label><input id="username" placeholder="Ваш ник">
-    <label>Пароль</label><input id="password" type="password" placeholder="Пароль">
-    <div class="row"><button class="primary" onclick="register()">Зарегистрироваться</button><button onclick="login()">Войти</button><button onclick="logout()">Выйти</button></div>
-    <p id="accountMessage" class="notice">Демо-режим: данные сохраняются только в этом браузере на этом устройстве. Не используйте настоящий пароль.</p>
-  </div></section>
-</main>
-<footer>© DAGA TEST • Независимый фан-форум. Не является официальным сайтом Black Russia.</footer>
-<script>
-const $=id=>document.getElementById(id);
-function showPage(id){document.querySelectorAll('section.page').forEach(x=>x.classList.remove('active'));$(id).classList.add('active');window.scrollTo(0,0)}
-function getUsers(){return JSON.parse(localStorage.getItem('daga_users')||'{}')}
-function getCurrent(){return localStorage.getItem('daga_current')||''}
-function register(){let n=$('username').value.trim(),p=$('password').value;if(n.length<3||p.length<4){$('accountMessage').textContent='Ник — минимум 3 символа, пароль — минимум 4.';return}let u=getUsers();if(u[n]){$('accountMessage').textContent='Такой ник уже занят.';return}u[n]={password:p,about:''};localStorage.setItem('daga_users',JSON.stringify(u));localStorage.setItem('daga_current',n);updateProfile();$('accountMessage').textContent='Регистрация выполнена в демо-режиме.'}
-function login(){let n=$('username').value.trim(),p=$('password').value,u=getUsers();if(!u[n]||u[n].password!==p){$('accountMessage').textContent='Неверный ник или пароль.';return}localStorage.setItem('daga_current',n);updateProfile();$('accountMessage').textContent='Вы вошли.'}
-function logout(){localStorage.removeItem('daga_current');updateProfile();$('accountMessage').textContent='Вы вышли из аккаунта.'}
-function updateProfile(){let n=getCurrent(),u=getUsers();$('profileInfo').innerHTML=n?'<div class="avatar">'+escapeHtml(n[0].toUpperCase())+'</div><div><b>'+escapeHtml(n)+'</b><div class="muted">Участник DAGA TEST</div></div>':'<div class="avatar">?</div><div><b>Гость</b><div class="muted">Войдите, чтобы увидеть локальный профиль</div></div>';if(n&&u[n])$('about').value=u[n].about||''}
-function saveAbout(){let n=getCurrent(),u=getUsers();if(!n){alert('Сначала войдите.');return}u[n].about=$('about').value;localStorage.setItem('daga_users',JSON.stringify(u));alert('Описание сохранено.')}
-function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function getTopics(){return JSON.parse(localStorage.getItem('daga_topics')||'[]')}
-function renderTopics(){let a=getTopics();$('topicCount').textContent=a.length+1;$('topicList').innerHTML='<div class="item"><strong>Добро пожаловать на DAGA TEST!</strong><span class="muted">Системная тема • Новости</span></div>'+a.slice().reverse().map(t=>'<div class="item"><strong>'+escapeHtml(t.title)+'</strong><span class="tag">'+escapeHtml(t.section)+'</span><div>'+escapeHtml(t.text)+'</div><span class="muted">'+escapeHtml(t.author)+' • '+escapeHtml(t.date)+'</span></div>').join('')}
-function createTopic(){let title=$('topicTitle').value.trim(),txt=$('topicText').value.trim(),author=getCurrent();if(!author){alert('Для публикации войдите в аккаунт.');showPage('account');return}if(!title||!txt){alert('Заполните заголовок и сообщение.');return}let a=getTopics();a.push({title,text:txt,section:$('topicSection').value,author,date:new Date().toLocaleString('ru-RU')});localStorage.setItem('daga_topics',JSON.stringify(a));$('topicTitle').value='';$('topicText').value='';renderTopics();alert('Тема добавлена.')}
-updateProfile();renderTopics();
-</script>
+    function randomBetween(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function sendMyState() {
+      if (!myId) return;
+      const playerRef = ref(db, `players/${myId}`);
+      set(playerRef, {
+        id: myId,
+        name: document.getElementById("playerName").value.trim() || "Игрок",
+        role: myRole,
+        x: randomBetween(50, canvas.width - 50),
+        y: randomBetween(50, canvas.height - 50),
+        color: myRole === "hunter" ? "#facc15" : "#38bdf8"
+      });
+    }
+
+    function readGameState() {
+      const playersRef = ref(db, "players");
+      onValue(playersRef, (snapshot) => {
+        players = snapshot.val() || {};
+        draw();
+      });
+    }
+
+    function drawPlayer(p) {
+      ctx.fillStyle = p.color || "#fff";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.role === "hunter" ? 18 : 12, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#fff";
+      ctx.font = "12px Arial";
+      ctx.fillText(p.name || "Player", p.x - 18, p.y - 18);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = "#08101d";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      Object.values(players).forEach(drawPlayer);
+    }
+
+    function updateLocalPlayer() {
+      if (!myId) return;
+      const p = players[myId];
+      if (!p) return;
+
+      let dx = 0, dy = 0;
+      if (myRole === "hunter") {
+        if (keys["ArrowUp"] || keys["w"]) dy -= 4;
+        if (keys["ArrowDown"] || keys["s"]) dy += 4;
+        if (keys["ArrowLeft"] || keys["a"]) dx -= 4;
+        if (keys["ArrowRight"] || keys["d"]) dx += 4;
+      } else {
+        if (keys["ArrowUp"] || keys["w"]) dy -= 2;
+        if (keys["ArrowDown"] || keys["s"]) dy += 2;
+        if (keys["ArrowLeft"] || keys["a"]) dx -= 2;
+        if (keys["ArrowRight"] || keys["d"]) dx += 2;
+      }
+
+      p.x = Math.max(20, Math.min(canvas.width - 20, p.x + dx));
+      p.y = Math.max(20, Math.min(canvas.height - 20, p.y + dy));
+
+      const playerRef = ref(db, `players/${myId}`);
+      set(playerRef, p);
+    }
+
+    function loop() {
+      if (gameStarted) {
+        updateLocalPlayer();
+        draw();
+      }
+      requestAnimationFrame(loop);
+    }
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+      myRole = document.getElementById("roleSelect").value;
+      myId = "player_" + Date.now() + "_" + Math.floor(Math.random() * 999);
+      setup.style.display = "none";
+      gameBox.style.display = "block";
+      gameStarted = true;
+      sendMyState();
+      readGameState();
+    });
+
+    document.addEventListener("keydown", e => {
+      keys[e.key] = true;
+    });
+
+    document.addEventListener("keyup", e => {
+      keys[e.key] = false;
+    });
+
+    requestAnimationFrame(loop);
+  </script>
 </body>
- </html>
+</html>
