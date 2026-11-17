@@ -1,201 +1,366 @@
 <!DOCTYPE html>
 <html lang="kk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hide & Seek 8 Players</title>
-  <style>
-    body {
-      margin: 0;
-      background: #0b1020;
-      color: white;
-      font-family: Arial, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .screen {
-      width: min(1000px, 100%);
-      text-align: center;
-    }
-    .box {
-      background: #1a2438;
-      border-radius: 15px;
-      padding: 24px;
-      box-shadow: 0 18px 40px rgba(0,0,0,0.25);
-    }
-    input, button, select {
-      width: 100%;
-      padding: 12px 14px;
-      font-size: 16px;
-      border: none;
-      border-radius: 10px;
-      margin-top: 10px;
-    }
-    input, select {
-      background: #dbeafe;
-      color: #0f172a;
-    }
-    button {
-      background: #38bdf8;
-      color: #062033;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    canvas {
-      width: 100%;
-      max-width: 980px;
-      height: auto;
-      border: 4px solid white;
-      background: #08101d;
-      border-radius: 12px;
-      margin-top: 18px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+<title>Hide & Seek 3D - Телефон</title>
+<style>
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:none}
+  body{margin:0;background:#0b1020;color:#fff;font-family:Arial,sans-serif;height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+  .top{padding:10px;text-align:center;background:#1a2438;font-weight:bold;font-size:15px}
+  .top span{color:#00C6FF}
+  .hud{display:flex;gap:6px;padding:8px}
+  .hud div{flex:1;background:#1a2438;padding:8px 4px;border-radius:10px;font-size:13px;font-weight:bold;text-align:center}
+  .hud b{color:#facc15}
+  #gameCanvas{width:100%;height:360px;background:#0a1a2e;border-top:3px solid #fff;border-bottom:3px solid #fff;display:block;flex-shrink:0}
+  #setup{position:fixed;inset:0;background:#0b1020;display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
+  .box{background:#1a2438;border-radius:18px;padding:22px;width:100%;max-width:380px;text-align:center}
+  .box h1{margin:0 0 6px;font-size:24px}
+  .box p{color:#94a3b8;font-size:13px;margin:0 0 10px}
+  input,select,button{width:100%;padding:15px;font-size:17px;border:none;border-radius:12px;margin-top:10px}
+  input,select{background:#dbeafe;color:#0f172a;font-weight:bold}
+  button{background:#38bdf8;color:#062033;font-weight:900;cursor:pointer;font-size:18px}
+  #msg{color:#facc15;font-weight:bold;margin-top:8px;min-height:20px;font-size:14px}
+  #controls{padding:10px 20px 14px;display:flex;justify-content:center;align-items:center;gap:16px;background:#0b1020;flex:1}
+  #joy{width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.12);border:3px solid rgba(255,255,255,.45);position:relative;flex-shrink:0}
+  #stick{width:62px;height:62px;border-radius:50%;background:#38bdf8;position:absolute;left:44px;top:44px;box-shadow:0 4px 15px rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;font-size:26px}
+  #dashBtn{width:90px;height:90px;border-radius:50%;background:#facc15;color:#000;font-size:28px;font-weight:900;border:4px solid #fff;flex-shrink:0}
+  #dashBtn:active{transform:scale(.92)}
+  .hint{font-size:12px;color:#94a3b8;text-align:center;padding:0 0 10px}
+</style>
 </head>
 <body>
-  <div class="screen">
-    <div id="setup" class="box">
-      <h1>8 Player Hide & Seek</h1>
-      <input id="playerName" placeholder="Сіздің атыңыз" value="Игрок 1">
-      <select id="roleSelect">
-        <option value="hunter">Іздеуші</option>
-        <option value="runner">Тығылған</option>
-      </select>
-      <button id="startBtn">Ойынды бастау</button>
-    </div>
 
-    <div id="gameBox" style="display:none">
-      <canvas id="gameCanvas" width="980" height="560"></canvas>
-    </div>
+<div class="top">👑 создатель: <span>ohhotnik</span> 🔥</div>
+
+<div class="hud" id="hud" style="display:none">
+  <div>⏱️ <b id="timer">60</b></div>
+  <div>👥 <b id="pCount">0</b>/8</div>
+  <div>🏆 Ұсталды: <b id="caughtCount">0</b></div>
+</div>
+
+<canvas id="gameCanvas" width="980" height="560"></canvas>
+
+<div id="controls" style="display:none">
+  <div id="joy"><div id="stick">🕹️</div></div>
+  <button id="dashBtn">⚡</button>
+</div>
+<div class="hint" id="hint" style="display:none">🕹️ Сол жақ - жүру &nbsp; ⚡ Оң жақ - жылдам жүгіру &nbsp; 🎮 3D көрініс</div>
+
+<div id="setup">
+  <div class="box">
+    <div style="font-size:50px">🏃‍♂️</div>
+    <h1>Hide & Seek 3D</h1>
+    <p>📱 3D экран - телефонға<br>Іздеуші 🟡 - тығылғанды ұста<br>Тығылған 🔵 - 60 сек тығыл</p>
+    <input id="playerName" placeholder="Атыңды жаз" maxlength="12" value="">
+    <select id="roleSelect">
+      <option value="hunter">🟡 Іздеуші - жылдам</option>
+      <option value="runner">🔵 Тығылған - жасырын</option>
+    </select>
+    <button id="startBtn">▶️ ОЙЫНДЫ БАСТАУ</button>
+    <div id="msg"></div>
+    <div id="online" style="margin-top:10px;color:#94a3b8;font-size:13px">Онлайн: жүктелуде...</div>
   </div>
+</div>
 
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
-    import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-app.js";
+import { getDatabase, ref, set, update, onValue, onDisconnect, get } from "https://www.gstatic.com/firebasejs/11.0.2/firebase-database.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA4sTKOzeU59xkRmvexYh3VxKzMGmNRgOs",
-      authDomain: "karatel-test-1806a.firebaseapp.com",
-      databaseURL: "https://karatel-test-1806a-default-rtdb.firebaseio.com",
-      projectId: "karatel-test-1806a",
-      storageBucket: "karatel-test-1806a.firebasestorage.app",
-      messagingSenderId: "448237119572",
-      appId: "1:448237119572:web:b26c39d70555d39c04e5c1",
-      measurementId: "G-2B1ZH4LV4E"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyA4sTKOzeU59xkRmvexYh3VxKzMGmNRgOs",
+  authDomain: "karatel-test-1806a.firebaseapp.com",
+  databaseURL: "https://karatel-test-1806a-default-rtdb.firebaseio.com",
+  projectId: "karatel-test-1806a",
+  storageBucket: "karatel-test-1806a.firebasestorage.app",
+  messagingSenderId: "448237119572",
+  appId: "1:448237119572:web:b26c39d70555d39c04e5c1",
+  measurementId: "G-2B1ZH4LV4E"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
+const canvas = document.getElementById("gameCanvas");
+const ctx = canvas.getContext("2d");
+let myId=null, myRole="hunter", myName="Игрок";
+let players={}, gameStarted=false, gameOver=false;
+let myX=100, myY=100, myColor="#38bdf8", lastSend=0;
+let joyX=0, joyY=0, isDash=false, dashCooldown=0;
+let gameTime=60, animTime=0;
 
-    const setup = document.getElementById("setup");
-    const gameBox = document.getElementById("gameBox");
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
+// ===== 3D ПЕРСПЕКТИВА =====
+// Жерді перспективамен көрсету: жоғары жағы алыс = кішкентай, төмен жағы жақын = үлкен
+function to3D(x, y){
+  // y=0 -> жоғары (алыс), y=560 -> төмен (жақын)
+  let p = 0.62 + (y / canvas.height) * 0.55; // 0.62 - 1.17 масштаб
+  let sx = canvas.width/2 + (x - canvas.width/2) * p;
+  let sy = 45 + y * 0.82; // жерді қысу
+  return {x:sx, y:sy, s:p};
+}
+function scaleAt(y){
+  return 0.62 + (y / canvas.height) * 0.55;
+}
 
-    const keys = {};
-    let myId = null;
-    let myRole = "hunter";
-    let players = {};
-    let gameStarted = false;
+const walls=[
+  {x:200,y:100,w:140,h:22},{x:640,y:100,w:140,h:22},
+  {x:100,y:300,w:22,h:140},{x:858,y:300,w:22,h:140},
+  {x:400,y:260,w:180,h:22},{x:350,y:430,w:280,h:22},
+  {x:450,y:150,w:80,h:80},
+];
+function isCollide(x,y,r){
+  for(const w of walls){
+    if(x+r>w.x && x-r<w.x+w.w && y+r>w.y && y-r<w.y+w.h) return true;
+  }
+  return false;
+}
+function randomPos(){
+  for(let i=0;i<60;i++){
+    let x=60+Math.random()*(canvas.width-120);
+    let y=60+Math.random()*(canvas.height-120);
+    if(!isCollide(x,y,26)) return {x,y};
+  }
+  return {x:100,y:100};
+}
 
-    function randomBetween(min, max) {
-      return Math.random() * (max - min) + min;
-    }
+// ===== 3D ЕДЕН =====
+function drawFloor3D(){
+  // Аспан / фон - градиент
+  let grad = ctx.createLinearGradient(0,0,0,canvas.height);
+  grad.addColorStop(0,"#0ea5e9"); // алыс - аспан көк
+  grad.addColorStop(0.12,"#1e3a5f");
+  grad.addColorStop(0.15,"#2d5a3d"); // жер басталады
+  grad.addColorStop(1,"#1a3a2a");
+  ctx.fillStyle=grad; ctx.fillRect(0,0,canvas.width,canvas.height);
+  // Алыстағы таулар / ағаштар силуэті
+  ctx.fillStyle="rgba(0,0,0,0.25)";
+  ctx.beginPath(); ctx.moveTo(0,70); ctx.lineTo(120,20); ctx.lineTo(250,70); ctx.lineTo(400,15); ctx.lineTo(550,70); ctx.lineTo(700,25); ctx.lineTo(850,70); ctx.lineTo(980,30); ctx.lineTo(980,90); ctx.lineTo(0,90); ctx.closePath(); ctx.fill();
+  // Жер - перспектива трапеция
+  ctx.fillStyle="#2d5a3d"; ctx.fillRect(0,70,canvas.width,canvas.height-70);
+  // Жер плиткалары - перспективамен
+  ctx.strokeStyle="rgba(255,255,255,0.12)"; ctx.lineWidth=1.5;
+  for(let gx=0; gx<=canvas.width; gx+=70){
+    let p1=to3D(gx,70), p2=to3D(gx,canvas.height);
+    ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.stroke();
+  }
+  for(let gy=70; gy<=canvas.height; gy+=70){
+    let left=to3D(0,gy), right=to3D(canvas.width,gy);
+    ctx.beginPath(); ctx.moveTo(left.x,left.y); ctx.lineTo(right.x,right.y); ctx.stroke();
+  }
+  // Жол / орта сызық
+  ctx.fillStyle="rgba(255,255,255,0.08)";
+  let a=to3D(480,70), b=to3D(500,70), c=to3D(500,canvas.height), d=to3D(480,canvas.height);
+  ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.lineTo(c.x,c.y); ctx.lineTo(d.x,d.y); ctx.closePath(); ctx.fill();
+}
 
-    function sendMyState() {
-      if (!myId) return;
-      const playerRef = ref(db, `players/${myId}`);
-      set(playerRef, {
-        id: myId,
-        name: document.getElementById("playerName").value.trim() || "Игрок",
-        role: myRole,
-        x: randomBetween(50, canvas.width - 50),
-        y: randomBetween(50, canvas.height - 50),
-        color: myRole === "hunter" ? "#facc15" : "#38bdf8"
-      });
-    }
+// ===== 3D ҚОРАП-ҚАБЫРҒА =====
+function drawWall3DBox(w){
+  let H = 52; // биіктігі - 3D
+  let p1=to3D(w.x, w.y+w.h); // алдыңғы сол төмен
+  let p2=to3D(w.x+w.w, w.y+w.h); // алдыңғы оң төмен
+  let p3=to3D(w.x+w.w, w.y); // артқы оң
+  let p4=to3D(w.x, w.y); // артқы сол
+  let s = scaleAt(w.y+w.h);
+  // Алдыңғы жағы (қараңғы)
+  ctx.fillStyle="#334155";
+  ctx.beginPath(); ctx.moveTo(p1.x,p1.y); ctx.lineTo(p2.x,p2.y); ctx.lineTo(p2.x,p2.y-H*s); ctx.lineTo(p1.x,p1.y-H*s); ctx.closePath(); ctx.fill();
+  // Бүйір жағы (ең қараңғы)
+  ctx.fillStyle="#1e293b";
+  ctx.beginPath(); ctx.moveTo(p2.x,p2.y); ctx.lineTo(p3.x,p3.y); ctx.lineTo(p3.x,p3.y-H*s); ctx.lineTo(p2.x,p2.y-H*s); ctx.closePath(); ctx.fill();
+  // Үстіңгі жағы (ең ашық - 3D көрінсін)
+  ctx.fillStyle="#94a3b8";
+  ctx.beginPath(); ctx.moveTo(p4.x,p4.y-H*s); ctx.lineTo(p3.x,p3.y-H*s); ctx.lineTo(p2.x,p2.y-H*s); ctx.lineTo(p1.x,p1.y-H*s); ctx.closePath(); ctx.fill();
+  // Кірпіш сызықтары үстінде
+  ctx.strokeStyle="rgba(0,0,0,0.2)"; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(p4.x,p4.y-H*s); ctx.lineTo(p1.x,p1.y-H*s); ctx.stroke();
+  // Жиек
+  ctx.strokeStyle="rgba(255,255,255,0.6)"; ctx.lineWidth=1.5;
+  ctx.strokeRect(p1.x,p1.y-H*s, p2.x-p1.x, H*s);
+  // Биіктік белгісі
+  ctx.fillStyle="rgba(0,0,0,0.15)";
+  ctx.fillRect(p1.x, p1.y-H*s, p2.x-p1.x, 4);
+}
 
-    function readGameState() {
-      const playersRef = ref(db, "players");
-      onValue(playersRef, (snapshot) => {
-        players = snapshot.val() || {};
-        draw();
-      });
-    }
+// ===== 3D АДАМ =====
+function drawHuman3D(p, isMe){
+  let pos=to3D(p.x,p.y);
+  let x=pos.x, y=pos.y, s=pos.s;
+  let isHunter = p.role==="hunter";
+  let color = isHunter ? "#facc15" : "#38bdf8";
+  let skin = "#ffcc99";
+  let h = 62*s; // адам биіктігі 3D масштабпен
+  let w = 22*s;
 
-    function drawPlayer(p) {
-      ctx.fillStyle = p.color || "#fff";
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.role === "hunter" ? 18 : 12, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = "#fff";
-      ctx.font = "12px Arial";
-      ctx.fillText(p.name || "Player", p.x - 18, p.y - 18);
-    }
+  let moving = false;
+  if(p.id===myId) moving = Math.abs(joyX)>0.1 || Math.abs(joyY)>0.1;
+  let legSwing = Math.sin(animTime*0.4 + p.x*0.02)*6*s*(moving?1:0.2);
 
-    function draw() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.fillStyle = "#08101d";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Көлеңке - 3D жерде
+  ctx.fillStyle="rgba(0,0,0,0.4)";
+  ctx.beginPath(); ctx.ellipse(x, y+2, 20*s, 6*s, 0, 0, Math.PI*2); ctx.fill();
 
-      Object.values(players).forEach(drawPlayer);
-    }
+  if(isMe){
+    ctx.strokeStyle="#22c55e"; ctx.setLineDash([6,6]); ctx.lineWidth=2.5;
+    ctx.beginPath(); ctx.ellipse(x, y, 30*s, 10*s, 0, 0, Math.PI*2); ctx.stroke(); ctx.setLineDash([]);
+  }
 
-    function updateLocalPlayer() {
-      if (!myId) return;
-      const p = players[myId];
-      if (!p) return;
+  // АЯҚТАР (3D - жерден жоғары)
+  ctx.strokeStyle="#1e293b"; ctx.lineWidth=5*s; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(x-4*s, y-h*0.35); ctx.lineTo(x-6*s+legSwing, y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x+4*s, y-h*0.35); ctx.lineTo(x+6*s-legSwing, y); ctx.stroke();
 
-      let dx = 0, dy = 0;
-      if (myRole === "hunter") {
-        if (keys["ArrowUp"] || keys["w"]) dy -= 4;
-        if (keys["ArrowDown"] || keys["s"]) dy += 4;
-        if (keys["ArrowLeft"] || keys["a"]) dx -= 4;
-        if (keys["ArrowRight"] || keys["d"]) dx += 4;
-      } else {
-        if (keys["ArrowUp"] || keys["w"]) dy -= 2;
-        if (keys["ArrowDown"] || keys["s"]) dy += 2;
-        if (keys["ArrowLeft"] || keys["a"]) dx -= 2;
-        if (keys["ArrowRight"] || keys["d"]) dx += 2;
+  // ДЕНЕ - 3D тік
+  ctx.fillStyle=color;
+  ctx.beginPath(); ctx.roundRect(x-w/2, y-h*0.68, w, h*0.35, 7*s); ctx.fill();
+  ctx.strokeStyle="white"; ctx.lineWidth=1.5; ctx.stroke();
+  // Дене көлеңкесі - 3D бүйірі
+  ctx.fillStyle="rgba(0,0,0,0.2)";
+  ctx.fillRect(x+w*0.2, y-h*0.68, w*0.3, h*0.35);
+
+  // ҚОЛДАР
+  ctx.strokeStyle=skin; ctx.lineWidth=4.5*s; ctx.lineCap="round";
+  ctx.beginPath(); ctx.moveTo(x-w/2, y-h*0.62); ctx.lineTo(x-w/2-7*s, y-h*0.45 - legSwing*0.4); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x+w/2, y-h*0.62); ctx.lineTo(x+w/2+7*s, y-h*0.45 + legSwing*0.4); ctx.stroke();
+
+  // БАС - 3D шар
+  ctx.fillStyle=skin;
+  ctx.beginPath(); ctx.arc(x, y-h*0.82, 11*s, 0, Math.PI*2); ctx.fill();
+  ctx.strokeStyle="white"; ctx.lineWidth=1.2; ctx.stroke();
+  // Бас көлеңкесі
+  ctx.fillStyle="rgba(0,0,0,0.12)";
+  ctx.beginPath(); ctx.arc(x+3*s, y-h*0.82+2*s, 10*s, 0, Math.PI*2); ctx.fill();
+  // Шаш
+  ctx.fillStyle="#1e293b";
+  ctx.beginPath(); ctx.arc(x, y-h*0.82-3*s, 10*s, Math.PI, Math.PI*2); ctx.fill();
+  // Көз
+  ctx.fillStyle="#000";
+  ctx.beginPath(); ctx.arc(x-3.5*s, y-h*0.82, 1.8*s, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(x+3.5*s, y-h*0.82, 1.8*s, 0, Math.PI*2); ctx.fill();
+
+  // Тәж / Қалпақ - 3D жоғары
+  ctx.font=`bold ${15*s}px Arial`; ctx.textAlign="center";
+  ctx.fillText(isHunter?"👑":"🧢", x, y-h-6*s);
+
+  // Аты - қалқып тұрады
+  ctx.fillStyle="rgba(0,0,0,0.65)";
+  let tw = 68*s;
+  ctx.fillRect(x-tw/2, y-h-28*s, tw, 17*s);
+  ctx.fillStyle="#fff"; ctx.font=`bold ${12*s}px Arial`;
+  ctx.fillText((isHunter?"🟡 ":"🔵 ")+(p.name||"Player"), x, y-h-16*s);
+}
+
+function draw(){
+  animTime++;
+  drawFloor3D();
+  // Қабырғалар - алыстағысы алдымен (y бойынша)
+  let sortedWalls=[...walls].sort((a,b)=>a.y-b.y);
+  sortedWalls.forEach(drawWall3DBox);
+  // Адамдар - алыстағысы алдымен
+  let sorted = Object.values(players).filter(p=>!p.caught).sort((a,b)=>a.y-b.y);
+  sorted.forEach(p=> drawHuman3D(p, p.id===myId));
+  let caught=Object.values(players).filter(p=>p.caught).length;
+  document.getElementById("caughtCount").textContent=caught;
+  document.getElementById("pCount").textContent=Object.keys(players).length;
+}
+
+function updateLocal(){
+  if(!myId || gameOver) return;
+  let me=players[myId];
+  if(me && me.caught) return;
+  let dx=joyX, dy=joyY;
+  if(dx!==0||dy!==0){
+    let len=Math.hypot(dx,dy); dx/=len; dy/=len;
+    let speed=myRole==="hunter"?4.5:3.2;
+    if(isDash) speed*=1.8;
+    let nx=myX+dx*speed, ny=myY+dy*speed;
+    let r=22;
+    if(!isCollide(nx,myY,r)) myX=nx;
+    if(!isCollide(myX,ny,r)) myY=ny;
+    myX=Math.max(r,Math.min(canvas.width-r,myX));
+    myY=Math.max(r,Math.min(canvas.height-r,myY));
+  }
+  if(dashCooldown>0) dashCooldown--;
+  if(myRole==="hunter"){
+    for(let p of Object.values(players)){
+      if(p.id===myId||p.caught||p.role==="hunter") continue;
+      if(Math.hypot(p.x-myX,p.y-myY)<38){
+        update(ref(db,`players/${p.id}`),{caught:true});
+        if(navigator.vibrate) navigator.vibrate(200);
       }
-
-      p.x = Math.max(20, Math.min(canvas.width - 20, p.x + dx));
-      p.y = Math.max(20, Math.min(canvas.height - 20, p.y + dy));
-
-      const playerRef = ref(db, `players/${myId}`);
-      set(playerRef, p);
     }
+  }
+  let now=Date.now();
+  if(now-lastSend>50){
+    lastSend=now;
+    update(ref(db,`players/${myId}`),{x:Math.round(myX),y:Math.round(myY)});
+  }
+  let runners=Object.values(players).filter(p=>p.role==="runner");
+  if(runners.length>0 && runners.every(p=>p.caught) && !gameOver){
+    gameOver=true; alert("🏆 Іздеушілер жеңді! Барлығы ұсталды!");
+  }
+}
+function loop(){ if(gameStarted){ updateLocal(); draw(); } requestAnimationFrame(loop); }
 
-    function loop() {
-      if (gameStarted) {
-        updateLocalPlayer();
-        draw();
-      }
-      requestAnimationFrame(loop);
-    }
+onValue(ref(db,"players"),snap=>{
+  let d=snap.val()||{};
+  document.getElementById("online").textContent="Онлайн: "+Object.keys(d).length+" / 8 ойыншы";
+  document.getElementById("pCount").textContent=Object.keys(d).length;
+});
 
-    document.getElementById("startBtn").addEventListener("click", () => {
-      myRole = document.getElementById("roleSelect").value;
-      myId = "player_" + Date.now() + "_" + Math.floor(Math.random() * 999);
-      setup.style.display = "none";
-      gameBox.style.display = "block";
-      gameStarted = true;
-      sendMyState();
-      readGameState();
-    });
+setInterval(()=>{
+  if(!gameStarted||gameOver) return;
+  gameTime--; document.getElementById("timer").textContent=Math.max(0,gameTime);
+  if(gameTime<=0 && !gameOver){
+    gameOver=true;
+    let alive=Object.values(players).filter(p=>p.role==="runner" && !p.caught).length;
+    alert(alive>0 ? "🎉 Тығылғандар жеңді! "+alive+" адам аман қалды!" : "🏆 Іздеушілер жеңді!");
+  }
+},1000);
 
-    document.addEventListener("keydown", e => {
-      keys[e.key] = true;
-    });
+document.getElementById("startBtn").addEventListener("click", async ()=>{
+  myName=document.getElementById("playerName").value.trim()||"Игрок";
+  if(myName.length<2){ document.getElementById("msg").textContent="❗ Атыңды жаз!"; return; }
+  myRole=document.getElementById("roleSelect").value;
+  myColor=myRole==="hunter"?"#facc15":"#38bdf8";
+  const snap=await get(ref(db,"players"));
+  if(Object.keys(snap.val()||{}).length>=8){ document.getElementById("msg").textContent="❌ Орын жоқ! 8 ойыншы толды!"; return; }
+  myId="player_"+Date.now()+"_"+Math.floor(Math.random()*9999);
+  let pos=randomPos(); myX=pos.x; myY=pos.y;
+  document.getElementById("setup").style.display="none";
+  document.getElementById("hud").style.display="flex";
+  document.getElementById("controls").style.display="flex";
+  document.getElementById("hint").style.display="block";
+  gameStarted=true;
+  await set(ref(db,`players/${myId}`),{id:myId,name:myName,role:myRole,x:Math.round(myX),y:Math.round(myY),color:myColor,caught:false});
+  onDisconnect(ref(db,`players/${myId}`)).remove();
+  onValue(ref(db,"players"),s=>{ players=s.val()||{}; });
+  if(navigator.vibrate) navigator.vibrate(100);
+});
 
-    document.addEventListener("keyup", e => {
-      keys[e.key] = false;
-    });
+const joy=document.getElementById("joy"), stick=document.getElementById("stick");
+let joyActive=false;
+function joyMove(e){
+  if(!joyActive) return;
+  let t=e.touches?e.touches[0]:e;
+  let r=joy.getBoundingClientRect();
+  let dx=t.clientX-(r.left+r.width/2), dy=t.clientY-(r.top+r.height/2);
+  let d=Math.hypot(dx,dy), max=48;
+  if(d>max){ dx=dx/d*max; dy=dy/d*max; }
+  stick.style.left=(44+dx)+"px"; stick.style.top=(44+dy)+"px";
+  joyX=dx/max; joyY=dy/max;
+  if(Math.abs(joyX)<0.12) joyX=0;
+  if(Math.abs(joyY)<0.12) joyY=0;
+}
+function joyEnd(){ joyActive=false; joyX=0; joyY=0; stick.style.left="44px"; stick.style.top="44px"; }
+joy.addEventListener("touchstart",e=>{ joyActive=true; joyMove(e); e.preventDefault(); },{passive:false});
+joy.addEventListener("touchmove",e=>{ joyMove(e); e.preventDefault(); },{passive:false});
+joy.addEventListener("touchend",joyEnd);
+joy.addEventListener("touchcancel",joyEnd);
 
-    requestAnimationFrame(loop);
-  </script>
+const dashBtn=document.getElementById("dashBtn");
+dashBtn.addEventListener("touchstart",e=>{ if(dashCooldown<=0){ isDash=true; dashCooldown=90; if(navigator.vibrate) navigator.vibrate(80); } e.preventDefault(); },{passive:false});
+dashBtn.addEventListener("touchend",()=>{ isDash=false; });
+
+requestAnimationFrame(loop);
+</script>
 </body>
-</html>
+  </html>
