@@ -3,19 +3,22 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>ТҮН - Судья 1 Рет + Первая Лица</title>
+<title>ТҮН - ТОЛЫҚ ОНЛАЙН + Судья 1 Рет + First Person + Джойстик</title>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 <style>
 *{box-sizing:border-box;touch-action:none;user-select:none}
 body{background:#000;color:white;font-family:sans-serif;text-align:center;margin:0;padding:0;overflow:hidden;height:100vh}
 button{background:#ff4757;color:white;border:none;padding:13px;border-radius:14px;font-size:17px;width:100%;margin:5px 0;cursor:pointer}
 button.green{background:#2ed573} button.blue{background:#1e90ff} button.black{background:#222;border:2px solid #ff4757}
+input{padding:13px;border-radius:14px;border:1px solid #444;background:#1e1e35;color:white;font-size:18px;margin:5px 0;text-align:center;width:100%}
 #loader{position:fixed;inset:0;background:#000;z-index:9999;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:20px}
 #loader h1{font-size:45px;letter-spacing:5px;color:#ff0000;text-shadow:0 0 20px red;animation:flicker .8s infinite}
 @keyframes flicker{0%{opacity:1}20%{opacity:.2}40%{opacity:1}60%{opacity:.1}80%{opacity:1}100%{opacity:.8}}
 .loadBar{width:80%;max-width:300px;height:12px;background:#222;border-radius:10px;overflow:hidden;margin:15px 0}
 #loadFill{height:100%;width:0%;background:red}
 #creepyText{color:#ff0000;font-size:16px;margin-top:20px}
-#horrorMenu{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%, #1a0000, #000 70%);z-index:9998;display:none;flex-direction:column;justify-content:center;align-items:center;padding:20px;overflow-y:auto}
+#horrorMenu{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%, #1a0000, #000 70%);z-index:9998;display:none;flex-direction:column;justify-content:flex-start;align-items:center;padding:20px;overflow-y:auto}
 #horrorMenu h1{font-size:42px;text-shadow:0 0 30px red}
 .menuBtn{max-width:320px;background:#8b0000;border:1px solid red}
 .menuBtn.greenBtn{background:#111;border:1px solid #555}
@@ -25,6 +28,8 @@ button.green{background:#2ed573} button.blue{background:#1e90ff} button.black{ba
 .genderBtn.selected{background:#1e90ff;border-color:white}
 .genderBtn.girlSel{background:#ff69b4;border-color:white}
 .roleCard{background:#1e1e35;padding:10px;border-radius:15px;margin:5px 0;display:flex;justify-content:space-between;align-items:center;font-size:14px}
+.playerRow{display:flex;justify-content:space-between;padding:7px 10px;background:#111;border-radius:10px;margin:4px 0;font-size:14px}
+.card{background:#1e1e35;padding:14px;border-radius:16px;width:100%;max-width:340px;margin:8px auto;text-align:left;border:1px solid #444}
 #mainGame{position:fixed;inset:0;display:none;background:#111}
 #fp{position:absolute;inset:0;width:100%;height:100%}
 #hudTop{position:absolute;top:0;left:0;width:100%;display:flex;justify-content:space-between;padding:10px;z-index:10;pointer-events:none}
@@ -52,15 +57,12 @@ button.green{background:#2ed573} button.blue{background:#1e90ff} button.black{ba
 #voteScreen{position:absolute;inset:0;background:rgba(0,0,0,0.95);z-index:40;display:none;flex-direction:column;justify-content:center;align-items:center;padding:10px;overflow-y:auto}
 #chatBox{width:100%;max-width:340px;height:130px;background:#111;border:1px solid #444;border-radius:12px;overflow-y:auto;padding:8px;text-align:left;font-size:13px;margin:8px 0}
 .chatMsg{margin:4px 0;padding:5px 8px;border-radius:10px;background:#1e1e35}
-.chatMsg.me{background:#1e90ff}
-.chatMsg.sys{background:#333;color:#ffa502;text-align:center}
-.chatMsg.judge{background:#eccc68;color:black}
+.chatMsg.me{background:#1e90ff} .chatMsg.sys{background:#333;color:#ffa502;text-align:center} .chatMsg.judge{background:#eccc68;color:black}
 #chatInput{width:70%;padding:10px;border-radius:12px;border:none;font-size:14px}
 #chatSend{width:28%;padding:10px;background:#ff4757;color:white;border:none;border-radius:12px}
 .voteCard{background:#1e1e35;padding:10px;border-radius:15px;width:100%;max-width:340px;margin:4px;display:flex;justify-content:space-between;align-items:center}
 .voteCard button{padding:8px 12px;background:#ff4757;color:white;border:none;border-radius:10px;width:auto;font-size:13px}
-.voteCard.voted{border:2px solid #2ed573}
-.voteCard.skipCard{border:2px solid #eccc68;background:#2a2a1a}
+.voteCard.voted{border:2px solid #2ed573} .voteCard.skipCard{border:2px solid #eccc68;background:#2a2a1a}
 #voteProgress{width:100%;max-width:340px;height:10px;background:#333;border-radius:10px;overflow:hidden;margin:5px 0}
 #voteFill{height:100%;width:100%;background:#eccc68}
 #meetingBanner{position:absolute;top:70px;left:50%;transform:translateX(-50%);background:#ff4757;padding:10px 18px;border-radius:15px;z-index:25;display:none;font-size:16px;animation:blinkRed 0.7s infinite}
@@ -75,77 +77,65 @@ button.green{background:#2ed573} button.blue{background:#1e90ff} button.black{ba
 </head>
 <body>
 
-<div id="loader">
-  <div style="font-size:60px">👁️🔦🌑</div>
-  <h1>ТҮН</h1>
-  <p>ПЕРВАЯ ЛИЦА • ТҮН КАРТА • ФОНАРИК</p>
-  <div class="loadBar"><div id="loadFill"></div></div>
-  <div id="loadText">Загрузка... 0%</div>
-  <div id="creepyText"></div>
-</div>
+<div id="loader"><div style="font-size:60px">👁️🔦🌑</div><h1>ТҮН</h1><p>ПЕРВАЯ ЛИЦА • ТҮН КАРТА • ФОНАРИК • ОНЛАЙН</p><div class="loadBar"><div id="loadFill"></div></div><div id="loadText">Загрузка... 0%</div><div id="creepyText"></div><div style="color:#2ed573;font-size:12px">✅ Firebase дайын! KILL 20 сек + Судья 1 рет!</div></div>
 
 <div id="horrorMenu">
   <div style="font-size:50px">👁️🔦</div>
   <h1>ТҮН</h1>
-  <div style="color:#ff4757;letter-spacing:3px">ПЕРВАЯ ЛИЦА • ТҮН • ФОНАРИК</div>
+  <div style="color:#ff4757;letter-spacing:3px">ПЕРВАЯ ЛИЦА • ТҮН • ФОНАРИК • ОНЛАЙН</div>
   <p style="color:#888;font-size:13px">Бұл Амонг Ас емес! Түн, қараңғы, фонарикпен жүресің!<br>👁️ Сен тек өз көзіңмен көресің!</p>
 
-  <h3 style="margin-top:10px">👥 Қанша адам?</h3>
-  <div>
-    <div class="playerBtn" onclick="selectPlayers(4,this)">4</div>
-    <div class="playerBtn" onclick="selectPlayers(5,this)">5</div>
-    <div class="playerBtn" onclick="selectPlayers(6,this)">6</div>
-    <div class="playerBtn" onclick="selectPlayers(7,this)">7</div>
-    <div class="playerBtn selected" onclick="selectPlayers(8,this)">8</div>
-  </div>
+  <h3 style="margin-top:10px">👤 Атың кім?</h3>
+  <input id="myNameInput" placeholder="АТЫҢДЫ ЖАЗ" maxlength="12" style="text-transform:none;max-width:320px">
+
+  <h3>👥 Қанша адам?</h3>
+  <div><div class="playerBtn" onclick="selectPlayers(4,this)">4</div><div class="playerBtn" onclick="selectPlayers(5,this)">5</div><div class="playerBtn" onclick="selectPlayers(6,this)">6</div><div class="playerBtn" onclick="selectPlayers(7,this)">7</div><div class="playerBtn selected" onclick="selectPlayers(8,this)">8</div></div>
 
   <h3>⚧️ Сенің жынысың?</h3>
-  <div>
-    <button class="genderBtn" id="boyBtn" onclick="selectGender('boy',this)">👦 Ұл - Шалбар</button>
-    <button class="genderBtn" id="girlBtn" onclick="selectGender('girl',this)">👧 Қыз - Юбка</button>
-  </div>
+  <div><button class="genderBtn selected" id="boyBtn" onclick="selectGender('boy',this)">👦 Ұл - Шалбар</button><button class="genderBtn" id="girlBtn" onclick="selectGender('girl',this)">👧 Қыз - Юбка</button></div>
 
   <h3>🎨 Сенің түсің?</h3>
-  <div>
-    <span class="skin" onclick="selectMyColor(this,'#ff4757','Қызыл')">🔴</span>
-    <span class="skin" onclick="selectMyColor(this,'#1e90ff','Көк')">🔵</span>
-    <span class="skin" onclick="selectMyColor(this,'#2ed573','Жасыл')">🟢</span>
-    <span class="skin" onclick="selectMyColor(this,'#ffa502','Сары')">🟡</span>
-    <span class="skin" onclick="selectMyColor(this,'#a55eea','Күлгін')">🟣</span>
-    <span class="skin" onclick="selectMyColor(this,'#ff69b4','Қызғылт')">💗</span>
-  </div>
+  <div><span class="skin selected" onclick="selectMyColor(this,'#ff4757','Қызыл')">🔴</span><span class="skin" onclick="selectMyColor(this,'#1e90ff','Көк')">🔵</span><span class="skin" onclick="selectMyColor(this,'#2ed573','Жасыл')">🟢</span><span class="skin" onclick="selectMyColor(this,'#ffa502','Сары')">🟡</span><span class="skin" onclick="selectMyColor(this,'#a55eea','Күлгін')">🟣</span><span class="skin" onclick="selectMyColor(this,'#ff69b4','Қызғылт')">💗</span></div>
   <p style="font-size:12px" id="myCharPreview">👦 Ұл • 🔴 Қызыл шалбар</p>
 
-  <!-- СУДЬЯ ЕРЕЖЕСІ - 1 РЕТ! -->
   <div style="width:100%;max-width:320px;margin-top:10px;background:#2a2a1a;border:2px solid #eccc68;border-radius:15px;padding:12px;text-align:left">
     <h3 style="text-align:center">⚖️ СУДЬЯ ЕРЕЖЕСІ - 1 РЕТ!</h3>
-    <p style="font-size:13px;line-height:1.7">
-      ⚖️ <b>Тек 1 рет</b> қолдана алады!<br>
-      ✅ <b>Дұрыс тапса</b> - Импостерді шығарса → <b>+1 рет</b> тағы беріледі! Команда жеңеді!<br>
-      ❌ <b>Қате басса</b> - Бейкүнә адамды шығарса → <b>Судьяның өзі ойыннан шығады!</b><br>
-      ⚠️ Ойланып бас! Қате - өлім!
-    </p>
+    <p style="font-size:13px;line-height:1.7">⚖️ <b>Тек 1 рет</b> қолдана алады!<br>✅ <b>Дұрыс тапса</b> - Импостерді шығарса → <b>+1 рет</b> тағы беріледі!<br>❌ <b>Қате басса</b> - Бейкүнә адамды шығарса → <b>Судьяның өзі ойыннан шығады!</b></p>
   </div>
-
   <div style="width:100%;max-width:320px;margin-top:10px"><div id="roleDistribution"></div></div>
 
-  <button class="menuBtn" onclick="enterGame()">👁️ ПЕРВАЯ ЛИЦА - START</button>
+  <!-- 🆕 ОНЛАЙН - КОДПЕН КІРУ! -->
+  <div class="card">
+    <h3 style="text-align:center;margin:0 0 8px">🎮 ОНЛАЙН - ТЕК КОДПЕН!</h3>
+    <button onclick="createRoom()">🏠 БӨЛМЕ ҚҰРУ</button>
+    <input id="joinCodeInput" placeholder="TUN-1234" style="text-transform:uppercase">
+    <button style="background:#1e90ff" onclick="joinRoom()">🚪 ТЕК КОДПЕН КІРУ!</button>
+    <p id="myCodeText" style="text-align:center;color:#2ed573;font-size:16px;font-weight:bold"></p>
+    <p id="connStatus" style="text-align:center;color:#888;font-size:12px"></p>
+  </div>
+  <div class="card" id="lobbyCard" style="display:none">
+    <h3 style="text-align:center">🏠 Лобби - <span id="roomCodeShow"></span></h3>
+    <p style="text-align:center" id="lobbyStatus">Күтіп тұрмыз...</p>
+    <div id="playerList"></div>
+    <button style="background:#2ed573;font-size:22px;padding:18px;border:3px solid white" onclick="startOnlineGame()">▶️ БАСТАУ! (Хост)</button>
+    <button style="background:#333" onclick="copyCode()">📋 Кодты көшіру</button>
+  </div>
+
+  <button class="menuBtn" onclick="enterGame()">👁️ ПЕРВАЯ ЛИЦА - START (Боттармен)</button>
   <button class="menuBtn greenBtn" onclick="showHow()">❓ ҚАЛАЙ?</button>
-  <p id="howText" style="display:none;color:#ccc;font-size:13px;line-height:1.6;text-align:left">👁️ Первая лица - сен тек өз көзіңмен көресің!<br>🌑 Түн карта - бәрі қараңғы, фонарикпен жүресің!<br>🔦 Фонарик өшсе - ештеңе көрмейсің!<br>⚖️ Судья 1 рет! Дұрыс тапса +1, қате басса өзі шығады!</p>
+  <p id="howText" style="display:none;color:#ccc;font-size:13px;line-height:1.6;text-align:left">👁️ Первая лица - сен тек өз көзіңмен көресің!<br>🌑 Түн карта - бәрі қараңғы, фонарикпен жүресің!<br>🕹️ Джойстикпен жүр, 🔦 Фонарикпен қара!<br>🔪 KILL - 20 сек күтесің!<br>😈 Внешка - түнде ауыстыр!<br>⚖️ Судья 1 рет! Дұрыс тапса +1, қате басса өзі шығады!<br>🌐 Онлайн - Кодпен кір!</p>
 </div>
 
 <div id="mainGame">
   <canvas id="fp" width="800" height="600"></canvas>
   <div id="hudTop">
     <div class="hudBox">
-      <b id="roleTitle">🎲 ...</b><br>
-      <span id="roleDesc" style="font-size:11px;color:#ccc"></span><br>
-      👁️ <b>ПЕРВАЯ ЛИЦА</b> | 🌑 Түн | 🔒 Рөл жасырын!<br>
+      <b id="roleTitle">🎲 ...</b><br><span id="roleDesc" style="font-size:11px;color:#ccc"></span><br>
+      👁️ <b>ПЕРВАЯ ЛИЦА</b> | 🌑 Түн | 🌐 <span id="hudRoomCode">ОФЛАЙН</span> | 🔒 Рөл жасырын!<br>
       <div id="judgeBox" style="display:none;color:#eccc68">⚖️ Судья: <span id="judgeCharges">1 рет қалды</span></div>
-      👥 <span id="playerCountText">8</span> адам<br>
-      📋 Задания: <span id="doneText">0 / 3</span>
-      <div id="taskBar"><div id="taskFill"></div></div>
-      <div id="impBox" style="display:none">🔪 Өлтіруге дейін: <span id="killTimerText">30 сек</span><div id="killBar"><div id="killFill"></div></div><div id="impWarning" style="color:#ff4757;font-size:12px"></div></div>
+      👥 <span id="playerCountText">8</span> адам | <span id="onlinePlayers" style="color:#2ed573;font-size:11px"></span><br>
+      📋 Задания: <span id="doneText">0 / 3</span><div id="taskBar"><div id="taskFill"></div></div>
+      <div id="impBox" style="display:none">🔪 Өлтіруге дейін: <span id="killTimerText">20 сек</span><div id="killBar"><div id="killFill"></div></div><div id="impWarning" style="color:#ff4757;font-size:12px"></div></div>
       <div id="roleBox" style="display:none"><span id="roleAbilityText">⭐ Қабілет дайын!</span><div id="roleBar"><div id="roleFill"></div></div></div>
       <div>🔔 Жиналыс: <span id="meetingCount">3 / 3 қалды</span><div id="meetBar"><div id="meetFill"></div></div><div id="meetingCooldownText" style="color:#ffa502;font-size:12px">✅ Жиналыс дайын!</div></div>
       <div>❤️ <span id="livesText">3</span> | 🔦 <span id="lampStatus">Қосулы</span> | 🔋 <span id="batteryText">100%</span></div>
@@ -155,175 +145,98 @@ button.green{background:#2ed573} button.blue{background:#1e90ff} button.black{ba
   </div>
   <div id="meetingBanner">🔔 ЖИНАЛЫС! БӘРІ СТОЛОВАЯҒА!</div>
   <div id="centerMsg"></div>
-
-  <div id="roleReveal">
-    <div style="font-size:30px">🔒</div>
-    <h2>РӨЛІҢ ҚҰПИЯ...</h2>
-    <div id="rollingText" style="font-size:40px;margin:15px">🎲</div>
-    <div id="revealList" style="font-size:13px;color:#ccc;line-height:1.8"></div>
-  </div>
-
-  <div id="judgePopup">
-    <div style="font-size:60px">⚖️</div>
-    <h2>СУДЬЯ ШЕШІМІ!</h2>
-    <p style="color:#eccc68">Дауыс тең болды! Судья шешеді!</p>
-    <p style="font-size:12px;color:#ff4757">⚠️ Есіңде болсын: Қате бассаң - ӨЗІҢ шығасың!<br>Дұрыс тапсаң - +1 рет аласың!</p>
-    <div id="judgeChoiceList" style="width:100%;max-width:320px"></div>
-    <button style="background:#eccc68;color:black;max-width:320px" onclick="judgeSkip()">⏭️ Ешкімді шығармау - СКИП</button>
-  </div>
-
-  <!-- СУДЬЯ РАСТАУ - ҚАТЕ БОЛСА ӨЗІҢ ШЫҒАСЫҢ! -->
-  <div id="judgeConfirm">
-    <div style="font-size:50px">⚠️</div>
-    <h2>СЕНІМДІСІҢ БЕ?</h2>
-    <p id="judgeConfirmText" style="font-size:16px;color:#eccc68"></p>
-    <p style="font-size:13px;color:#ff4757;line-height:1.6">✅ Егер ол Импостер болса → +1 рет + Команда жеңеді!<br>❌ Егер ол бейкүнә болса → СЕН ӨЗІҢ ойыннан шығасың!</p>
-    <button style="background:#eccc68;color:black;max-width:320px" onclick="confirmJudge()">✅ ИӘ, СЕНІМДІМІН! ШЫҒАРУ!</button>
-    <button style="background:#333;max-width:320px" onclick="cancelJudge()">❌ Жоқ, ойланып көрейін</button>
-  </div>
-
-  <div id="winScreen">
-    <div style="font-size:70px" id="winEmoji">🎉</div>
-    <h2 id="winTitle">ЖЕҢІС!</h2>
-    <p id="winText" style="font-size:14px;line-height:1.6"></p>
-    <button style="max-width:320px" onclick="location.reload()">🔄 ҚАЙТА ОЙНАУ</button>
-  </div>
-
+  <div id="roleReveal"><div style="font-size:30px">🔒</div><h2>РӨЛІҢ ҚҰПИЯ...</h2><div id="rollingText" style="font-size:40px;margin:15px">🎲</div><div id="revealList" style="font-size:13px;color:#ccc;line-height:1.8"></div></div>
+  <div id="judgePopup"><div style="font-size:60px">⚖️</div><h2>СУДЬЯ ШЕШІМІ!</h2><p style="color:#eccc68">Дауыс тең болды! Судья шешеді!</p><p style="font-size:12px;color:#ff4757">⚠️ Қате бассаң - ӨЗІҢ шығасың! Дұрыс тапсаң - +1 рет!</p><div id="judgeChoiceList" style="width:100%;max-width:320px"></div><button style="background:#eccc68;color:black;max-width:320px" onclick="judgeSkip()">⏭️ СКИП</button></div>
+  <div id="judgeConfirm"><div style="font-size:50px">⚠️</div><h2>СЕНІМДІСІҢ БЕ?</h2><p id="judgeConfirmText" style="font-size:16px;color:#eccc68"></p><p style="font-size:13px;color:#ff4757;line-height:1.6">✅ Импостер болса → +1 рет + Команда жеңеді!<br>❌ Бейкүнә болса → СЕН ӨЗІҢ шығасың!</p><button style="background:#eccc68;color:black;max-width:320px" onclick="confirmJudge()">✅ ИӘ, ШЫҒАРУ!</button><button style="background:#333;max-width:320px" onclick="cancelJudge()">❌ Жоқ, ойланып көрейін</button></div>
+  <div id="winScreen"><div style="font-size:70px" id="winEmoji">🎉</div><h2 id="winTitle">ЖЕҢІС!</h2><p id="winText" style="font-size:14px;line-height:1.6"></p><button style="max-width:320px" onclick="location.reload()">🔄 ҚАЙТА ОЙНАУ</button></div>
   <div id="joyLabel">🕹️ ЖҮРУ - ПЕРВАЯ ЛИЦА</div>
   <div id="joyBase"><div id="joyKnob"></div></div>
-
   <div id="rightBtns">
     <div style="text-align:center"><div class="auBtn lampOn" id="lampBtn" onclick="toggleFlash()">🔦</div><div class="auBtnLabel">Фонарик</div></div>
     <div style="text-align:center"><div class="auBtn greenBtn" onclick="doTask()">🔧</div><div class="auBtnLabel">USE</div></div>
     <div style="text-align:center"><div class="auBtn" onclick="useVent()">🕳️</div><div class="auBtnLabel">VENT</div></div>
-    <div style="text-align:center"><div class="auBtn" onclick="openSkin()">👕</div><div class="auBtnLabel">Киім</div></div>
-    <div style="text-align:center"><div class="auBtn redBtn" id="killBtn" onclick="killAction()">🔪</div><div class="auBtnLabel">KILL</div></div>
+    <div style="text-align:center"><div class="auBtn" onclick="openSkin()">👕</div><div class="auBtnLabel">Киім / Внешка</div></div>
+    <div style="text-align:center"><div class="auBtn redBtn" id="killBtn" onclick="killAction()">🔪</div><div class="auBtnLabel">KILL 20сек</div></div>
     <div style="text-align:center"><div class="auBtn goldBtn" id="roleBtn" onclick="useRoleAbility()">⭐<span class="badge" id="roleBadge">?</span><div class="cooldown" id="roleCooldown">20</div></div><div class="auBtnLabel" id="roleBtnLabel">Қабілет</div></div>
     <div style="text-align:center"><div class="auBtn orangeBtn" id="meetingBtn" onclick="callMeeting()">🔔<span class="badge" id="meetingBadge">3</span><div class="cooldown" id="meetingCooldown">30</div></div><div class="auBtnLabel">ЖИНАЛЫС</div></div>
     <div style="text-align:center"><div class="auBtn" style="background:#ffa502" onclick="openVote()">🗳️</div><div class="auBtnLabel">Дауыс</div></div>
   </div>
-
-  <div id="bottomBtns">
-    <div class="smallBtn" onclick="report()">📢</div>
-    <div class="smallBtn" onclick="openChatQuick()">💬</div>
-    <div class="smallBtn" onclick="runAway()">🏃</div>
-  </div>
-
+  <div id="bottomBtns"><div class="smallBtn" onclick="report()">📢</div><div class="smallBtn" onclick="openChatQuick()">💬</div><div class="smallBtn" onclick="runAway()">🏃</div></div>
   <div id="skinMenu">
-    <h3 style="text-align:center">👕 КИІМ АУЫСТЫРУ</h3>
-    <div style="text-align:center">
-      <button style="background:#1e90ff;width:45%" onclick="changeGender('boy')">👦 Ұл</button>
-      <button style="background:#ff69b4;width:45%" onclick="changeGender('girl')">👧 Қыз</button>
-    </div>
-    <div style="text-align:center;margin-top:10px">
-      <span class="skin" onclick="selectSkin(this,'#ff4757','Қызыл')">🔴</span>
-      <span class="skin" onclick="selectSkin(this,'#1e90ff','Көк')">🔵</span>
-      <span class="skin" onclick="selectSkin(this,'#2ed573','Жасыл')">🟢</span>
-      <span class="skin" onclick="selectSkin(this,'#ffa502','Сары')">🟡</span>
-      <span class="skin" onclick="selectSkin(this,'#a55eea','Күлгін')">🟣</span>
-      <span class="skin" onclick="selectSkin(this,'#ff69b4','Қызғылт')">💗</span>
-    </div>
+    <h3 style="text-align:center">👕 КИІМ / 😈 ВНЕШКА АУЫСТЫРУ</h3>
+    <div style="text-align:center"><button style="background:#1e90ff;width:45%" onclick="changeGender('boy')">👦 Ұл</button><button style="background:#ff69b4;width:45%" onclick="changeGender('girl')">👧 Қыз</button></div>
+    <div style="text-align:center;margin-top:10px"><span class="skin" onclick="selectSkin(this,'#ff4757','Қызыл')">🔴</span><span class="skin" onclick="selectSkin(this,'#1e90ff','Көк')">🔵</span><span class="skin" onclick="selectSkin(this,'#2ed573','Жасыл')">🟢</span><span class="skin" onclick="selectSkin(this,'#ffa502','Сары')">🟡</span><span class="skin" onclick="selectSkin(this,'#a55eea','Күлгін')">🟣</span><span class="skin" onclick="selectSkin(this,'#ff69b4','Қызғылт')">💗</span></div>
     <p style="text-align:center" id="mySkinName">Киім: Қызыл</p>
-    <button style="background:red" onclick="shapeshift()">👕 АУЫСТЫРУ!</button>
+    <div style="text-align:center"><span class="skin" onclick="selectVneshka(this,'🧑‍🚀')">🧑‍🚀</span><span class="skin" onclick="selectVneshka(this,'👩‍🚀')">👩‍🚀</span><span class="skin" onclick="selectVneshka(this,'🤖')">🤖</span><span class="skin" onclick="selectVneshka(this,'👽')">👽</span><span class="skin" onclick="selectVneshka(this,'🐱')">🐱</span><span class="skin" onclick="selectVneshka(this,'🦖')">🦖</span></div>
+    <p style="text-align:center" id="myVneshkaName">Внешка: Жоқ</p>
+    <button style="background:red" onclick="shapeshift()">😈 ТҮНДЕ ВНЕШКА АУЫСТЫРУ!</button>
     <button style="background:#333" onclick="closeSkin()">❌ Жабу</button>
   </div>
-
-  <div id="roleMenu">
-    <h3 style="text-align:center" id="roleMenuTitle">Кімді таңдайсың?</h3>
-    <p style="text-align:center;font-size:12px;color:#ff4757">🔒 Рөлдер көрінбейді!</p>
-    <p style="text-align:center;font-size:12px;color:#eccc68" id="judgeWarningInMenu"></p>
-    <div id="roleMenuList"></div>
-    <button style="background:#333" onclick="closeRoleMenu()">❌ Жабу</button>
-  </div>
-
-  <div id="voteScreen">
-    <h2>🗳️ ЖИНАЛЫС - КІМ ИМПОСТЕР?</h2>
-    <p style="color:#888;font-size:12px">🔒 Рөлдер КӨРІНБЕЙДІ! 💬 Чатта сөйлес!</p>
-    <div style="background:#1e1e35;padding:10px;border-radius:15px;width:100%;max-width:340px;text-align:center">
-      <div style="font-size:28px" id="voteTimerBig">⏳ 2:00</div>
-      <div style="font-size:12px;color:#aaa">Дауыс беру - 2 минут!</div>
-      <div id="voteProgress"><div id="voteFill"></div></div>
-      <div style="font-size:12px">Қалды: <span id="voteTimer">120</span> сек</div>
-    </div>
-    <p style="color:#ff4757;font-size:12px" id="voteReason"></p>
-    <div id="chatBox"></div>
-    <div style="width:100%;max-width:340px;display:flex;gap:5px">
-      <input id="chatInput" placeholder="💬 Жаз...">
-      <button id="chatSend" onclick="sendChat()">Жібер</button>
-    </div>
-    <div style="display:flex;gap:5px;width:100%;max-width:340px;margin-top:5px">
-      <button style="background:#333;font-size:12px;padding:8px" onclick="quickChat('Мен көрдім! Ол Импостер!')">😈 Ол Импостер!</button>
-      <button style="background:#333;font-size:12px;padding:8px" onclick="quickChat('Мен емес! Задания істеп жүрдім!')">🙏 Мен емес!</button>
-      <button style="background:#333;font-size:12px;padding:8px" onclick="quickChat('Венттен шықты!')">🕳️ Венттен шықты!</button>
-    </div>
-    <div id="voteList" style="width:100%;max-width:340px;margin-top:8px;max-height:160px;overflow-y:auto"></div>
-    <button style="background:#eccc68;color:black;max-width:340px;font-size:16px;border:2px solid #fff" onclick="voteFor('Өткізу ⏭️')">⏭️ СКИП - Ешкімді шығармау!</button>
-    <button style="background:#333;max-width:340px" onclick="closeVote()">❌ Жиналысты аяқтау</button>
-  </div>
+  <div id="roleMenu"><h3 style="text-align:center" id="roleMenuTitle">Кімді таңдайсың?</h3><p style="text-align:center;font-size:12px;color:#ff4757">🔒 Рөлдер көрінбейді!</p><p style="text-align:center;font-size:12px;color:#eccc68" id="judgeWarningInMenu"></p><div id="roleMenuList"></div><button style="background:#333" onclick="closeRoleMenu()">❌ Жабу</button></div>
+  <div id="voteScreen"><h2>🗳️ ЖИНАЛЫС - КІМ ИМПОСТЕР?</h2><p style="color:#888;font-size:12px">🔒 Рөлдер КӨРІНБЕЙДІ! 💬 Чатта сөйлес!</p><div style="background:#1e1e35;padding:10px;border-radius:15px;width:100%;max-width:340px;text-align:center"><div style="font-size:28px" id="voteTimerBig">⏳ 2:00</div><div style="font-size:12px;color:#aaa">Дауыс беру - 2 минут!</div><div id="voteProgress"><div id="voteFill"></div></div><div style="font-size:12px">Қалды: <span id="voteTimer">120</span> сек</div></div><p style="color:#ff4757;font-size:12px" id="voteReason"></p><div id="chatBox"></div><div style="width:100%;max-width:340px;display:flex;gap:5px"><input id="chatInput" placeholder="💬 Жаз..."><button id="chatSend" onclick="sendChat()">Жібер</button></div><div style="display:flex;gap:5px;width:100%;max-width:340px;margin-top:5px"><button style="background:#333;font-size:12px;padding:8px" onclick="quickChat('Мен көрдім! Ол Импостер!')">😈 Ол Импостер!</button><button style="background:#333;font-size:12px;padding:8px" onclick="quickChat('Мен емес! Задания істеп жүрдім!')">🙏 Мен емес!</button><button style="background:#333;font-size:12px;padding:8px" onclick="quickChat('Венттен шықты!')">🕳️ Венттен шықты!</button></div><div id="voteList" style="width:100%;max-width:340px;margin-top:8px;max-height:160px;overflow-y:auto"></div><button style="background:#eccc68;color:black;max-width:340px;font-size:16px;border:2px solid #fff" onclick="voteFor('Өткізу ⏭️')">⏭️ СКИП - Ешкімді шығармау!</button><button style="background:#333;max-width:340px" onclick="closeVote()">❌ Жиналысты аяқтау</button></div>
 </div>
-
-<div id="jumpscare">
-  <h1>👹</h1>
-  <p style="color:red;font-size:28px" id="jumpscareText">ИМПОСТЕР СЕНІ ҰСТАДЫ!</p>
-  <button style="max-width:300px" onclick="location.reload()">🔄 ҚАЙТА ОЙНАУ</button>
-</div>
+<div id="jumpscare"><h1>👹</h1><p style="color:red;font-size:28px" id="jumpscareText">ИМПОСТЕР СЕНІ ҰСТАДЫ!</p><button style="max-width:300px" onclick="location.reload()">🔄 ҚАЙТА ОЙНАУ</button></div>
 
 <script>
-let progress=0, creepyPhrases=["Ол жақындап келеді...","Рөлің құпия...","Дауыс 2 минут...","Фонаригіңді өшірме..."];
-let ci=0;
-let loadTimer=setInterval(()=>{
-  progress+=Math.floor(Math.random()*15)+5; if(progress>100) progress=100;
-  document.getElementById('loadFill').style.width=progress+'%';
-  document.getElementById('loadText').innerText='Загрузка... '+progress+'%';
-  if(Math.random()>0.6){ document.getElementById('creepyText').innerText=creepyPhrases[ci%creepyPhrases.length]; ci++; }
-  if(progress>=100){ clearInterval(loadTimer); setTimeout(()=>{ document.getElementById('loader').style.display='none'; document.getElementById('horrorMenu').style.display='flex'; updateDistribution(); },600); }
-},400);
-function showHow(){ let t=document.getElementById('howText'); t.style.display=t.style.display==='none'?'block':'none'; }
-
-let totalPlayers=8, myGender='boy', myColorHex='#ff4757', myColorName='Қызыл';
-const ALL_ROLES=[
-  {id:'Импостер', icon:'😈', name:'ИМПОСТЕР', desc:'Өлтір, Вент, Внешка. Өлтірмесе - байқалады!', btn:'🔪', btnLabel:'KILL', color:'#ff0000'},
-  {id:'Детектив', icon:'🕵️', name:'ДЕТЕКТИВ', desc:'Біреуді тексер - Импостер па?', btn:'🔍', btnLabel:'Тексеру', color:'#1e90ff'},
-  {id:'Инженер', icon:'🔧', name:'ИНЖЕНЕР', desc:'Вент + Жөндеу', btn:'🔧', btnLabel:'Жөндеу', color:'#2ed573'},
-  {id:'Трекер', icon:'📍', name:'ТРЕКЕР', desc:'Біреуді бақыла', btn:'📍', btnLabel:'Бақылау', color:'#a55eea'},
-  {id:'Паника', icon:'😱', name:'ПАНИКА', desc:'Бәрінің орны көрінеді', btn:'😱', btnLabel:'Паника!', color:'#ffa502'},
-  {id:'Судья', icon:'⚖️', name:'СУДЬЯ', desc:'1 рет! Дұрыс тапса +1, қате басса өзі шығады!', btn:'⚖️', btnLabel:'Шығару!', color:'#eccc68'},
-  {id:'Полиция', icon:'👮', name:'ПОЛИЦИЯ', desc:'Біреуді қама', btn:'👮', btnLabel:'Қамау!', color:'#3742fa'},
-];
-function getDistribution(n){
-  let base=Math.floor(n/4), extra=n%4;
-  let shuffled=[...ALL_ROLES].sort(()=>Math.random()-0.5).slice(0,4);
-  return shuffled.map((r,i)=>({...r, count: base + (i<extra?1:0)}));
+// ===== 🆕 FIREBASE - СЕН ЕШТЕҢЕ ЖАЗБАЙСЫҢ! =====
+const firebaseConfig = { apiKey: "AIzaSyA4sTKOzeU59xkRmvexYh3VxKzMGmNRgOs", authDomain: "karatel-test-1806a.firebaseapp.com", databaseURL: "https://karatel-test-1806a-default-rtdb.firebaseio.com", projectId: "karatel-test-1806a", storageBucket: "karatel-test-1806a.firebasestorage.app", messagingSenderId: "448237119572", appId: "1:448237119572:web:b26c39d70555d39c04e5c1", measurementId: "G-2B1ZH4LV4E" };
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+let myId='p'+Math.floor(Math.random()*1000000), roomCode='', isHost=false, onlineMode=false, onlinePlayersData={};
+function getName(){ let v=document.getElementById('myNameInput').value.trim(); return v?v:'Ойыншы'+Math.floor(Math.random()*100); }
+function makeCode(){ return 'TUN-'+Math.floor(1000+Math.random()*9000); }
+function roomRef(){ return db.ref('rooms/'+roomCode); }
+function createRoom(){
+  let name=getName(); isHost=true; roomCode=makeCode(); onlineMode=true;
+  document.getElementById('myCodeText').innerText='✅ Код: '+roomCode+' — достарыңа жібер!';
+  document.getElementById('connStatus').innerText='✅ Бөлме дайын!';
+  document.getElementById('roomCodeShow').innerText=roomCode; document.getElementById('hudRoomCode').innerText=roomCode;
+  roomRef().set({host:myId, status:'lobby', created:Date.now()});
+  roomRef().child('players/'+myId).set({name:name, gender:myGender, color:myColorHex, colorName:myColorName, x:150, y:120, role:'', alive:true});
+  listenRoom(); showLobby();
 }
+function joinRoom(){
+  let name=getName(); let code=document.getElementById('joinCodeInput').value.trim().toUpperCase();
+  if(!code){ alert('Код жаз!'); return; } if(!code.startsWith('TUN-')) code='TUN-'+code; roomCode=code; isHost=false; onlineMode=true;
+  document.getElementById('connStatus').innerText='Қосылып жатыр... '+code;
+  roomRef().once('value', snap=>{ if(!snap.exists()){ alert('❌ Бөлме табылмады!'); return; }
+    roomRef().child('players/'+myId).set({name:name, gender:myGender, color:myColorHex, colorName:myColorName, x:150+Math.random()*200, y:120+Math.random()*200, role:'', alive:true});
+    listenRoom(); showLobby(); document.getElementById('connStatus').innerText='✅ Қосылдың!';
+  });
+}
+function showLobby(){ document.getElementById('lobbyCard').style.display='block'; document.getElementById('roomCodeShow').innerText=roomCode; }
+function copyCode(){ if(navigator.clipboard) navigator.clipboard.writeText(roomCode); alert('📋 '+roomCode); }
+function listenRoom(){
+  roomRef().child('players').on('value', snap=>{ onlinePlayersData=snap.val()||{}; updateOnlinePlayerList(); if(document.getElementById('mainGame').style.display==='block') syncOnlinePlayers(); });
+  roomRef().child('status').on('value', snap=>{ if(snap.val()==='started' && document.getElementById('mainGame').style.display!=='block'){ startOnlineGameUI(); } });
+  roomRef().child('chat').limitToLast(1).on('child_added', snap=>{ let m=snap.val(); if(m && m.from!==myId) addChat(m.name,m.text,false,false); });
+  roomRef().child('events').limitToLast(1).on('child_added', snap=>{ let e=snap.val(); if(!e||e.from===myId) return; if(e.type==='kill'&&e.target===getName()) document.getElementById('jumpscare').style.display='flex'; if(e.type==='task') showMsg('✅ '+e.name+' задания істеді!'); if(e.type==='shape') showMsg('😈 '+e.name+' внешка ауыстырды: '+e.skin); if(e.type==='judge') showMsg('⚖️ Судья '+e.name+'-ды шығарды!'); });
+  roomRef().child('roles/'+myId).on('value', snap=>{ if(snap.val()){ let rid=snap.val(); let obj=ALL_ROLES.find(r=>r.id===rid); if(obj){ myRoleObj=obj; myRole=rid; } } });
+}
+function updateOnlinePlayerList(){ let list=Object.values(onlinePlayersData); document.getElementById('playerList').innerHTML=list.map(p=>`<div class="playerRow"><span>${p.gender==='girl'?'👧':'👦'} ${p.name} <span style="display:inline-block;width:12px;height:12px;border-radius:50%;background:${p.color||'#ff4757'}"></span> ${p.colorName||''}</span></div>`).join(''); document.getElementById('lobbyStatus').innerText='👥 '+list.length+' адам қосылды'; document.getElementById('playerCountText').innerText=list.length; document.getElementById('onlinePlayers').innerText='🌐 '+list.map(p=>p.name).join(', '); }
+function syncOnlinePlayers(){ let list=Object.values(onlinePlayersData).filter(p=>p.name!==getName()); otherPlayers=list.map((p,i)=>({name:p.name, gender:p.gender||'boy', color:p.color||'#1e90ff', x:p.x||150, y:p.y||120, role:p.role||'Тірі', roleObj:ALL_ROLES.find(r=>r.id===(p.role||'Тірі'))||ALL_ROLES[3], jailed:0, revealed:false})); drawFP(); }
+function startOnlineGame(){ if(!roomCode){ alert('Алдымен БӨЛМЕ ҚҰРУ!'); return; } if(!isHost){ alert('Хост БАСТАУ басу керек!'); return; } let ids=Object.keys(onlinePlayersData); if(ids.length<2){ alert('Кемінде 2 адам керек!'); return; } let dist=getDistribution(ids.length); let pool=[]; dist.forEach(d=>{ for(let i=0;i<d.count;i++) pool.push(d); }); pool.sort(()=>Math.random()-0.5); ids.forEach((id,i)=>{ roomRef().child('roles/'+id).set(pool[i].id); roomRef().child('players/'+id+'/role').set(pool[i].id); }); roomRef().child('status').set('started'); startOnlineGameUI(); }
+function startOnlineGameUI(){ document.getElementById('horrorMenu').style.display='none'; document.getElementById('mainGame').style.display='block'; if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); document.getElementById('roleReveal').style.display='flex'; let icons=['😈','🕵️','🔧','📍','😱','⚖️','👮']; let idx=0; let roll=setInterval(()=>{ document.getElementById('rollingText').innerText=icons[idx%icons.length]; idx++; },100); setTimeout(()=>{ clearInterval(roll); assignRolesOnline(); document.getElementById('roleReveal').style.display='none'; },2200); drawFP(); }
+function assignRolesOnline(){ if(!myRoleObj){ let obj=ALL_ROLES.find(r=>r.id==='Инженер'); myRoleObj=obj; myRole='Инженер'; } document.getElementById('playerCountText').innerText=Object.keys(onlinePlayersData).length||totalPlayers; document.getElementById('playersAlive').innerText='👥 '+(Object.keys(onlinePlayersData).length||totalPlayers)+' адам | 🔒 Рөл жасырын!'; document.getElementById('revealList').innerHTML='<b>СЕН: '+myRoleObj.icon+' '+myRoleObj.name+'</b><br>'+myRoleObj.desc+(myRole==='Судья'?'<br><br>⚖️ СУДЬЯ - 1 РЕТ! Дұрыс +1, Қате - өзің шығасың!':''); document.getElementById('roleTitle').innerText=myRoleObj.icon+' СЕН: '+myRoleObj.name+' (Құпия!)'; document.getElementById('roleDesc').innerText=myRoleObj.desc; document.getElementById('roleBtn').innerHTML=myRoleObj.btn+'<span class="badge" id="roleBadge">'+(myRole==='Судья'?'1':'!')+'</span><div class="cooldown" id="roleCooldown">20</div>'; document.getElementById('roleBtnLabel').innerText=myRoleObj.btnLabel; document.getElementById('roleBox').style.display='block'; if(myRole==='Судья'){ document.getElementById('judgeBox').style.display='block'; document.getElementById('judgeCharges').innerText='1 рет қалды'; } document.getElementById('roleAbilityText').innerText='⭐ '+myRoleObj.btnLabel+' дайын!'; document.getElementById('roleFill').style.background=myRoleObj.color; alert('🔒 ҚҰПИЯ!\n\n'+myRoleObj.icon+' СЕН: '+myRoleObj.name+'!\n'+myRoleObj.desc+'\n\nБөлме: '+roomCode); showMsg(myRoleObj.icon+' СЕН: '+myRoleObj.name+'!'); if(myRole==='Импостер'){ document.getElementById('impBox').style.display='block'; startKillTimer(); } else document.getElementById('killBtn').style.opacity='0.3'; drawFP(); setInterval(monsterMove, 5000); setInterval(()=>{ if(flash && battery>0){ battery-=1; document.getElementById('batteryText').innerText=battery+'%'; if(battery===0){ flash=false; updateLampBtn(); } } },1000); setInterval(updateMeetingTimer, 1000); setInterval(updateRoleTimer, 1000); setInterval(()=>{ if(onlineMode) roomRef().child('players/'+myId).update({x:px, y:py}); },300); }
+// ===== ЗАГРУЗКА - СЕНІҢ КОДЫҢДАҒЫДАЙ =====
+let progress=0, creepyPhrases=["Ол жақындап келеді...","Рөлің құпия...","Дауыс 2 минут...","Фонаригіңді өшірме..."], ci=0;
+let loadTimer=setInterval(()=>{ progress+=Math.floor(Math.random()*15)+5; if(progress>100) progress=100; document.getElementById('loadFill').style.width=progress+'%'; document.getElementById('loadText').innerText='Загрузка... '+progress+'%'; if(Math.random()>0.6){ document.getElementById('creepyText').innerText=creepyPhrases[ci%creepyPhrases.length]; ci++; } if(progress>=100){ clearInterval(loadTimer); setTimeout(()=>{ document.getElementById('loader').style.display='none'; document.getElementById('horrorMenu').style.display='flex'; updateDistribution(); },600); } },400);
+function showHow(){ let t=document.getElementById('howText'); t.style.display=t.style.display==='none'?'block':'none'; }
+let totalPlayers=8, myGender='boy', myColorHex='#ff4757', myColorName='Қызыл';
+const ALL_ROLES=[ {id:'Импостер', icon:'😈', name:'ИМПОСТЕР', desc:'Өлтір, Вент, Внешка. Өлтірмесе - байқалады!', btn:'🔪', btnLabel:'KILL', color:'#ff0000'}, {id:'Детектив', icon:'🕵️', name:'ДЕТЕКТИВ', desc:'Біреуді тексер - Импостер па?', btn:'🔍', btnLabel:'Тексеру', color:'#1e90ff'}, {id:'Инженер', icon:'🔧', name:'ИНЖЕНЕР', desc:'Вент + Жөндеу', btn:'🔧', btnLabel:'Жөндеу', color:'#2ed573'}, {id:'Трекер', icon:'📍', name:'ТРЕКЕР', desc:'Біреуді бақыла', btn:'📍', btnLabel:'Бақылау', color:'#a55eea'}, {id:'Паника', icon:'😱', name:'ПАНИКА', desc:'Бәрінің орны көрінеді', btn:'😱', btnLabel:'Паника!', color:'#ffa502'}, {id:'Судья', icon:'⚖️', name:'СУДЬЯ', desc:'1 рет! Дұрыс тапса +1, қате басса өзі шығады!', btn:'⚖️', btnLabel:'Шығару!', color:'#eccc68'}, {id:'Полиция', icon:'👮', name:'ПОЛИЦИЯ', desc:'Біреуді қама', btn:'👮', btnLabel:'Қамау!', color:'#3742fa'}, ];
+function getDistribution(n){ let base=Math.floor(n/4), extra=n%4; let shuffled=[...ALL_ROLES].sort(()=>Math.random()-0.5).slice(0,4); return shuffled.map((r,i)=>({...r, count: base + (i<extra?1:0)})); }
 function selectPlayers(n, el){ totalPlayers=n; document.querySelectorAll('.playerBtn').forEach(b=>b.classList.remove('selected')); el.classList.add('selected'); updateDistribution(); }
 function selectGender(g, el){ myGender=g; document.querySelectorAll('.genderBtn').forEach(b=>{ b.classList.remove('selected'); b.classList.remove('girlSel'); }); if(g==='boy') el.classList.add('selected'); else el.classList.add('girlSel'); updateCharPreview(); }
 function selectMyColor(el, hex, name){ myColorHex=hex; myColorName=name; document.querySelectorAll('.skin').forEach(s=>s.classList.remove('selected')); el.classList.add('selected'); updateCharPreview(); }
-function updateCharPreview(){ let icon=myGender==='girl'?'👧':'👦'; let cloth=myGender==='girl'?'Юбка':'Шалбар'; document.getElementById('myCharPreview').innerText=icon+' '+(myGender==='girl'?'Қыз':'Ұл')+' • '+myColorName+' '+cloth; document.getElementById('myGenderText').innerText=icon+' '+(myGender==='girl'?'Қыз':'Ұл'); }
+function updateCharPreview(){ let icon=myGender==='girl'?'👧':'👦'; let cloth=myGender==='girl'?'Юбка':'Шалбар'; document.getElementById('myCharPreview').innerText=icon+' '+(myGender==='girl'?'Қыз':'Ұл')+' • '+myColorName+' '+cloth; let gt=document.getElementById('myGenderText'); if(gt) gt.innerText=icon+' '+(myGender==='girl'?'Қыз':'Ұл'); }
 function updateDistribution(){ let dist=getDistribution(totalPlayers); let html=''; dist.forEach(d=>{ html+=`<div class="roleCard"><span>${d.icon} ${d.name}</span><b>${d.count} адам</b><span style="color:#888">🔒</span></div>`; }); document.getElementById('roleDistribution').innerHTML=html; window.currentDist=dist; }
-function enterGame(){
-  document.getElementById('horrorMenu').style.display='none';
-  document.getElementById('mainGame').style.display='block';
-  if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{});
-  document.getElementById('roleReveal').style.display='flex';
-  let icons=['😈','🕵️','🔧','📍','😱','⚖️','👮'];
-  let idx=0;
-  let roll=setInterval(()=>{ document.getElementById('rollingText').innerText=icons[idx%icons.length]; idx++; },100);
-  setTimeout(()=>{ clearInterval(roll); assignRoles(); document.getElementById('roleReveal').style.display='none'; },2200);
-  drawFP();
-}
-let myRole="", myRoleObj=null, px=150, py=120, dirX=1, dirY=0, flash=true, battery=100, tasksDone=0, lives=3, monsterActive=false, monsterX=620, monsterY=420, selectedColorHex='#ff4757', selectedName='Қызыл';
-let killTimer=30, isRevealed=false, shapeshiftActive=false, inMeeting=false, meetingLeft=3, meetingCooldown=0, meetingCooldownMax=30;
+function enterGame(){ document.getElementById('horrorMenu').style.display='none'; document.getElementById('mainGame').style.display='block'; if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(()=>{}); document.getElementById('roleReveal').style.display='flex'; let icons=['😈','🕵️','🔧','📍','😱','⚖️','👮']; let idx=0; let roll=setInterval(()=>{ document.getElementById('rollingText').innerText=icons[idx%icons.length]; idx++; },100); setTimeout(()=>{ clearInterval(roll); assignRoles(); document.getElementById('roleReveal').style.display='none'; },2200); drawFP(); }
+let myRole="", myRoleObj=null, px=150, py=120, dirX=1, dirY=0, flash=true, battery=100, tasksDone=0, lives=3, monsterActive=false, monsterX=620, monsterY=420, selectedColorHex='#ff4757', selectedName='Қызыл', selectedVneshka='';
+// 🆕 KILL ТАЙМЕР 20 СЕК!
+let killTimer=20, killTimerMax=20, isRevealed=false, shapeshiftActive=false, inMeeting=false, meetingLeft=3, meetingCooldown=0, meetingCooldownMax=30;
 let roleCooldown=0, roleCooldownMax=20, trackedPlayer=null, panicActive=false;
-// СУДЬЯ - 1 РЕТ!
 let judgeCharges=1, judgeUsed=false, pendingJudgeTarget=null, pendingJudgeIndex=-1, gameOver=false;
-let rooms=[
-  {name:'Каюта 🛏️', x:50, y:50, w:180, h:130, task:'Код'},
-  {name:'Столовая 🍽️', x:310, y:50, w:180, h:130, task:'Жиналыс'},
-  {name:'Двигатель ⚙️', x:570, y:50, w:180, h:130, task:'Винт'},
-  {name:'Лаб 🧪', x:570, y:350, w:180, h:130, task:'Лампочка'},
-  {name:'Коридор 🚶', x:250, y:220, w:300, h:160, task:'Жоқ'},
-  {name:'Вент 🕳️', x:50, y:350, w:180, h:130, task:'Вент'},
-];
+let rooms=[ {name:'Каюта 🛏️', x:50, y:50, w:180, h:130, task:'Код'}, {name:'Столовая 🍽️', x:310, y:50, w:180, h:130, task:'Жиналыс'}, {name:'Двигатель ⚙️', x:570, y:50, w:180, h:130, task:'Винт'}, {name:'Лаб 🧪', x:570, y:350, w:180, h:130, task:'Лампочка'}, {name:'Коридор 🚶', x:250, y:220, w:300, h:160, task:'Жоқ'}, {name:'Вент 🕳️', x:50, y:350, w:180, h:130, task:'Вент'}, ];
 let otherPlayers=[];
 const PLAYER_NAMES=['Айя','Нұрлан','Аружан','Дима','Алина','Ерлан','Малика'];
 const PLAYER_GENDERS=['girl','boy','girl','boy','girl','boy','girl'];
@@ -331,561 +244,57 @@ const PLAYER_COLORS=['#1e90ff','#2ed573','#ffa502','#a55eea','#ff69b4','#3742fa'
 const PLAYER_POS=[{x:330,y:270},{x:610,y:270},{x:420,y:410},{x:150,y:400},{x:600,y:400},{x:350,y:150},{x:500,y:300}];
 function getRoom(){ for(let r of rooms){ if(px>=r.x && px<=r.x+r.w && py>=r.y && py<=r.y+r.h) return r; } return {name:'Коридор 🚶', task:'Жоқ'}; }
 function showMsg(t){ let m=document.getElementById('centerMsg'); m.innerText=t; setTimeout(()=>{ if(m.innerText===t) m.innerText=''; },4000); }
-
-function assignRoles(){
-  let dist=window.currentDist || getDistribution(totalPlayers);
-  let rolePool=[];
-  dist.forEach(d=>{ for(let i=0;i<d.count;i++) rolePool.push(d); });
-  rolePool.sort(()=>Math.random()-0.5);
-  myRoleObj=rolePool[0]; myRole=myRoleObj.id;
-  otherPlayers=[];
-  for(let i=1;i<totalPlayers;i++){
-    let r=rolePool[i];
-    otherPlayers.push({name:PLAYER_NAMES[i-1], gender:PLAYER_GENDERS[i-1], color:PLAYER_COLORS[i-1], x:PLAYER_POS[i-1].x, y:PLAYER_POS[i-1].y, role:r.id, roleObj:r, jailed:0, revealed:false});
-  }
-  document.getElementById('playerCountText').innerText=totalPlayers;
-  document.getElementById('playersAlive').innerText='👥 '+totalPlayers+' адам | 🔒 Рөл жасырын!';
-  let listHtml='<b>Рөлдер бөлінді (тек саған):</b><br>';
-  dist.forEach(d=>{ listHtml+=d.icon+' '+d.name+': '+d.count+' адам 🔒<br>'; });
-  listHtml+='<br><b>СЕН: '+myRoleObj.icon+' '+myRoleObj.name+'</b>';
-  if(myRole==='Судья') listHtml+='<br><br>⚖️ СЕН СУДЬЯСЫҢ!<br>• ТЕК 1 РЕТ!<br>• Дұрыс тапсаң (Импостер) → +1 рет!<br>• Қате бассаң → ӨЗІҢ шығасың!';
-  document.getElementById('revealList').innerHTML=listHtml;
-  document.getElementById('roleTitle').innerText=myRoleObj.icon+' СЕН: '+myRoleObj.name+' (Құпия!)';
-  document.getElementById('roleDesc').innerText=myRoleObj.desc;
-  document.getElementById('roleBtn').innerHTML=myRoleObj.btn+'<span class="badge" id="roleBadge">'+(myRole==='Судья'?'1':'!')+'</span><div class="cooldown" id="roleCooldown">20</div>';
-  document.getElementById('roleBtnLabel').innerText=myRoleObj.btnLabel;
-  document.getElementById('roleBox').style.display='block';
-  if(myRole==='Судья'){
-    document.getElementById('judgeBox').style.display='block';
-    document.getElementById('judgeCharges').innerText='1 рет қалды';
-  }
-  document.getElementById('roleAbilityText').innerText='⭐ '+myRoleObj.btnLabel+' дайын!';
-  document.getElementById('roleFill').style.background=myRoleObj.color;
-  let judgeExtra=myRole==='Судья' ? '\n\n⚖️ СУДЬЯ ЕРЕЖЕСІ:\n• ТЕК 1 РЕТ қолдана аласың!\n• Дұрыс тапсаң (Импостер) → +1 рет + Команда жеңеді!\n• Қате бассаң (бейкүнә) → ӨЗІҢ ойыннан шығасың!' : '';
-  alert('🔒 ҚҰПИЯ!\n\n'+myRoleObj.icon+' СЕН: '+myRoleObj.name+'!\n'+myRoleObj.desc+judgeExtra+'\n\n👁️ ПЕРВАЯ ЛИЦА - Түн карта, фонарик!');
-  showMsg(myRoleObj.icon+' СЕН: '+myRoleObj.name+'! 👁️ Первая лица!');
-  if(myRole==='Импостер'){
-    document.getElementById('impBox').style.display='block';
-    setInterval(()=>{
-      if(inMeeting || gameOver) return;
-      killTimer--;
-      document.getElementById('killTimerText').innerText=killTimer+' сек';
-      document.getElementById('killFill').style.width=(killTimer/30*100)+'%';
-      if(killTimer<=10){ document.getElementById('impWarning').innerText='⚠️ Жылдам өлтір!'; document.getElementById('killBtn').classList.add('danger'); }
-      if(killTimer<=0){ isRevealed=true; document.getElementById('impWarning').innerText='🚨 ВНЕШКА СЫНДЫ!'; }
-    },1000);
-  } else {
-    document.getElementById('killBtn').style.opacity='0.3';
-  }
-  drawFP();
-  setInterval(monsterMove, 5000);
-  setInterval(()=>{ if(flash && battery>0){ battery-=1; document.getElementById('batteryText').innerText=battery+'%'; if(battery===0){ flash=false; updateLampBtn(); } } },1000);
-  setInterval(updateMeetingTimer, 1000);
-  setInterval(updateRoleTimer, 1000);
-}
-function drawPerson(ctx, x, y, gender, colorHex, isMe){
-  ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(x, y+28, 18, 5, 0, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle='#ffdbac'; ctx.beginPath(); ctx.arc(x, y-18, 13, 0, Math.PI*2); ctx.fill();
-  ctx.fillStyle=gender==='girl'?'#5a2d0c':'#222';
-  if(gender==='girl'){ ctx.beginPath(); ctx.arc(x, y-22, 13, Math.PI, 0); ctx.fill(); ctx.fillRect(x-14, y-22, 5, 18); ctx.fillRect(x+9, y-22, 5, 18); ctx.fillStyle='#ff69b4'; ctx.beginPath(); ctx.arc(x+10, y-30, 4, 0, Math.PI*2); ctx.fill(); }
-  else { ctx.beginPath(); ctx.arc(x, y-22, 13, Math.PI, 0); ctx.fill(); }
-  ctx.fillStyle='#000'; ctx.fillRect(x-6, y-19, 3, 3); ctx.fillRect(x+3, y-19, 3, 3);
-  ctx.fillStyle=colorHex; ctx.fillRect(x-12, y-5, 24, 18);
-  ctx.fillStyle='#ffdbac'; ctx.fillRect(x-16, y-3, 5, 12); ctx.fillRect(x+11, y-3, 5, 12);
-  if(gender==='girl'){ ctx.fillStyle=colorHex; ctx.beginPath(); ctx.moveTo(x-12, y+13); ctx.lineTo(x+12, y+13); ctx.lineTo(x+18, y+28); ctx.lineTo(x-18, y+28); ctx.closePath(); ctx.fill(); ctx.fillStyle='#ffdbac'; ctx.fillRect(x-8, y+28, 5, 8); ctx.fillRect(x+3, y+28, 5, 8); }
-  else { ctx.fillStyle='#1e3a5f'; ctx.fillRect(x-10, y+13, 8, 15); ctx.fillRect(x+2, y+13, 8, 15); ctx.fillStyle='#111'; ctx.fillRect(x-10, y+28, 8, 4); ctx.fillRect(x+2, y+28, 8, 4); }
-  ctx.font='16px sans-serif'; ctx.fillText('🔦', x+12, y+5);
-  if(isMe){ ctx.fillStyle='white'; ctx.font='11px sans-serif'; ctx.fillText('СЕН', x-10, y+42); }
-}
-function updateRoleTimer(){
-  if(roleCooldown>0){
-    roleCooldown--;
-    let cd=document.getElementById('roleCooldown');
-    if(cd){ cd.style.display='flex'; cd.innerText=roleCooldown; }
-    document.getElementById('roleBtn').classList.add('disabled');
-    document.getElementById('roleAbilityText').innerText='⏳ Қабілет: '+roleCooldown+' сек...';
-    document.getElementById('roleFill').style.width=(roleCooldown/roleCooldownMax*100)+'%';
-    if(roleCooldown===0){ if(cd) cd.style.display='none'; document.getElementById('roleBtn').classList.remove('disabled'); document.getElementById('roleAbilityText').innerText='⭐ Қабілет дайын!'; document.getElementById('roleFill').style.width='100%'; }
-  }
-  if(panicActive && roleCooldown===0) panicActive=false;
-}
-function updateMeetingTimer(){
-  if(meetingCooldown>0){
-    meetingCooldown--;
-    let cd=document.getElementById('meetingCooldown');
-    cd.style.display='flex'; cd.innerText=meetingCooldown;
-    document.getElementById('meetingBtn').classList.add('disabled');
-    document.getElementById('meetingCooldownText').innerText='⏳ Келесі жиналыс: '+meetingCooldown+' сек...';
-    document.getElementById('meetFill').style.width=(meetingCooldown/meetingCooldownMax*100)+'%';
-    if(meetingCooldown===0){ cd.style.display='none'; document.getElementById('meetingBtn').classList.remove('disabled'); document.getElementById('meetingCooldownText').innerText='✅ Жиналыс дайын!'; document.getElementById('meetFill').style.width='100%'; }
-  }
-}
-function updateMeetingUI(){
-  document.getElementById('meetingCount').innerText=meetingLeft+' / 3 қалды';
-  document.getElementById('meetingBadge').innerText=meetingLeft;
-  document.getElementById('meetingLabel').innerText=meetingLeft>0?meetingLeft+' рет қалды':'Бітті!';
-  document.getElementById('voteMeetingLeft').innerText=meetingLeft;
-  if(meetingLeft<=0){ document.getElementById('meetingBtn').classList.add('disabled'); }
-}
+function startKillTimer(){ setInterval(()=>{ if(inMeeting || gameOver) return; if(killTimer>0){ killTimer--; document.getElementById('killTimerText').innerText=killTimer+' сек'; document.getElementById('killFill').style.width=(killTimer/killTimerMax*100)+'%'; if(killTimer<=10){ document.getElementById('impWarning').innerText='⚠️ Жылдам өлтір! 20 сек бітсе - байқаласың!'; document.getElementById('killBtn').classList.add('danger'); } if(killTimer<=0){ isRevealed=true; document.getElementById('impWarning').innerText='🚨 ВНЕШКА СЫНДЫ! 20 сек бітті!'; } } },1000); }
+function assignRoles(){ let dist=window.currentDist || getDistribution(totalPlayers); let rolePool=[]; dist.forEach(d=>{ for(let i=0;i<d.count;i++) rolePool.push(d); }); rolePool.sort(()=>Math.random()-0.5); myRoleObj=rolePool[0]; myRole=myRoleObj.id; otherPlayers=[]; for(let i=1;i<totalPlayers;i++){ let r=rolePool[i]; otherPlayers.push({name:PLAYER_NAMES[i-1], gender:PLAYER_GENDERS[i-1], color:PLAYER_COLORS[i-1], x:PLAYER_POS[i-1].x, y:PLAYER_POS[i-1].y, role:r.id, roleObj:r, jailed:0, revealed:false}); } document.getElementById('playerCountText').innerText=totalPlayers; document.getElementById('playersAlive').innerText='👥 '+totalPlayers+' адам | 🔒 Рөл жасырын!'; let listHtml='<b>Рөлдер бөлінді (тек саған):</b><br>'; dist.forEach(d=>{ listHtml+=d.icon+' '+d.name+': '+d.count+' адам 🔒<br>'; }); listHtml+='<br><b>СЕН: '+myRoleObj.icon+' '+myRoleObj.name+'</b>'; if(myRole==='Судья') listHtml+='<br><br>⚖️ СЕН СУДЬЯСЫҢ!<br>• ТЕК 1 РЕТ!<br>• Дұрыс тапсаң (Импостер) → +1 рет!<br>• Қате бассаң → ӨЗІҢ шығасың!'; document.getElementById('revealList').innerHTML=listHtml; document.getElementById('roleTitle').innerText=myRoleObj.icon+' СЕН: '+myRoleObj.name+' (Құпия!)'; document.getElementById('roleDesc').innerText=myRoleObj.desc; document.getElementById('roleBtn').innerHTML=myRoleObj.btn+'<span class="badge" id="roleBadge">'+(myRole==='Судья'?'1':'!')+'</span><div class="cooldown" id="roleCooldown">20</div>'; document.getElementById('roleBtnLabel').innerText=myRoleObj.btnLabel; document.getElementById('roleBox').style.display='block'; if(myRole==='Судья'){ document.getElementById('judgeBox').style.display='block'; document.getElementById('judgeCharges').innerText='1 рет қалды'; } document.getElementById('roleAbilityText').innerText='⭐ '+myRoleObj.btnLabel+' дайын!'; document.getElementById('roleFill').style.background=myRoleObj.color; let judgeExtra=myRole==='Судья' ? '\n\n⚖️ СУДЬЯ ЕРЕЖЕСІ:\n• ТЕК 1 РЕТ!\n• Дұрыс тапсаң → +1 рет!\n• Қате бассаң → ӨЗІҢ шығасың!' : ''; alert('🔒 ҚҰПИЯ!\n\n'+myRoleObj.icon+' СЕН: '+myRoleObj.name+'!\n'+myRoleObj.desc+judgeExtra+'\n\n👁️ ПЕРВАЯ ЛИЦА - Түн карта, фонарик!'); showMsg(myRoleObj.icon+' СЕН: '+myRoleObj.name+'! 👁️ Первая лица!'); if(myRole==='Импостер'){ document.getElementById('impBox').style.display='block'; startKillTimer(); } else { document.getElementById('killBtn').style.opacity='0.3'; } drawFP(); setInterval(monsterMove, 5000); setInterval(()=>{ if(flash && battery>0){ battery-=1; document.getElementById('batteryText').innerText=battery+'%'; if(battery===0){ flash=false; updateLampBtn(); } } },1000); setInterval(updateMeetingTimer, 1000); setInterval(updateRoleTimer, 1000); }
+function drawPerson(ctx, x, y, gender, colorHex, isMe){ ctx.fillStyle='rgba(0,0,0,0.3)'; ctx.beginPath(); ctx.ellipse(x, y+28, 18, 5, 0, 0, Math.PI*2); ctx.fill(); ctx.fillStyle='#ffdbac'; ctx.beginPath(); ctx.arc(x, y-18, 13, 0, Math.PI*2); ctx.fill(); ctx.fillStyle=gender==='girl'?'#5a2d0c':'#222'; if(gender==='girl'){ ctx.beginPath(); ctx.arc(x, y-22, 13, Math.PI, 0); ctx.fill(); ctx.fillRect(x-14, y-22, 5, 18); ctx.fillRect(x+9, y-22, 5, 18); ctx.fillStyle='#ff69b4'; ctx.beginPath(); ctx.arc(x+10, y-30, 4, 0, Math.PI*2); ctx.fill(); } else { ctx.beginPath(); ctx.arc(x, y-22, 13, Math.PI, 0); ctx.fill(); } ctx.fillStyle='#000'; ctx.fillRect(x-6, y-19, 3, 3); ctx.fillRect(x+3, y-19, 3, 3); ctx.fillStyle=colorHex; ctx.fillRect(x-12, y-5, 24, 18); ctx.fillStyle='#ffdbac'; ctx.fillRect(x-16, y-3, 5, 12); ctx.fillRect(x+11, y-3, 5, 12); if(gender==='girl'){ ctx.fillStyle=colorHex; ctx.beginPath(); ctx.moveTo(x-12, y+13); ctx.lineTo(x+12, y+13); ctx.lineTo(x+18, y+28); ctx.lineTo(x-18, y+28); ctx.closePath(); ctx.fill(); ctx.fillStyle='#ffdbac'; ctx.fillRect(x-8, y+28, 5, 8); ctx.fillRect(x+3, y+28, 5, 8); } else { ctx.fillStyle='#1e3a5f'; ctx.fillRect(x-10, y+13, 8, 15); ctx.fillRect(x+2, y+13, 8, 15); ctx.fillStyle='#111'; ctx.fillRect(x-10, y+28, 8, 4); ctx.fillRect(x+2, y+28, 8, 4); } ctx.font='16px sans-serif'; ctx.fillText('🔦', x+12, y+5); if(isMe){ ctx.fillStyle='white'; ctx.font='11px sans-serif'; ctx.fillText('СЕН', x-10, y+42); } }
+function updateRoleTimer(){ if(roleCooldown>0){ roleCooldown--; let cd=document.getElementById('roleCooldown'); if(cd){ cd.style.display='flex'; cd.innerText=roleCooldown; } document.getElementById('roleBtn').classList.add('disabled'); document.getElementById('roleAbilityText').innerText='⏳ Қабілет: '+roleCooldown+' сек...'; document.getElementById('roleFill').style.width=(roleCooldown/roleCooldownMax*100)+'%'; if(roleCooldown===0){ if(cd) cd.style.display='none'; document.getElementById('roleBtn').classList.remove('disabled'); document.getElementById('roleAbilityText').innerText='⭐ Қабілет дайын!'; document.getElementById('roleFill').style.width='100%'; } } if(panicActive && roleCooldown===0) panicActive=false; }
+function updateMeetingTimer(){ if(meetingCooldown>0){ meetingCooldown--; let cd=document.getElementById('meetingCooldown'); cd.style.display='flex'; cd.innerText=meetingCooldown; document.getElementById('meetingBtn').classList.add('disabled'); document.getElementById('meetingCooldownText').innerText='⏳ Келесі жиналыс: '+meetingCooldown+' сек...'; document.getElementById('meetFill').style.width=(meetingCooldown/meetingCooldownMax*100)+'%'; if(meetingCooldown===0){ cd.style.display='none'; document.getElementById('meetingBtn').classList.remove('disabled'); document.getElementById('meetingCooldownText').innerText='✅ Жиналыс дайын!'; document.getElementById('meetFill').style.width='100%'; } } }
+function updateMeetingUI(){ document.getElementById('meetingCount').innerText=meetingLeft+' / 3 қалды'; document.getElementById('meetingBadge').innerText=meetingLeft; if(meetingLeft<=0){ document.getElementById('meetingBtn').classList.add('disabled'); } }
 function updateLampBtn(){ let b=document.getElementById('lampBtn'); b.className='auBtn '+(flash?'lampOn':''); document.getElementById('lampStatus').innerText=flash?'Қосулы':'Өшірулі'; }
-function chargeLamp(){ battery=100; document.getElementById('batteryText').innerText='100%'; showMsg('🔋 Зарядталды!'); drawFP(); }
-
-// ===== ПЕРВАЯ ЛИЦА - ТҮН КАРТА, ФОНАРИК КОНУСЫ =====
-function drawFP(){
-  let c=document.getElementById('fp'); let ctx=c.getContext('2d');
-  // ТҮН - қараңғы фон
-  ctx.fillStyle='#050510'; ctx.fillRect(0,0,800,600);
-  // Еден - перспектива (первая лица)
-  ctx.fillStyle='#0a0a1a'; ctx.fillRect(0,300,800,300);
-  // Қабырғалар - бөлмелер
-  for(let r of rooms){
-    let isCafeteria=r.name.includes('Столовая');
-    // Первая лица: бөлмелер алыстан көрінеді
-    ctx.fillStyle= isCafeteria?'#3a2a1a':r.name.includes('Каюта')?'#1e1e4a':r.name.includes('Двигатель')?'#4a2a1a':r.name.includes('Лаб')?'#1a3a2a':r.name.includes('Вент')?'#2a2a2a':'#1a1a2a';
-    ctx.fillRect(r.x,r.y,r.w,r.h);
-    ctx.strokeStyle= isCafeteria?'#ffa502':'#555'; ctx.lineWidth= isCafeteria?3:1; ctx.strokeRect(r.x,r.y,r.w,r.h); ctx.lineWidth=1;
-    ctx.fillStyle='white'; ctx.font='15px sans-serif'; ctx.fillText(r.name, r.x+10, r.y+25);
-    if(r.task!=='Жоқ' && r.task!=='Вент' && r.task!=='Жиналыс') ctx.fillText('🔧 '+r.task, r.x+10, r.y+50);
-    if(isCafeteria){ ctx.fillText('🔔 ЖИНАЛЫС '+meetingLeft+'/3', r.x+10, r.y+50); ctx.fillText('🍽️🍕🥤', r.x+10, r.y+75); }
-    if(r.name.includes('Вент')) ctx.fillText('🕳️ Вент!', r.x+10, r.y+50);
-  }
-  ctx.strokeStyle='#333'; ctx.setLineDash([10,10]); ctx.strokeRect(250,220,300,160); ctx.setLineDash([]);
-  // Басқа ойыншылар - тек фонарик жарығында көрінеді!
-  for(let p of otherPlayers){
-    // Фонарикке жақын болса ғана анық көрінеді, алыс болса күңгірт
-    let dist=Math.abs(p.x-px)+Math.abs(p.y-py);
-    if(dist>300 && !panicActive && !flash){
-      // Қараңғыда көрінбейді - тек көздері!
-      ctx.font='16px sans-serif'; ctx.fillText('👀', p.x-10, p.y);
-      continue;
-    }
-    if(trackedPlayer && trackedPlayer.name===p.name){ ctx.strokeStyle='#a55eea'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(p.x,p.y,35,0,Math.PI*2); ctx.stroke(); ctx.lineWidth=1; }
-    if(p.jailed>0){ drawPerson(ctx, p.x, p.y, p.gender, '#555', false); ctx.font='20px sans-serif'; ctx.fillText('🔒', p.x-10, p.y-35); }
-    else { drawPerson(ctx, p.x, p.y, p.gender, p.color, false); }
-    ctx.font='12px sans-serif'; ctx.fillStyle='white';
-    let label=p.gender==='girl'?'👧 ':'👦 ';
-    ctx.fillText(label+p.name, p.x-20, p.y+55);
-    if(p.revealed){ ctx.font='11px sans-serif'; ctx.fillStyle='#ff4757'; ctx.fillText('🔍 Тексерілді', p.x-20, p.y+68); }
-  }
-  if(monsterActive){ ctx.font='50px sans-serif'; ctx.fillText('👹', monsterX-25, monsterY+25); }
-  // СЕН - первая лицада өзіңді көрмейсің, тек қолың + фонарик! Бірақ карта үшін кішкене белгі
-  if(isRevealed && shapeshiftActive){
-    let flicker=Math.floor(Date.now()/300)%2===0;
-    if(flicker){ ctx.font='30px sans-serif'; ctx.fillText('😈', px-15, py+10); ctx.font='14px sans-serif'; ctx.fillStyle='red'; ctx.fillText('⚠️ ИМПОСТЕР!', px-35, py-40); }
-    else { drawPerson(ctx, px, py, myGender, myColorHex, true); }
-    ctx.strokeStyle='red'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(px,py,45,0,Math.PI*2); ctx.stroke(); ctx.lineWidth=1;
-  } else {
-    drawPerson(ctx, px, py, myGender, myColorHex, true);
-  }
-  // ===== ФОНАРИК - ПЕРВАЯ ЛИЦА КОНУСЫ =====
-  let handX=px + dirX*30, handY=py + dirY*25;
-  if(flash){
-    // Фонарик конусы - алдыға бағытталған
-    ctx.save(); ctx.translate(handX, handY); let angle=Math.atan2(dirY, dirX); ctx.rotate(angle);
-    let grad=ctx.createRadialGradient(0,0,10,0,0,220);
-    grad.addColorStop(0,'rgba(255,255,200,0.65)'); grad.addColorStop(0.5,'rgba(255,255,200,0.25)'); grad.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=grad; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,220,-0.5,0.5); ctx.closePath(); ctx.fill(); ctx.restore();
-    // Айналада кішкене жарық
-    let g2=ctx.createRadialGradient(px,py,20,px,py,100);
-    g2.addColorStop(0,'rgba(255,255,200,0.25)'); g2.addColorStop(1,'rgba(0,0,0,0)');
-    ctx.fillStyle=g2; ctx.beginPath(); ctx.arc(px,py,100,0,Math.PI*2); ctx.fill();
-    // Фонарик өзі
-    ctx.font='28px sans-serif'; ctx.fillText('🔦', handX-14, handY+10);
-  }
-  // ТҮН - қараңғылық! Фонарик жоқ жер - қараңғы!
-  if(flash){
-    let dark=ctx.createRadialGradient(px,py,90,px,py,420);
-    dark.addColorStop(0,'rgba(0,0,0,0)'); dark.addColorStop(0.5,'rgba(0,0,0,0.3)'); dark.addColorStop(1,'rgba(0,0,0,0.88)');
-    ctx.fillStyle=dark; ctx.fillRect(0,0,800,600);
-    // Первая лица виньетка
-    ctx.fillStyle='rgba(0,0,0,0.25)'; ctx.fillRect(0,0,800,20); ctx.fillRect(0,580,800,20);
-  } else {
-    ctx.fillStyle='rgba(0,0,0,0.95)'; ctx.fillRect(0,0,800,600);
-    ctx.fillStyle='white'; ctx.font='22px sans-serif'; ctx.fillText('🌑 Фонарик өшірулі... Ештеңе көрінбейді!',180,300);
-    ctx.font='14px sans-serif'; ctx.fillText('👁️ Первая лица - тек фонарикпен көресің!',220,330);
-  }
-  // Первая лица - төменде қол
-  ctx.fillStyle='rgba(255,219,172,0.9)'; ctx.beginPath(); ctx.arc(400,580,25,0,Math.PI*2); ctx.fill();
-  ctx.font='20px sans-serif'; ctx.fillText('🔦', 390, 588);
-  let room=getRoom();
-  document.getElementById('posText').innerText=room.name;
-  document.getElementById('doneText').innerText=tasksDone+' / 3';
-  document.getElementById('taskFill').style.width=(tasksDone/3*100)+'%';
-  document.getElementById('livesText').innerText=lives;
-  if(trackedPlayer) document.getElementById('trackedText').innerText='📍 Бақылауда: '+trackedPlayer.name;
-}
+function drawFP(){ let c=document.getElementById('fp'); let ctx=c.getContext('2d'); ctx.fillStyle='#050510'; ctx.fillRect(0,0,800,600); ctx.fillStyle='#0a0a1a'; ctx.fillRect(0,300,800,300); for(let r of rooms){ let isCafeteria=r.name.includes('Столовая'); ctx.fillStyle= isCafeteria?'#3a2a1a':r.name.includes('Каюта')?'#1e1e4a':r.name.includes('Двигатель')?'#4a2a1a':r.name.includes('Лаб')?'#1a3a2a':r.name.includes('Вент')?'#2a2a2a':'#1a1a2a'; ctx.fillRect(r.x,r.y,r.w,r.h); ctx.strokeStyle= isCafeteria?'#ffa502':'#555'; ctx.lineWidth= isCafeteria?3:1; ctx.strokeRect(r.x,r.y,r.w,r.h); ctx.lineWidth=1; ctx.fillStyle='white'; ctx.font='15px sans-serif'; ctx.fillText(r.name, r.x+10, r.y+25); if(r.task!=='Жоқ' && r.task!=='Вент' && r.task!=='Жиналыс') ctx.fillText('🔧 '+r.task, r.x+10, r.y+50); if(isCafeteria){ ctx.fillText('🔔 ЖИНАЛЫС '+meetingLeft+'/3', r.x+10, r.y+50); ctx.fillText('🍽️🍕🥤', r.x+10, r.y+75); } if(r.name.includes('Вент')) ctx.fillText('🕳️ Вент!', r.x+10, r.y+50); } ctx.strokeStyle='#333'; ctx.setLineDash([10,10]); ctx.strokeRect(250,220,300,160); ctx.setLineDash([]); for(let p of otherPlayers){ let dist=Math.abs(p.x-px)+Math.abs(p.y-py); if(dist>300 && !panicActive && !flash){ ctx.font='16px sans-serif'; ctx.fillText('👀', p.x-10, p.y); continue; } if(trackedPlayer && trackedPlayer.name===p.name){ ctx.strokeStyle='#a55eea'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(p.x,p.y,35,0,Math.PI*2); ctx.stroke(); ctx.lineWidth=1; } if(p.jailed>0){ drawPerson(ctx, p.x, p.y, p.gender, '#555', false); ctx.font='20px sans-serif'; ctx.fillText('🔒', p.x-10, p.y-35); } else { drawPerson(ctx, p.x, p.y, p.gender, p.color, false); } ctx.font='12px sans-serif'; ctx.fillStyle='white'; let label=p.gender==='girl'?'👧 ':'👦 '; ctx.fillText(label+p.name, p.x-20, p.y+55); if(p.revealed){ ctx.font='11px sans-serif'; ctx.fillStyle='#ff4757'; ctx.fillText('🔍 Тексерілді', p.x-20, p.y+68); } } if(monsterActive){ ctx.font='50px sans-serif'; ctx.fillText('👹', monsterX-25, monsterY+25); } if(isRevealed && shapeshiftActive){ let flicker=Math.floor(Date.now()/300)%2===0; if(flicker){ ctx.font='30px sans-serif'; ctx.fillText('😈', px-15, py+10); ctx.font='14px sans-serif'; ctx.fillStyle='red'; ctx.fillText('⚠️ ИМПОСТЕР!', px-35, py-40); } else { drawPerson(ctx, px, py, myGender, myColorHex, true); } ctx.strokeStyle='red'; ctx.lineWidth=3; ctx.beginPath(); ctx.arc(px,py,45,0,Math.PI*2); ctx.stroke(); ctx.lineWidth=1; } else { drawPerson(ctx, px, py, myGender, myColorHex, true); } let handX=px + dirX*30, handY=py + dirY*25; if(flash){ ctx.save(); ctx.translate(handX, handY); let angle=Math.atan2(dirY, dirX); ctx.rotate(angle); let grad=ctx.createRadialGradient(0,0,10,0,0,220); grad.addColorStop(0,'rgba(255,255,200,0.65)'); grad.addColorStop(0.5,'rgba(255,255,200,0.25)'); grad.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=grad; ctx.beginPath(); ctx.moveTo(0,0); ctx.arc(0,0,220,-0.5,0.5); ctx.closePath(); ctx.fill(); ctx.restore(); let g2=ctx.createRadialGradient(px,py,20,px,py,100); g2.addColorStop(0,'rgba(255,255,200,0.25)'); g2.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=g2; ctx.beginPath(); ctx.arc(px,py,100,0,Math.PI*2); ctx.fill(); ctx.font='28px sans-serif'; ctx.fillText('🔦', handX-14, handY+10); } if(flash){ let dark=ctx.createRadialGradient(px,py,90,px,py,420); dark.addColorStop(0,'rgba(0,0,0,0)'); dark.addColorStop(0.5,'rgba(0,0,0,0.3)'); dark.addColorStop(1,'rgba(0,0,0,0.88)'); ctx.fillStyle=dark; ctx.fillRect(0,0,800,600); ctx.fillStyle='rgba(0,0,0,0.25)'; ctx.fillRect(0,0,800,20); ctx.fillRect(0,580,800,20); } else { ctx.fillStyle='rgba(0,0,0,0.95)'; ctx.fillRect(0,0,800,600); ctx.fillStyle='white'; ctx.font='22px sans-serif'; ctx.fillText('🌑 Фонарик өшірулі... Ештеңе көрінбейді!',180,300); ctx.font='14px sans-serif'; ctx.fillText('👁️ Первая лица - тек фонарикпен көресің!',220,330); } ctx.fillStyle='rgba(255,219,172,0.9)'; ctx.beginPath(); ctx.arc(400,580,25,0,Math.PI*2); ctx.fill(); ctx.font='20px sans-serif'; ctx.fillText('🔦', 390, 588); let room=getRoom(); document.getElementById('posText').innerText=room.name; document.getElementById('doneText').innerText=tasksDone+' / 3'; document.getElementById('taskFill').style.width=(tasksDone/3*100)+'%'; document.getElementById('livesText').innerText=lives; }
 let joyBase=document.getElementById('joyBase'), joyKnob=document.getElementById('joyKnob'), joyActive=false;
-function joyMove(e){
-  let touch=e.touches[0];
-  let rect=joyBase.getBoundingClientRect();
-  let dx=touch.clientX-(rect.left+rect.width/2), dy=touch.clientY-(rect.top+rect.height/2);
-  let dist=Math.sqrt(dx*dx+dy*dy); let max=45;
-  if(dist>max){ dx=dx/dist*max; dy=dy/dist*max; }
-  joyKnob.style.transform=`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
-  if(Math.abs(dy)>18 || Math.abs(dx)>18){
-    if(Math.abs(dy)>Math.abs(dx)){ if(dy<-18){ movePlayer(0,-12); dirX=0; dirY=-1; } else if(dy>18){ movePlayer(0,12); dirX=0; dirY=1; } }
-    else { if(dx<-18){ movePlayer(-12,0); dirX=-1; dirY=0; } else if(dx>18){ movePlayer(12,0); dirX=1; dirY=0; } }
-  }
-}
-joyBase.addEventListener('touchstart', e=>{ joyActive=true; joyMove(e); });
-joyBase.addEventListener('touchmove', e=>{ if(joyActive) joyMove(e); e.preventDefault(); });
-joyBase.addEventListener('touchend', ()=>{ joyActive=false; joyKnob.style.transform='translate(-50%,-50%)'; });
+function joyMove(e){ let touch=e.touches[0]; let rect=joyBase.getBoundingClientRect(); let dx=touch.clientX-(rect.left+rect.width/2), dy=touch.clientY-(rect.top+rect.height/2); let dist=Math.sqrt(dx*dx+dy*dy); let max=45; if(dist>max){ dx=dx/dist*max; dy=dy/dist*max; } joyKnob.style.transform=`translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`; if(Math.abs(dy)>18 || Math.abs(dx)>18){ if(Math.abs(dy)>Math.abs(dx)){ if(dy<-18){ movePlayer(0,-12); dirX=0; dirY=-1; } else if(dy>18){ movePlayer(0,12); dirX=0; dirY=1; } } else { if(dx<-18){ movePlayer(-12,0); dirX=-1; dirY=0; } else if(dx>18){ movePlayer(12,0); dirX=1; dirY=0; } } } }
+joyBase.addEventListener('touchstart', e=>{ joyActive=true; joyMove(e); }); joyBase.addEventListener('touchmove', e=>{ if(joyActive) joyMove(e); e.preventDefault(); }); joyBase.addEventListener('touchend', ()=>{ joyActive=false; joyKnob.style.transform='translate(-50%,-50%)'; });
 function movePlayer(dx,dy){ if(gameOver) return; let nx=px+dx, ny=py+dy; if(nx<20||nx>780||ny<20||ny>580) return; px=nx; py=ny; drawFP(); }
 function toggleFlash(){ if(!flash && battery<=0){ showMsg('🔋 Батарейка бітті!'); return; } flash=!flash; updateLampBtn(); showMsg(flash?'🔦 Фонарик қосулы!':'🌑 Фонарик өшірулі!'); drawFP(); }
-function doTask(){
-  let room=getRoom();
-  if(room.name.includes('Столовая')){ showMsg('🍽️ Столоваяда задания жоқ! 🔔 ЖИНАЛЫС бас!'); return; }
-  if(room.task==='Жоқ' || room.task==='Вент'){ showMsg('❌ Бұл жерде задания жоқ!'); return; }
-  tasksDone++; showMsg('✅ '+room.name+' - '+room.task+' бітті!');
-  if(tasksDone>=3) showWin('🎉 КОМАНДА ЖЕҢДІ!', 'Задания бітті! Импостер жеңілді!');
-  drawFP();
-}
-function useVent(){
-  if(myRole!=='Импостер' && myRole!=='Инженер'){ showMsg('❌ Вентке тек Импостер + Инженер!'); return; }
-  let vents=[{x:120,y:420},{x:620,y:120},{x:620,y:420}];
-  let next=vents[Math.floor(Math.random()*vents.length)];
-  px=next.x; py=next.y;
-  showMsg('🕳️ Вентпен секірдің! ('+myRole+')');
-  drawFP();
-}
-function killAction(){
-  if(myRole!=='Импостер'){ showMsg('❌ Тек Импостер! Сен: '+myRole); return; }
-  killTimer=30; isRevealed=false;
-  document.getElementById('impWarning').innerText='✅ Өлтірдің! Внешка жөнделді!';
-  document.getElementById('killBtn').classList.remove('danger');
-  showMsg('🔪 Өлтірдің! Внешка жөнделді!');
-  if(!monsterActive){ monsterActive=true; document.getElementById('monsterText').innerText='👹 Монстр: ОЯНДЫ!'; }
-  drawFP();
-}
-let chatMessages=[], votes={};
-function addChat(name, text, isMe, isJudge){
-  let box=document.getElementById('chatBox');
-  let div=document.createElement('div');
-  div.className='chatMsg '+(isMe?'me':'')+(name==='СИСТЕМА'?'sys':'')+(isJudge?'judge':'');
-  div.innerHTML='<b>'+name+':</b> '+text;
-  box.appendChild(div);
-  box.scrollTop=box.scrollHeight;
-}
-function sendChat(){
-  let input=document.getElementById('chatInput');
-  let text=input.value.trim();
-  if(!text) return;
-  let isJudge=myRole==='Судья';
-  addChat(isJudge?'СЕН ⚖️':'СЕН', text, true, isJudge);
-  input.value='';
-  setTimeout(()=>{ let replies=['Мен емес!','Мен задания істеп жүрдім!','Ол өтірік айтып тұр!','Мен Столоваяда болдым!','Венттен шыққанын көрдім!']; let p=otherPlayers[Math.floor(Math.random()*otherPlayers.length)]; if(p) addChat(p.name, replies[Math.floor(Math.random()*replies.length)], false, false); },1200);
-}
-function quickChat(text){ let isJudge=myRole==='Судья'; addChat(isJudge?'СЕН ⚖️':'СЕН', text, true, isJudge); }
+function doTask(){ let room=getRoom(); if(room.name.includes('Столовая')){ showMsg('🍽️ Столоваяда задания жоқ! 🔔 ЖИНАЛЫС бас!'); return; } if(room.task==='Жоқ' || room.task==='Вент'){ showMsg('❌ Бұл жерде задания жоқ!'); return; } tasksDone++; showMsg('✅ '+room.name+' - '+room.task+' бітті!'); if(onlineMode) roomRef().child('events').push({type:'task', name:getName(), from:myId}); if(tasksDone>=3) showWin('🎉 КОМАНДА ЖЕҢДІ!', 'Задания бітті! Импостер жеңілді!'); drawFP(); }
+function useVent(){ if(myRole!=='Импостер' && myRole!=='Инженер'){ showMsg('❌ Вентке тек Импостер + Инженер!'); return; } let vents=[{x:120,y:420},{x:620,y:120},{x:620,y:420}]; let next=vents[Math.floor(Math.random()*vents.length)]; px=next.x; py=next.y; showMsg('🕳️ Вентпен секірдің! ('+myRole+')'); drawFP(); }
+function killAction(){ if(myRole!=='Импостер'){ showMsg('❌ Тек Импостер! Сен: '+myRole); return; } if(killTimer<=0){ showMsg('🚨 Внешка сынды! Байқалдың!'); return; } let targetName=prompt('🔪 Кімді өлтіресің? '+otherPlayers.map(p=>p.name).join(', ')); if(!targetName) return; if(onlineMode) roomRef().child('events').push({type:'kill', name:getName(), target:targetName, from:myId}); killTimer=killTimerMax; isRevealed=false; document.getElementById('impWarning').innerText='✅ Өлтірдің! 20 сек қайта басталды! ⏳'; document.getElementById('killBtn').classList.remove('danger'); showMsg('🔪 Өлтірдің! ⏳ 20 сек күт!'); if(!monsterActive){ monsterActive=true; document.getElementById('monsterText').innerText='👹 Монстр: ОЯНДЫ!'; } drawFP(); }
+let votes={};
+function addChat(name, text, isMe, isJudge){ let box=document.getElementById('chatBox'); let div=document.createElement('div'); div.className='chatMsg '+(isMe?'me':'')+(name==='СИСТЕМА'?'sys':'')+(isJudge?'judge':''); div.innerHTML='<b>'+name+':</b> '+text; box.appendChild(div); box.scrollTop=box.scrollHeight; }
+function sendChat(){ let input=document.getElementById('chatInput'); let text=input.value.trim(); if(!text) return; let isJudge=myRole==='Судья'; addChat(isJudge?'СЕН ⚖️':'СЕН', text, true, isJudge); if(onlineMode) roomRef().child('chat').push({name:getName(), text:text, from:myId}); input.value=''; if(!onlineMode){ setTimeout(()=>{ let replies=['Мен емес!','Мен задания істеп жүрдім!','Ол өтірік айтып тұр!','Мен Столоваяда болдым!','Венттен шыққанын көрдім!']; let p=otherPlayers[Math.floor(Math.random()*otherPlayers.length)]; if(p) addChat(p.name, replies[Math.floor(Math.random()*replies.length)], false, false); },1200); } }
+function quickChat(text){ let isJudge=myRole==='Судья'; addChat(isJudge?'СЕН ⚖️':'СЕН', text, true, isJudge); if(onlineMode) roomRef().child('chat').push({name:getName(), text:text, from:myId}); }
 function openChatQuick(){ openVote('💬 Чат ашылды!'); }
-
-// ===== СУДЬЯ - 1 РЕТ, ДҰРЫС ТАПСА +1, ҚАТЕ БОЛСА ӨЗІ ШЫҒАДЫ! =====
-function useRoleAbility(){
-  if(!myRoleObj){ showMsg('🎲 Рөл әлі ашылмады!'); return; }
-  if(myRole==='Судья'){
-    if(judgeCharges<=0){
-      showMsg('❌ Судья қабілеті бітті! 1 рет қолдандың!');
-      alert('❌ Судья қабілеті бітті!\nСен 1 рет қолдандың, енді жоқ!');
-      return;
-    }
-    openRoleMenu('⚖️ Кімді шығарасың? (Тек '+judgeCharges+' рет қалды!)', 'judge');
-    return;
-  }
-  if(roleCooldown>0){ showMsg('⏳ Күт! '+roleCooldown+' сек!'); return; }
-  roleCooldown=roleCooldownMax;
-  if(myRole==='Детектив'){ openRoleMenu('🕵️ Кімді тексересің? (Тек саған көрінеді!)', 'check'); }
-  else if(myRole==='Инженер'){ tasksDone=Math.min(3, tasksDone+1); showMsg('🔧 Жөндеді! Задания +1!'); drawFP(); }
-  else if(myRole==='Трекер'){ openRoleMenu('📍 Кімді бақылайсың?', 'track'); }
-  else if(myRole==='Паника'){ panicActive=true; showMsg('😱 ПАНИКА! Бәрінің орны көрінеді!'); setTimeout(()=>{ panicActive=false; drawFP(); },10000); drawFP(); }
-  else if(myRole==='Полиция'){ openRoleMenu('👮 Кімді қамайсың?', 'jail'); }
-  else if(myRole==='Импостер'){ showMsg('😈 Импостер - 🔪 KILL бас!'); roleCooldown=0; }
-}
-function openRoleMenu(title, action){
-  document.getElementById('roleMenuTitle').innerText=title;
-  if(action==='judge'){
-    document.getElementById('judgeWarningInMenu').innerText='⚠️ Есіңде болсын: Дұрыс тапсаң +1 рет, Қате бассаң ӨЗІҢ шығасың! Қалды: '+judgeCharges+' рет!';
-  } else {
-    document.getElementById('judgeWarningInMenu').innerText='';
-  }
-  let list=document.getElementById('roleMenuList');
-  list.innerHTML='';
-  otherPlayers.forEach((p,i)=>{
-    let btn=document.createElement('button');
-    btn.style.background='#1e1e35'; btn.style.border='1px solid #555';
-    let icon=p.gender==='girl'?'👧':'👦';
-    btn.innerText=icon+' '+p.name;
-    btn.onclick=()=>applyRoleAction(action, i);
-    list.appendChild(btn);
-  });
-  document.getElementById('roleMenu').style.display='block';
-}
+function useRoleAbility(){ if(!myRoleObj){ showMsg('🎲 Рөл әлі ашылмады!'); return; } if(myRole==='Судья'){ if(judgeCharges<=0){ showMsg('❌ Судья бітті! 1 рет қолдандың!'); return; } openRoleMenu('⚖️ Кімді шығарасың? (Тек '+judgeCharges+' рет қалды!)', 'judge'); return; } if(roleCooldown>0){ showMsg('⏳ Күт! '+roleCooldown+' сек!'); return; } roleCooldown=roleCooldownMax; if(myRole==='Детектив'){ openRoleMenu('🕵️ Кімді тексересің? (Тек саған көрінеді!)', 'check'); } else if(myRole==='Инженер'){ tasksDone=Math.min(3, tasksDone+1); showMsg('🔧 Жөндеді! Задания +1!'); drawFP(); } else if(myRole==='Трекер'){ openRoleMenu('📍 Кімді бақылайсың?', 'track'); } else if(myRole==='Паника'){ panicActive=true; showMsg('😱 ПАНИКА! Бәрінің орны көрінеді!'); setTimeout(()=>{ panicActive=false; drawFP(); },10000); drawFP(); } else if(myRole==='Полиция'){ openRoleMenu('👮 Кімді қамайсың?', 'jail'); } else if(myRole==='Импостер'){ showMsg('😈 Импостер - 🔪 KILL бас!'); roleCooldown=0; } }
+function openRoleMenu(title, action){ document.getElementById('roleMenuTitle').innerText=title; if(action==='judge'){ document.getElementById('judgeWarningInMenu').innerText='⚠️ Дұрыс тапсаң +1 рет, Қате бассаң ӨЗІҢ шығасың! Қалды: '+judgeCharges+' рет!'; } else { document.getElementById('judgeWarningInMenu').innerText=''; } let list=document.getElementById('roleMenuList'); list.innerHTML=''; otherPlayers.forEach((p,i)=>{ let btn=document.createElement('button'); btn.style.background='#1e1e35'; btn.style.border='1px solid #555'; let icon=p.gender==='girl'?'👧':'👦'; btn.innerText=icon+' '+p.name; btn.onclick=()=>applyRoleAction(action, i); list.appendChild(btn); }); document.getElementById('roleMenu').style.display='block'; }
 function closeRoleMenu(){ document.getElementById('roleMenu').style.display='none'; }
-function applyRoleAction(action, idx){
-  let p=otherPlayers[idx];
-  closeRoleMenu();
-  if(action==='check'){
-    p.revealed=true;
-    if(p.role==='Импостер') { showMsg('🕵️ '+p.name+' - 😈 ИМПОСТЕР!!! Чатта айт!'); }
-    else { showMsg('🕵️ '+p.name+' - Таза'); }
-    alert('🕵️ ҚҰПИЯ (тек саған!):\n'+p.name+' - '+p.role);
-  }
-  else if(action==='track'){ trackedPlayer=p; showMsg('📍 Бақылауда: '+p.name+'!'); }
-  else if(action==='judge'){
-    // СУДЬЯ - растау терезесі!
-    pendingJudgeTarget=p;
-    pendingJudgeIndex=idx;
-    document.getElementById('judgeConfirmText').innerText='⚖️ '+p.name+'-ды шығарасың ба?';
-    document.getElementById('judgeConfirm').style.display='flex';
-  }
-  else if(action==='jail'){ p.jailed=20; showMsg('👮 '+p.name+' 20 сек қамалды!'); let t=setInterval(()=>{ p.jailed--; if(p.jailed<=0){ clearInterval(t); showMsg('👮 '+p.name+' босатылды!'); } drawFP(); },1000); }
-  drawFP();
-}
-function cancelJudge(){
-  document.getElementById('judgeConfirm').style.display='none';
-  pendingJudgeTarget=null; pendingJudgeIndex=-1;
-  showMsg('⚖️ Судья ойланды... Бас тартты!');
-}
-function confirmJudge(){
-  document.getElementById('judgeConfirm').style.display='none';
-  let p=pendingJudgeTarget;
-  let idx=pendingJudgeIndex;
-  if(!p) return;
-  // 1 рет жұмсалды!
-  judgeCharges--;
-  updateJudgeUI();
-  // Тексеру: Импостер па?
-  if(p.role==='Импостер'){
-    // ✅ ДҰРЫС ТАПТЫ!
-    judgeCharges++; // +1 рет қайта беріледі!
-    updateJudgeUI();
-    otherPlayers.splice(idx,1);
-    showMsg('✅ ДҰРЫС! '+p.name+' - 😈 ИМПОСТЕР! +1 рет алдың!');
-    addChat('СИСТЕМА', '✅ СУДЬЯ ДҰРЫС ТАПТЫ! '+p.name+' - ИМПОСТЕР! Судья +1 рет алды!', false, true);
-    // Импостерлер қалды ма?
-    let impostersLeft=otherPlayers.filter(x=>x.role==='Импостер').length;
-    if(impostersLeft===0){
-      // БАРЛЫҚ ИМПОСТЕР ШЫҚТЫ - КОМАНДА ЖЕҢДІ!
-      setTimeout(()=>{
-        showWin('🎉 КОМАНДА ЖЕҢДІ!', '⚖️ Судья дұрыс тапты!\n'+p.name+' - Импостер болды!\nБарлық Импостер шықты!\nКоманда жеңді! Судья - герой!');
-      },1000);
-    } else {
-      setTimeout(()=>{ alert('✅ СУДЬЯ ДҰРЫС ТАПТЫ!\n\n'+p.name+' - 😈 ИМПОСТЕР!\n\nСудья +1 рет алды! Енді '+judgeCharges+' рет қалды!\nҚалған Импостер: '+impostersLeft); },500);
-    }
-  } else {
-    // ❌ ҚАТЕ БАСТЫ - СУДЬЯ ӨЗІ ШЫҒАДЫ!
-    showMsg('❌ ҚАТЕ! '+p.name+' бейкүнә еді! Судья өзі шығады!');
-    addChat('СИСТЕМА', '❌ СУДЬЯ ҚАТЕ БАСТЫ! '+p.name+' бейкүнә еді! Судья өзі шығады!', false, true);
-    // Бейкүнә адам да шығады + Судья өзі шығады!
-    otherPlayers.splice(idx,1);
-    setTimeout(()=>{
-      alert('❌ СУДЬЯ ҚАТЕ БАСТЫ!\n\n'+p.name+' бейкүнә еді! ('+p.role+')\n\n⚖️ Ереже бойынша СУДЬЯНЫҢ ӨЗІ ойыннан шығады!\n\nСен ойыннан шықтың!');
-      judgeEliminated();
-    },500);
-  }
-  pendingJudgeTarget=null; pendingJudgeIndex=-1;
-  drawFP();
-}
-function updateJudgeUI(){
-  if(myRole==='Судья'){
-    document.getElementById('judgeCharges').innerText=judgeCharges+' рет қалды';
-    let badge=document.getElementById('roleBadge');
-    if(badge) badge.innerText=judgeCharges;
-    if(judgeCharges<=0){
-      document.getElementById('roleBtn').classList.add('disabled');
-      document.getElementById('roleAbilityText').innerText='❌ Судья қабілеті бітті!';
-    } else {
-      document.getElementById('roleBtn').classList.remove('disabled');
-      document.getElementById('roleAbilityText').innerText='⚖️ Судья: '+judgeCharges+' рет қалды! Ойланып бас!';
-    }
-  }
-}
-function judgeEliminated(){
-  gameOver=true;
-  document.getElementById('jumpscareText').innerText='⚖️ СУДЬЯ ҚАТЕ БАСТЫ!\nСЕН ОЙЫННАН ШЫҚТЫҢ!';
-  document.getElementById('jumpscare').style.display='flex';
-}
-function showWin(emojiTitle, text){
-  gameOver=true;
-  document.getElementById('winEmoji').innerText='🎉';
-  document.getElementById('winTitle').innerText=emojiTitle;
-  document.getElementById('winText').innerText=text;
-  document.getElementById('winScreen').style.display='flex';
-}
-function callMeeting(){
-  if(gameOver) return;
-  if(meetingLeft<=0){ showMsg('❌ Жиналыс бітті!'); return; }
-  if(meetingCooldown>0){ showMsg('⏳ Күт! '+meetingCooldown+' сек!'); return; }
-  let room=getRoom();
-  if(!room.name.includes('Столовая')){ showMsg('❌ Жиналыс тек СТОЛОВАЯДА!'); document.getElementById('meetingBanner').style.display='block'; setTimeout(()=>{ document.getElementById('meetingBanner').style.display='none'; },2000); return; }
-  meetingLeft--; meetingCooldown=meetingCooldownMax; updateMeetingUI(); inMeeting=true;
-  if(isRevealed){ isRevealed=false; }
-  showMsg('🔔 ЖИНАЛЫС! ('+(3-meetingLeft)+'/3)');
-  px=400; py=115;
-  if(otherPlayers[0]){ otherPlayers[0].x=350; otherPlayers[0].y=110; }
-  if(otherPlayers[1]){ otherPlayers[1].x=450; otherPlayers[1].y=110; }
-  if(otherPlayers[2]){ otherPlayers[2].x=400; otherPlayers[2].y=140; }
-  drawFP();
-  setTimeout(()=>{ openVote('🍽️ Столоваяда жиналыс! ('+(3-meetingLeft)+'/3)'); inMeeting=false; },800);
-}
+function applyRoleAction(action, idx){ let p=otherPlayers[idx]; closeRoleMenu(); if(action==='check'){ p.revealed=true; if(p.role==='Импостер') { showMsg('🕵️ '+p.name+' - 😈 ИМПОСТЕР!!! Чатта айт!'); } else { showMsg('🕵️ '+p.name+' - Таза'); } alert('🕵️ ҚҰПИЯ (тек саған!):\n'+p.name+' - '+p.role); } else if(action==='track'){ trackedPlayer=p; showMsg('📍 Бақылауда: '+p.name+'!'); } else if(action==='judge'){ pendingJudgeTarget=p; pendingJudgeIndex=idx; document.getElementById('judgeConfirmText').innerText='⚖️ '+p.name+'-ды шығарасың ба?'; document.getElementById('judgeConfirm').style.display='flex'; } else if(action==='jail'){ p.jailed=20; showMsg('👮 '+p.name+' 20 сек қамалды!'); let t=setInterval(()=>{ p.jailed--; if(p.jailed<=0){ clearInterval(t); showMsg('👮 '+p.name+' босатылды!'); } drawFP(); },1000); } drawFP(); }
+function cancelJudge(){ document.getElementById('judgeConfirm').style.display='none'; pendingJudgeTarget=null; pendingJudgeIndex=-1; showMsg('⚖️ Судья ойланды... Бас тартты!'); }
+function confirmJudge(){ document.getElementById('judgeConfirm').style.display='none'; let p=pendingJudgeTarget; let idx=pendingJudgeIndex; if(!p) return; judgeCharges--; updateJudgeUI(); if(p.role==='Импостер'){ judgeCharges++; updateJudgeUI(); otherPlayers.splice(idx,1); showMsg('✅ ДҰРЫС! '+p.name+' - 😈 ИМПОСТЕР! +1 рет!'); addChat('СИСТЕМА', '✅ СУДЬЯ ДҰРЫС ТАПТЫ! '+p.name+' - ИМПОСТЕР! +1 рет!', false, true); if(onlineMode) roomRef().child('events').push({type:'judge', name:getName(), from:myId}); let impostersLeft=otherPlayers.filter(x=>x.role==='Импостер').length; if(impostersLeft===0){ setTimeout(()=>{ showWin('🎉 КОМАНДА ЖЕҢДІ!', '⚖️ Судья дұрыс тапты!\n'+p.name+' - Импостер!\nБарлық Импостер шықты!'); },1000); } else { setTimeout(()=>{ alert('✅ СУДЬЯ ДҰРЫС ТАПТЫ!\n\n'+p.name+' - 😈 ИМПОСТЕР!\n\n+1 рет! Енді '+judgeCharges+' рет!\nҚалған Импостер: '+impostersLeft); },500); } } else { showMsg('❌ ҚАТЕ! '+p.name+' бейкүнә! Судья өзі шығады!'); addChat('СИСТЕМА', '❌ СУДЬЯ ҚАТЕ БАСТЫ! '+p.name+' бейкүнә! Судья өзі шығады!', false, true); otherPlayers.splice(idx,1); setTimeout(()=>{ alert('❌ СУДЬЯ ҚАТЕ БАСТЫ!\n\n'+p.name+' бейкүнә еді! ('+p.role+')\n\n⚖️ Судья ӨЗІ шығады!'); judgeEliminated(); },500); } pendingJudgeTarget=null; pendingJudgeIndex=-1; drawFP(); }
+function updateJudgeUI(){ if(myRole==='Судья'){ document.getElementById('judgeCharges').innerText=judgeCharges+' рет қалды'; let badge=document.getElementById('roleBadge'); if(badge) badge.innerText=judgeCharges; if(judgeCharges<=0){ document.getElementById('roleBtn').classList.add('disabled'); document.getElementById('roleAbilityText').innerText='❌ Судья бітті!'; } else { document.getElementById('roleBtn').classList.remove('disabled'); document.getElementById('roleAbilityText').innerText='⚖️ Судья: '+judgeCharges+' рет қалды!'; } } }
+function judgeEliminated(){ gameOver=true; document.getElementById('jumpscareText').innerText='⚖️ СУДЬЯ ҚАТЕ БАСТЫ!\nСЕН ОЙЫННАН ШЫҚТЫҢ!'; document.getElementById('jumpscare').style.display='flex'; }
+function showWin(emojiTitle, text){ gameOver=true; document.getElementById('winEmoji').innerText='🎉'; document.getElementById('winTitle').innerText=emojiTitle; document.getElementById('winText').innerText=text; document.getElementById('winScreen').style.display='flex'; }
+function callMeeting(){ if(gameOver) return; if(meetingLeft<=0){ showMsg('❌ Жиналыс бітті!'); return; } if(meetingCooldown>0){ showMsg('⏳ Күт! '+meetingCooldown+' сек!'); return; } let room=getRoom(); if(!room.name.includes('Столовая')){ showMsg('❌ Жиналыс тек СТОЛОВАЯДА!'); document.getElementById('meetingBanner').style.display='block'; setTimeout(()=>{ document.getElementById('meetingBanner').style.display='none'; },2000); return; } meetingLeft--; meetingCooldown=meetingCooldownMax; updateMeetingUI(); inMeeting=true; if(isRevealed){ isRevealed=false; } showMsg('🔔 ЖИНАЛЫС! ('+(3-meetingLeft)+'/3)'); px=400; py=115; if(otherPlayers[0]){ otherPlayers[0].x=350; otherPlayers[0].y=110; } if(otherPlayers[1]){ otherPlayers[1].x=450; otherPlayers[1].y=110; } if(otherPlayers[2]){ otherPlayers[2].x=400; otherPlayers[2].y=140; } drawFP(); setTimeout(()=>{ openVote('🍽️ Столоваяда жиналыс! ('+(3-meetingLeft)+'/3)'); inMeeting=false; },800); }
 function report(){ showMsg('📢 REPORT!'); openVote('📢 Мәйіт табылды! Чатта талқылаңдар!'); }
-function hideFromMonster(){ monsterX=620; monsterY=420; showMsg('🙈 Жасырындың!'); flash=false; updateLampBtn(); drawFP(); }
 function runAway(){ px=150; py=115; showMsg('🏃 Каютаға қаштың!'); drawFP(); }
-function monsterMove(){
-  if(!monsterActive || gameOver) return;
-  if(monsterX>px) monsterX-=30; else if(monsterX<px) monsterX+=30;
-  if(monsterY>py) monsterY-=30; else if(monsterY<py) monsterY+=30;
-  let dist=Math.abs(monsterX-px)+Math.abs(monsterY-py);
-  if(dist<60) loseLife(); else if(dist<150) showMsg('👹 ОЛ ЖАҚЫН! ҚАШ!');
-  drawFP();
-}
-function loseLife(){
-  lives--;
-  if(lives<=0){ document.getElementById('jumpscare').style.display='flex'; }
-  else { showMsg('👹 Монстр ұстады! -1 өмір!'); monsterX=620; monsterY=420; }
-  drawFP();
-}
+function monsterMove(){ if(!monsterActive || gameOver) return; if(monsterX>px) monsterX-=30; else if(monsterX<px) monsterX+=30; if(monsterY>py) monsterY-=30; else if(monsterY<py) monsterY+=30; let dist=Math.abs(monsterX-px)+Math.abs(monsterY-py); if(dist<60) loseLife(); else if(dist<150) showMsg('👹 ОЛ ЖАҚЫН! ҚАШ!'); drawFP(); }
+function loseLife(){ lives--; if(lives<=0){ document.getElementById('jumpscare').style.display='flex'; } else { showMsg('👹 Монстр ұстады! -1 өмір!'); monsterX=620; monsterY=420; } drawFP(); }
 function openSkin(){ document.getElementById('skinMenu').style.display='block'; }
 function closeSkin(){ document.getElementById('skinMenu').style.display='none'; }
 function changeGender(g){ myGender=g; updateCharPreview(); showMsg(g==='girl'?'👧 Қыз - Юбка!':'👦 Ұл - Шалбар!'); drawFP(); }
-function selectSkin(el, hex, name){
-  document.querySelectorAll('.skin').forEach(s=>s.classList.remove('selected'));
-  el.classList.add('selected'); selectedColorHex=hex; selectedName=name;
-  document.getElementById('mySkinName').innerText='Киім: '+name;
-}
-function shapeshift(){ myColorHex=selectedColorHex; shapeshiftActive=true; showMsg('👕 Киім ауыстырдың: '+selectedName+'!'); closeSkin(); drawFP(); }
+function selectSkin(el, hex, name){ document.querySelectorAll('#skinMenu .skin').forEach(s=>s.classList.remove('selected')); el.classList.add('selected'); selectedColorHex=hex; selectedName=name; document.getElementById('mySkinName').innerText='Киім: '+name; }
+function selectVneshka(el, emoji){ document.querySelectorAll('#skinMenu .skin').forEach(s=>s.classList.remove('selected')); el.classList.add('selected'); selectedVneshka=emoji; document.getElementById('myVneshkaName').innerText='Внешка: '+emoji; }
+function shapeshift(){ if(selectedVneshka){ shapeshiftActive=true; showMsg('😈 Внешка ауыстырдың: '+selectedVneshka+'! Түнде ешкім байқамады!'); if(onlineMode) roomRef().child('events').push({type:'shape', name:getName(), skin:selectedVneshka, from:myId}); } else { myColorHex=selectedColorHex; showMsg('👕 Киім ауыстырдың: '+selectedName+'!'); } closeSkin(); drawFP(); }
 let voteTimerInt=null, voteTimeLeft=120;
-function openVote(reason){
-  if(reason) document.getElementById('voteReason').innerText=reason;
-  document.getElementById('voteScreen').style.display='flex';
-  document.getElementById('chatBox').innerHTML='';
-  votes={};
-  addChat('СИСТЕМА', '🔔 Жиналыс басталды! 2 минут бар!', false, false);
-  addChat('СИСТЕМА', '⏭️ Скип көп болса - ешкім шықпайды! ⚖️ Судья 1 рет, қате басса өзі шығады!', false, false);
-  let list=document.getElementById('voteList'); list.innerHTML='';
-  let players=[...otherPlayers.map(p=>({name:p.name, gender:p.gender})), {name:'СЕН', gender:myGender}];
-  players.forEach(p=>{
-    let div=document.createElement('div'); div.className='voteCard'; div.id='vote-'+p.name;
-    let icon=p.gender==='girl'?'👧':p.gender==='boy'?'👦':'⏭️';
-    div.innerHTML=`<span>${icon} ${p.name} <b id="count-${p.name}">0 дауыс</b></span><button onclick="voteFor('${p.name}')">Дауыс</button>`;
-    list.appendChild(div);
-  });
-  let skipDiv=document.createElement('div'); skipDiv.className='voteCard skipCard'; skipDiv.id='vote-Өткізу ⏭️';
-  skipDiv.innerHTML=`<span>⏭️ СКИП - Ешкімді шығармау <b id="count-Өткізу ⏭️">0 дауыс</b></span><button style="background:#eccc68;color:black" onclick="voteFor('Өткізу ⏭️')">СКИП</button>`;
-  list.appendChild(skipDiv);
-  voteTimeLeft=120;
-  clearInterval(voteTimerInt);
-  updateVoteTimerUI();
-  voteTimerInt=setInterval(()=>{ voteTimeLeft--; updateVoteTimerUI(); if(voteTimeLeft<=0){ clearInterval(voteTimerInt); finishVote(); } },1000);
-}
-function updateVoteTimerUI(){
-  let min=Math.floor(voteTimeLeft/60);
-  let sec=voteTimeLeft%60;
-  let secStr=sec<10?'0'+sec:sec;
-  document.getElementById('voteTimerBig').innerText='⏳ '+min+':'+secStr;
-  document.getElementById('voteTimer').innerText=voteTimeLeft;
-  document.getElementById('voteFill').style.width=(voteTimeLeft/120*100)+'%';
-  if(voteTimeLeft<=10) document.getElementById('voteFill').style.background='red';
-  else document.getElementById('voteFill').style.background='#eccc68';
-}
-function voteFor(name){
-  if(votes['СЕН']){ alert('Сен уже дауыс бердің!'); return; }
-  votes['СЕН']=name;
-  let voteCount=myRole==='Судья'?2:1;
-  let el=document.getElementById('count-'+name);
-  if(el){ let cur=parseInt(el.innerText)||0; el.innerText=(cur+voteCount)+' дауыс'+(myRole==='Судья'?' (Судья 2 дауыс!)':''); }
-  let card=document.getElementById('vote-'+name);
-  if(card) card.classList.add('voted');
-  if(name==='Өткізу ⏭️'){ addChat('СЕН', 'Мен СКИП бастым!', true, myRole==='Судья'); }
-  else { addChat('СЕН', 'Мен '+name+'-ға дауыс бердім!'+(myRole==='Судья'?' (2 дауыс!)':''), true, myRole==='Судья'); }
-  otherPlayers.forEach((p,i)=>{
-    setTimeout(()=>{
-      let targets=[...otherPlayers.map(x=>x.name), 'СЕН', 'Өткізу ⏭️'];
-      let t=targets[Math.floor(Math.random()*targets.length)];
-      let el2=document.getElementById('count-'+t);
-      if(el2){ let c=parseInt(el2.innerText)||0; el2.innerText=(c+1)+' дауыс'; }
-      addChat(p.name, t==='Өткізу ⏭️'?'Мен СКИП бастым!':'Мен '+t+'-ға дауыс бердім!', false, false);
-    }, 800*(i+1));
-  });
-}
-function finishVote(){
-  let max=-1, winner=null, tie=false;
-  document.querySelectorAll('[id^="count-"]').forEach(el=>{
-    let v=parseInt(el.innerText)||0;
-    let name=el.id.replace('count-','');
-    if(v>max){ max=v; winner=name; tie=false; }
-    else if(v===max && v>0){ tie=true; }
-  });
-  if(winner==='Өткізу ⏭️'){ addChat('СИСТЕМА', '⏭️ СКИП жеңді! ЕШКІМ шықпайды!', false, false); alert('⏭️ СКИП ЖЕҢДІ!\nЕШКІМ шықпайды!'); closeVote(); return; }
-  if(tie || !winner || max===0){
-    if(myRole==='Судья' && judgeCharges>0){
-      document.getElementById('voteScreen').style.display='none';
-      clearInterval(voteTimerInt);
-      openJudgeDecision();
-      return;
-    } else {
-      let judgeExists=otherPlayers.some(p=>p.role==='Судья');
-      if(judgeExists){
-        addChat('СИСТЕМА', '🤝 Дауыс тең! ⚖️ Судья шешеді...', false, true);
-        setTimeout(()=>{
-          let all=[...otherPlayers.map(p=>p.name), 'СЕН'];
-          let chosen=all[Math.floor(Math.random()*all.length)];
-          if(chosen==='СЕН'){ alert('⚖️ СУДЬЯ СЕНІ шығарды!'); document.getElementById('jumpscare').style.display='flex'; }
-          else { alert('⚖️ СУДЬЯ '+chosen+'-ды шығарды!'); otherPlayers=otherPlayers.filter(p=>p.name!==chosen); }
-          closeVote();
-        },1000);
-        return;
-      } else {
-        addChat('СИСТЕМА', '🤝 Дауыс тең! ЕШКІМ шықпайды!', false, false);
-        alert('🤝 ДАУЫС ТЕҢ!\nЕШКІМ шықпайды!'); closeVote(); return;
-      }
-    }
-  }
-  // Кәдімгі дауыс - шығарылған адамның рөлі құпия, бірақ егер Импостер болса команда жеңеді!
-  let removed=otherPlayers.find(p=>p.name===winner);
-  let wasImposter=removed && removed.role==='Импостер';
-  addChat('СИСТЕМА', '🗳️ '+winner+' шығарылды! Рөлі құпия!', false, false);
-  alert('🗳️ '+winner+' шығарылды!\nРөлі құпия!');
-  otherPlayers=otherPlayers.filter(p=>p.name!==winner);
-  if(wasImposter){
-    let left=otherPlayers.filter(p=>p.role==='Импостер').length;
-    if(left===0){ setTimeout(()=>{ showWin('🎉 КОМАНДА ЖЕҢДІ!', 'Импостер шығарылды!\nБарлық Импостер жоқ!\nКоманда жеңді!'); },500); }
-  }
-  closeVote();
-}
-function openJudgeDecision(){
-  document.getElementById('judgePopup').style.display='flex';
-  let list=document.getElementById('judgeChoiceList');
-  list.innerHTML='';
-  [...otherPlayers.map(p=>p.name), 'СЕН'].forEach(name=>{
-    let btn=document.createElement('button');
-    btn.style.background='#eccc68'; btn.style.color='black';
-    btn.innerText='⚖️ '+name+'-ды шығару (Қалды: '+judgeCharges+')';
-    btn.onclick=()=>judgeDecideFromVote(name);
-    list.appendChild(btn);
-  });
-}
-function judgeDecideFromVote(name){
-  document.getElementById('judgePopup').style.display='none';
-  if(name==='СЕН'){ alert('⚖️ Сен өзіңді шығардың!'); document.getElementById('jumpscare').style.display='flex'; return; }
-  let p=otherPlayers.find(x=>x.name===name);
-  if(!p) return;
-  pendingJudgeTarget=p;
-  pendingJudgeIndex=otherPlayers.indexOf(p);
-  document.getElementById('judgeConfirmText').innerText='⚖️ '+p.name+'-ды шығарасың ба?';
-  document.getElementById('judgeConfirm').style.display='flex';
-}
-function judgeSkip(){
-  document.getElementById('judgePopup').style.display='none';
-  alert('⚖️ СУДЬЯ ШЕШІМІ: СКИП!\nЕШКІМ шықпайды!');
-  closeVote();
-}
-function closeVote(){
-  clearInterval(voteTimerInt);
-  document.getElementById('voteScreen').style.display='none';
-  document.getElementById('judgePopup').style.display='none';
-  if(myRole==='Импостер'){ killTimer=30; }
-  drawFP();
-}
+function openVote(reason){ if(reason) document.getElementById('voteReason').innerText=reason; document.getElementById('voteScreen').style.display='flex'; document.getElementById('chatBox').innerHTML=''; votes={}; addChat('СИСТЕМА', '🔔 Жиналыс басталды! 2 минут!', false, false); let list=document.getElementById('voteList'); list.innerHTML=''; let players=[...otherPlayers.map(p=>({name:p.name, gender:p.gender})), {name:'СЕН', gender:myGender}]; players.forEach(p=>{ let div=document.createElement('div'); div.className='voteCard'; div.id='vote-'+p.name; let icon=p.gender==='girl'?'👧':p.gender==='boy'?'👦':'⏭️'; div.innerHTML=`<span>${icon} ${p.name} <b id="count-${p.name}">0 дауыс</b></span><button onclick="voteFor('${p.name}')">Дауыс</button>`; list.appendChild(div); }); let skipDiv=document.createElement('div'); skipDiv.className='voteCard skipCard'; skipDiv.id='vote-Өткізу ⏭️'; skipDiv.innerHTML=`<span>⏭️ СКИП <b id="count-Өткізу ⏭️">0 дауыс</b></span><button style="background:#eccc68;color:black" onclick="voteFor('Өткізу ⏭️')">СКИП</button>`; list.appendChild(skipDiv); voteTimeLeft=120; clearInterval(voteTimerInt); updateVoteTimerUI(); voteTimerInt=setInterval(()=>{ voteTimeLeft--; updateVoteTimerUI(); if(voteTimeLeft<=0){ clearInterval(voteTimerInt); finishVote(); } },1000); }
+function updateVoteTimerUI(){ let min=Math.floor(voteTimeLeft/60); let sec=voteTimeLeft%60; let secStr=sec<10?'0'+sec:sec; document.getElementById('voteTimerBig').innerText='⏳ '+min+':'+secStr; document.getElementById('voteTimer').innerText=voteTimeLeft; document.getElementById('voteFill').style.width=(voteTimeLeft/120*100)+'%'; if(voteTimeLeft<=10) document.getElementById('voteFill').style.background='red'; else document.getElementById('voteFill').style.background='#eccc68'; }
+function voteFor(name){ if(votes['СЕН']){ alert('Сен уже дауыс бердің!'); return; } votes['СЕН']=name; let voteCount=myRole==='Судья'?2:1; let el=document.getElementById('count-'+name); if(el){ let cur=parseInt(el.innerText)||0; el.innerText=(cur+voteCount)+' дауыс'+(myRole==='Судья'?' (Судья 2 дауыс!)':''); } let card=document.getElementById('vote-'+name); if(card) card.classList.add('voted'); if(name==='Өткізу ⏭️'){ addChat('СЕН', 'Мен СКИП бастым!', true, myRole==='Судья'); } else { addChat('СЕН', 'Мен '+name+'-ға дауыс бердім!'+(myRole==='Судья'?' (2 дауыс!)':''), true, myRole==='Судья'); } if(onlineMode) roomRef().child('chat').push({name:getName(), text:'Мен '+name+'-ға дауыс бердім!', from:myId}); if(!onlineMode){ otherPlayers.forEach((p,i)=>{ setTimeout(()=>{ let targets=[...otherPlayers.map(x=>x.name), 'СЕН', 'Өткізу ⏭️']; let t=targets[Math.floor(Math.random()*targets.length)]; let el2=document.getElementById('count-'+t); if(el2){ let c=parseInt(el2.innerText)||0; el2.innerText=(c+1)+' дауыс'; } addChat(p.name, t==='Өткізу ⏭️'?'Мен СКИП бастым!':'Мен '+t+'-ға дауыс бердім!', false, false); }, 800*(i+1)); }); } }
+function finishVote(){ let max=-1, winner=null, tie=false; document.querySelectorAll('[id^="count-"]').forEach(el=>{ let v=parseInt(el.innerText)||0; let name=el.id.replace('count-',''); if(v>max){ max=v; winner=name; tie=false; } else if(v===max && v>0){ tie=true; } }); if(winner==='Өткізу ⏭️'){ addChat('СИСТЕМА', '⏭️ СКИП жеңді! ЕШКІМ шықпайды!', false, false); alert('⏭️ СКИП ЖЕҢДІ!\nЕШКІМ шықпайды!'); closeVote(); return; } if(tie || !winner || max===0){ if(myRole==='Судья' && judgeCharges>0){ document.getElementById('voteScreen').style.display='none'; clearInterval(voteTimerInt); openJudgeDecision(); return; } else { let judgeExists=otherPlayers.some(p=>p.role==='Судья'); if(judgeExists){ addChat('СИСТЕМА', '🤝 Дауыс тең! ⚖️ Судья шешеді...', false, true); setTimeout(()=>{ let all=[...otherPlayers.map(p=>p.name), 'СЕН']; let chosen=all[Math.floor(Math.random()*all.length)]; if(chosen==='СЕН'){ alert('⚖️ СУДЬЯ СЕНІ шығарды!'); document.getElementById('jumpscare').style.display='flex'; } else { alert('⚖️ СУДЬЯ '+chosen+'-ды шығарды!'); otherPlayers=otherPlayers.filter(p=>p.name!==chosen); } closeVote(); },1000); return; } else { addChat('СИСТЕМА', '🤝 Дауыс тең! ЕШКІМ шықпайды!', false, false); alert('🤝 ДАУЫС ТЕҢ!\nЕШКІМ шықпайды!'); closeVote(); return; } } } let removed=otherPlayers.find(p=>p.name===winner); let wasImposter=removed && removed.role==='Импостер'; addChat('СИСТЕМА', '🗳️ '+winner+' шығарылды! Рөлі құпия!', false, false); alert('🗳️ '+winner+' шығарылды!\nРөлі құпия!'); otherPlayers=otherPlayers.filter(p=>p.name!==winner); if(wasImposter){ let left=otherPlayers.filter(p=>p.role==='Импостер').length; if(left===0){ setTimeout(()=>{ showWin('🎉 КОМАНДА ЖЕҢДІ!', 'Импостер шығарылды!\nБарлық Импостер жоқ!\nКоманда жеңді!'); },500); } } closeVote(); }
+function openJudgeDecision(){ document.getElementById('judgePopup').style.display='flex'; let list=document.getElementById('judgeChoiceList'); list.innerHTML=''; [...otherPlayers.map(p=>p.name), 'СЕН'].forEach(name=>{ let btn=document.createElement('button'); btn.style.background='#eccc68'; btn.style.color='black'; btn.innerText='⚖️ '+name+'-ды шығару (Қалды: '+judgeCharges+')'; btn.onclick=()=>judgeDecideFromVote(name); list.appendChild(btn); }); }
+function judgeDecideFromVote(name){ document.getElementById('judgePopup').style.display='none'; if(name==='СЕН'){ alert('⚖️ Сен өзіңді шығардың!'); document.getElementById('jumpscare').style.display='flex'; return; } let p=otherPlayers.find(x=>x.name===name); if(!p) return; pendingJudgeTarget=p; pendingJudgeIndex=otherPlayers.indexOf(p); document.getElementById('judgeConfirmText').innerText='⚖️ '+p.name+'-ды шығарасың ба?'; document.getElementById('judgeConfirm').style.display='flex'; }
+function judgeSkip(){ document.getElementById('judgePopup').style.display='none'; alert('⚖️ СУДЬЯ: СКИП!\nЕШКІМ шықпайды!'); closeVote(); }
+function closeVote(){ clearInterval(voteTimerInt); document.getElementById('voteScreen').style.display='none'; document.getElementById('judgePopup').style.display='none'; if(myRole==='Импостер'){ killTimer=killTimerMax; } drawFP(); }
 document.getElementById('chatInput').addEventListener('keydown', e=>{ if(e.key==='Enter') sendChat(); });
 </script>
 </body>
-                                                                 </html>
+  </html>
