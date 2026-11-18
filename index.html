@@ -1,225 +1,1155 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <title>ЛАПОЧКА — Horror Online</title>
+
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#08090d;color:#f4f4f4;font-family:Arial,sans-serif}
+html,body{
+ margin:0;width:100%;height:100%;overflow:hidden;
+ background:#08090d;color:white;font-family:Arial,sans-serif
+}
 button,input{font:inherit}
+button{cursor:pointer}
 #game{position:fixed;inset:0}
-#menu{position:fixed;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;padding:18px;background:radial-gradient(circle at 50% 30%,#29202b 0,#101116 45%,#050609 100%)}
-.panel{width:min(440px,100%);padding:25px;border:1px solid #59404b;border-radius:18px;background:#101116ed;box-shadow:0 18px 70px #000b}
-h1{margin:0 0 6px;text-align:center;letter-spacing:4px;color:#ff657e;font-size:32px}
-.sub{text-align:center;color:#aaa;margin:0 0 22px;font-size:13px}
-input{width:100%;padding:14px;margin:7px 0;border:1px solid #444;background:#090a0e;color:white;border-radius:10px;outline:none}
+#menu{
+ position:fixed;inset:0;z-index:5;
+ display:flex;align-items:center;justify-content:center;
+ padding:18px;
+ background:radial-gradient(circle at 50% 30%,#29202b,#101116 55%,#050609)
+}
+.panel{
+ width:min(440px,100%);padding:25px;
+ border:1px solid #59404b;border-radius:20px;
+ background:#101116ed;box-shadow:0 18px 70px #000b
+}
+h1{
+ margin:0 0 6px;text-align:center;
+ letter-spacing:4px;color:#ff657e;font-size:34px
+}
+.sub{text-align:center;color:#aaa;margin-bottom:22px}
+input{
+ width:100%;padding:15px;margin:7px 0;
+ border:1px solid #444;background:#090a0e;
+ color:white;border-radius:11px;outline:none
+}
 input:focus{border-color:#ff657e}
-button{width:100%;padding:14px;margin:7px 0;border:0;border-radius:10px;background:#a52c4b;color:white;font-weight:bold;cursor:pointer}
-button.secondary{background:#292b34;color:#eee}
-button:disabled{opacity:.45}
-#status{min-height:20px;color:#ff9aaa;text-align:center;font-size:13px;margin-top:8px}
-#hud{position:fixed;z-index:2;inset:0;pointer-events:none;display:none}
-#roomLabel{position:absolute;top:14px;left:14px;padding:9px 12px;background:#0009;border-radius:9px;font-size:13px}
-#role{position:absolute;top:14px;right:14px;padding:9px 12px;background:#0009;border-radius:9px}
-#hint{position:absolute;left:50%;top:58px;transform:translateX(-50%);font-size:12px;color:#ddd;background:#0008;padding:8px 12px;border-radius:8px;white-space:nowrap}
-#joystick{position:absolute;left:22px;bottom:25px;width:120px;height:120px;border-radius:50%;background:#ffffff18;border:2px solid #ffffff55;pointer-events:auto;touch-action:none}
-#stick{position:absolute;width:48px;height:48px;left:34px;top:34px;border-radius:50%;background:#ff657eaa;border:2px solid #fff8}
-#look{position:absolute;right:0;bottom:0;width:58%;height:68%;pointer-events:auto;touch-action:none}
-#flash{position:absolute;right:20px;bottom:28px;width:62px;height:62px;border-radius:50%;pointer-events:auto;background:#e6dba8;color:#222}
-#exit{position:absolute;right:20px;top:65px;width:auto;padding:9px 13px;pointer-events:auto;background:#333}
-#crosshair{position:absolute;left:50%;top:50%;width:5px;height:5px;border-radius:50%;background:#fff;box-shadow:0 0 5px #fff}
-@media(min-width:700px){#joystick{width:140px;height:140px}#stick{left:44px;top:44px}}
+button{
+ width:100%;padding:15px;margin:7px 0;
+ border:0;border-radius:11px;
+ background:#a52c4b;color:white;font-weight:bold
+}
+.secondary{background:#292b34;color:white}
+#status{
+ min-height:22px;margin-top:10px;
+ text-align:center;color:#ff9aaa;font-size:13px;
+ overflow-wrap:anywhere
+}
+#hud{
+ position:fixed;inset:0;z-index:2;
+ display:none;pointer-events:none
+}
+#roomLabel,#role,#hint,#hudStatus{
+ position:absolute;background:#0009;
+ border-radius:9px;padding:9px 12px;font-size:12px
+}
+#roomLabel{top:12px;left:10px}
+#role{top:12px;right:10px}
+#hint{top:58px;left:50%;transform:translateX(-50%);white-space:nowrap}
+#hudStatus{top:95px;left:50%;transform:translateX(-50%);color:#ff9aaa}
+#look{
+ position:absolute;right:0;bottom:0;width:58%;height:68%;
+ pointer-events:auto;touch-action:none;z-index:1
+}
+#joystick{
+ position:absolute;left:22px;bottom:25px;
+ width:120px;height:120px;border-radius:50%;
+ background:#ffffff18;border:2px solid #ffffff55;
+ pointer-events:auto;touch-action:none;z-index:3
+}
+#stick{
+ position:absolute;width:48px;height:48px;
+ left:34px;top:34px;border-radius:50%;
+ background:#ff657eaa;border:2px solid #fff8
+}
+#flash{
+ position:absolute;right:20px;bottom:28px;
+ width:65px;height:65px;border-radius:50%;
+ background:#e6dba8;color:#222;
+ pointer-events:auto;z-index:4
+}
+#exit{
+ position:absolute;right:20px;top:65px;width:auto;
+ padding:10px 15px;background:#333;
+ pointer-events:auto;z-index:4
+}
+#crosshair{
+ position:absolute;left:50%;top:50%;
+ width:5px;height:5px;border-radius:50%;
+ background:white;box-shadow:0 0 5px white
+}
+#startGame{
+ position:absolute;top:135px;left:50%;
+ transform:translateX(-50%);
+ width:auto;padding:13px 20px;
+ pointer-events:auto;z-index:5
+}
+@media(max-height:650px){
+ .panel{padding:16px}
+ h1{font-size:27px}
+ input,button{padding:11px}
+}
 </style>
 </head>
+
 <body>
+
 <div id="game"></div>
+
 <div id="menu">
  <div class="panel">
-  <h1>ЛАПОЧКА</h1><p class="sub">HORROR ONLINE · TEST BUILD</p>
-  <input id="nick" maxlength="16" placeholder="Твой ник" autocomplete="off">
+  <h1>ЛАПОЧКА</h1>
+  <p class="sub">HORROR ONLINE · TEST BUILD</p>
+
+  <input id="nick" maxlength="16" placeholder="Твой ник">
+
   <button id="create">Создать комнату</button>
-  <input id="roomCode" maxlength="6" placeholder="Код комнаты">
-  <button id="join" class="secondary">Войти в комнату</button>
-  <div id="status">Подключение к Firebase…</div>
+
+  <input id="roomCode" maxlength="6"
+  placeholder="Код комнаты">
+
+  <button id="join" class="secondary">
+   Войти в комнату
+  </button>
+
+  <div id="status">Подключение...</div>
  </div>
 </div>
+
 <div id="hud">
- <div id="roomLabel">Комната: —</div><div id="role">Ожидание</div>
- <div id="hint">Левый джойстик — движение · Правая часть экрана — обзор</div>
- <button id="exit">Выйти</button><div id="crosshair"></div>
- <div id="joystick"><div id="stick"></div></div>
- <button id="flash">СВЕТ</button><div id="look"></div>
+
+ <div id="roomLabel">Комната: —</div>
+ <div id="role">Ожидание</div>
+
+ <div id="hint">
+  Джойстик — движение · Правая сторона — обзор
+ </div>
+
+ <div id="hudStatus">Онлайн</div>
+
+ <button id="exit">Выйти</button>
+
+ <div id="crosshair"></div>
+
+ <div id="joystick">
+  <div id="stick"></div>
+ </div>
+
+ <button id="flash">СВЕТ</button>
+
+ <div id="look"></div>
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getDatabase, ref, get, set, update, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js";
 
-/* ВАЖНО: вставь сюда точный firebaseConfig из Firebase Console → Project settings → Your apps.
-   Не придумывай appId. Остальные значения тоже должны совпадать с твоим проектом. */
+// FIREBASE IMPORTS
+
+import {initializeApp}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+ getAuth,
+ signInAnonymously
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+ getDatabase,
+ ref,
+ get,
+ set,
+ update,
+ onValue,
+ onDisconnect,
+ remove,
+ runTransaction
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// FIREBASE CONFIG
+
 const firebaseConfig = {
-  apiKey: "AIzaSyAMCgVPoPd_NS9ahlCp5Ka9YNT2dk-viwg",
-  authDomain: "lapochka-76772.firebaseapp.com",
-  databaseURL: "https://lapochka-76772-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "lapochka-76772",
-  storageBucket: "lapochka-76772.firebasestorage.app",
-  messagingSenderId: "146260614860",
-  appId: "1:146260614860:web:3b8177d3ab5bd714b6ec69"
+ apiKey:"AIzaSyAMCgVPoPd_NS9ahlCp5Ka9YNT2dk-viwg",
+ authDomain:"lapochka-76772.firebaseapp.com",
+ databaseURL:"https://lapochka-76772-default-rtdb.europe-west1.firebasedatabase.app",
+ projectId:"lapochka-76772",
+ storageBucket:"lapochka-76772.firebasestorage.app",
+ messagingSenderId:"146260614860",
+ appId:"1:146260614860:web:3b8177d3ab5bd714b6ec69"
 };
 
 const $ = id => document.getElementById(id);
-const status = msg => $("status").textContent = msg;
-let app, auth, db, myUid=null, currentRoom=null, myNick="", myRole="survivor";
-let roomListener=null, playersListener=null, lastSend=0, started=false;
-let scene,camera,renderer,player,flashLight,remoteMeshes={};
-let yaw=0,pitch=0, moveX=0,moveY=0, flashlightOn=true;
+
+let app,auth,db,THREE;
+
+let myUid=null;
+let myNick="";
+let myRole="survivor";
+let currentRoom=null;
+
+let roomListener=null;
+let playersListener=null;
+
+let scene,camera,renderer;
+let player,flashLight;
+
+let remoteMeshes={};
+
+let started=false;
+let flashlightOn=true;
+
+let yaw=0,pitch=0;
+let moveX=0,moveY=0;
+
+let lastSend=0;
+
 const keys={};
-const playerPos={x:0,y:1,z:0};
+
+const playerPos={x:0,z:0};
+
+// STATUS
+
+function status(message){
+ $("status").textContent=message;
+}
+
+function hudStatus(message){
+ $("hudStatus").textContent=message;
+}
+
+// FIREBASE CONNECTION
+
+async function connectFirebase(){
+
+ try{
+
+  status("Подключение к Firebase...");
+
+  app=initializeApp(firebaseConfig);
+  auth=getAuth(app);
+  db=getDatabase(app);
+
+  const credential=await signInAnonymously(auth);
+
+  myUid=credential.user.uid;
+
+  status("Firebase подключён!");
+
+  return true;
+
+ }catch(error){
+
+  console.error(error);
+
+  status(
+   "Ошибка Firebase: "+
+   error.code+" "+
+   error.message
+  );
+
+  return false;
+ }
+}
+
+// 3D INITIALIZATION
+
+async function init3D(){
+
+ try{
+
+  THREE=await import(
+   "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  );
+
+  makeWorld();
+
+ }catch(error){
+
+  console.error(error);
+
+  status("Ошибка загрузки 3D: "+error.message);
+ }
+}
+
+// WORLD
 
 function makeWorld(){
- scene=new THREE.Scene(); scene.background=new THREE.Color(0x08090d); scene.fog=new THREE.Fog(0x08090d,8,34);
- camera=new THREE.PerspectiveCamera(75,innerWidth/innerHeight,.1,100);
- renderer=new THREE.WebGLRenderer({antialias:true}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.setSize(innerWidth,innerHeight);
+
+ scene=new THREE.Scene();
+
+ scene.background=new THREE.Color(0x08090d);
+
+ scene.fog=new THREE.Fog(0x08090d,8,34);
+
+ camera=new THREE.PerspectiveCamera(
+  75,innerWidth/innerHeight,.1,100
+ );
+
+ renderer=new THREE.WebGLRenderer({
+  antialias:true
+ });
+
+ renderer.setPixelRatio(
+  Math.min(devicePixelRatio,2)
+ );
+
+ renderer.setSize(innerWidth,innerHeight);
+
  $("game").appendChild(renderer.domElement);
- scene.add(new THREE.HemisphereLight(0x8790a8,0x17131b,1.2));
- const ambient=new THREE.AmbientLight(0x667080,.35);scene.add(ambient);
- const floor=new THREE.Mesh(new THREE.PlaneGeometry(80,80),new THREE.MeshStandardMaterial({color:0x25252a,roughness:1}));
- floor.rotation.x=-Math.PI/2;floor.position.y=0;scene.add(floor);
- const grid=new THREE.GridHelper(80,40,0x37313b,0x24232b);grid.position.y=.01;scene.add(grid);
- const wallMat=new THREE.MeshStandardMaterial({color:0x34313a,roughness:1});
- function wall(x,y,z,w,h,d){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),wallMat);m.position.set(x,y,z);scene.add(m)}
- // Простая тестовая планировка коридоров и комнат
- wall(0,2,-12,30,4,1);wall(0,2,12,30,4,1);wall(-15,2,0,1,4,24);wall(15,2,0,1,4,24);
- wall(-5,2,-5,1,4,14);wall(5,2,5,1,4,14);wall(0,2,2,10,4,1);
- for(let i=0;i<7;i++){const lamp=new THREE.PointLight(0x9ca6c8,.45,8);lamp.position.set(-10+i*3,3.4,(i%2?5:-5));scene.add(lamp)}
+
+ scene.add(
+  new THREE.HemisphereLight(
+   0x8790a8,0x17131b,1.2
+  )
+ );
+
+ scene.add(
+  new THREE.AmbientLight(0x667080,.35)
+ );
+
+ const floor=new THREE.Mesh(
+  new THREE.PlaneGeometry(80,80),
+  new THREE.MeshStandardMaterial({
+   color:0x25252a,roughness:1
+  })
+ );
+
+ floor.rotation.x=-Math.PI/2;
+
+ scene.add(floor);
+
+ const grid=new THREE.GridHelper(
+  80,40,0x37313b,0x24232b
+ );
+
+ grid.position.y=.01;
+
+ scene.add(grid);
+
+ const wallMat=new THREE.MeshStandardMaterial({
+  color:0x34313a,roughness:1
+ });
+
+ function wall(x,y,z,w,h,d){
+
+  const object=new THREE.Mesh(
+   new THREE.BoxGeometry(w,h,d),
+   wallMat
+  );
+
+  object.position.set(x,y,z);
+
+  scene.add(object);
+ }
+
+ // MAP
+
+ wall(0,2,-12,30,4,1);
+ wall(0,2,12,30,4,1);
+ wall(-15,2,0,1,4,24);
+ wall(15,2,0,1,4,24);
+
+ wall(-5,2,-5,1,4,14);
+ wall(5,2,5,1,4,14);
+ wall(0,2,2,10,4,1);
+
+ for(let i=0;i<7;i++){
+
+  const lamp=new THREE.PointLight(
+   0x9ca6c8,.45,8
+  );
+
+  lamp.position.set(
+   -10+i*3,
+   3.4,
+   i%2?5:-5
+  );
+
+  scene.add(lamp);
+ }
+
+ // LOCAL PLAYER
+
  player=new THREE.Group();
- const body=new THREE.Mesh(new THREE.CapsuleGeometry(.35,.8,4,8),new THREE.MeshStandardMaterial({color:0x6b91a8}));
- body.position.y=.8;player.add(body);scene.add(player);
- flashLight=new THREE.SpotLight(0xffefc5,3,18,Math.PI/7,.45,1.2);flashLight.position.set(0,0,0);flashLight.target.position.set(0,0,-1);camera.add(flashLight);camera.add(flashLight.target);scene.add(camera);
+
+ const body=new THREE.Mesh(
+  new THREE.CapsuleGeometry(.35,.8,4,8),
+  new THREE.MeshStandardMaterial({
+   color:0x6b91a8
+  })
+ );
+
+ body.position.y=.8;
+
+ player.add(body);
+
+ scene.add(player);
+
+ // FLASHLIGHT
+
+ flashLight=new THREE.SpotLight(
+  0xffefc5,3,18,Math.PI/7,.45,1.2
+ );
+
+ flashLight.position.set(0,0,0);
+
+ flashLight.target.position.set(0,0,-1);
+
+ camera.add(flashLight);
+ camera.add(flashLight.target);
+
+ scene.add(camera);
+
  camera.position.set(0,1.65,0);
- addEventListener("resize",()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+
+ addEventListener("resize",resize3D);
+
  animate();
 }
+
+function resize3D(){
+
+ if(!camera||!renderer)return;
+
+ camera.aspect=innerWidth/innerHeight;
+
+ camera.updateProjectionMatrix();
+
+ renderer.setSize(innerWidth,innerHeight);
+}
+
+// GAME LOOP
+
 function animate(){
+
  requestAnimationFrame(animate);
- if(!started){renderer.render(scene,camera);return}
- const speed=.085;
- const forward=new THREE.Vector3(-Math.sin(yaw),0,-Math.cos(yaw));
- const right=new THREE.Vector3(Math.cos(yaw),0,-Math.sin(yaw));
- const dir=forward.multiplyScalar(-moveY).add(right.multiplyScalar(moveX));
- if(dir.lengthSq()>0){dir.normalize().multiplyScalar(speed);playerPos.x+=dir.x;playerPos.z+=dir.z}
- playerPos.x=Math.max(-13,Math.min(13,playerPos.x));playerPos.z=Math.max(-10,Math.min(10,playerPos.z));
- camera.position.set(playerPos.x,1.65,playerPos.z);
- camera.rotation.order="YXZ";camera.rotation.y=yaw;camera.rotation.x=pitch;
- player.position.set(playerPos.x,0,playerPos.z);
- const now=Date.now();
- if(currentRoom && myUid && now-lastSend>120){lastSend=now;update(ref(db,`rooms/${currentRoom}/players/${myUid}`),{x:playerPos.x,z:playerPos.z,yaw,nick:myNick,role:myRole,online:true}).catch(()=>{})}
- Object.entries(remoteMeshes).forEach(([id,obj])=>{const data=obj.userData.remote;if(data){obj.position.x+=(data.x-obj.position.x)*.25;obj.position.z+=(data.z-obj.position.z)*.25}});
+
+ if(!renderer)return;
+
+ if(started){
+
+  const speed=.085;
+
+  const forward=new THREE.Vector3(
+   -Math.sin(yaw),0,-Math.cos(yaw)
+  );
+
+  const right=new THREE.Vector3(
+   Math.cos(yaw),0,-Math.sin(yaw)
+  );
+
+  const direction=forward
+   .multiplyScalar(-moveY)
+   .add(right.multiplyScalar(moveX));
+
+  if(direction.lengthSq()>0){
+
+   direction.normalize().multiplyScalar(speed);
+
+   playerPos.x+=direction.x;
+   playerPos.z+=direction.z;
+  }
+
+  playerPos.x=Math.max(-13,Math.min(13,playerPos.x));
+  playerPos.z=Math.max(-10,Math.min(10,playerPos.z));
+
+  camera.position.set(
+   playerPos.x,1.65,playerPos.z
+  );
+
+  camera.rotation.order="YXZ";
+
+  camera.rotation.y=yaw;
+  camera.rotation.x=pitch;
+
+  player.position.set(
+   playerPos.x,0,playerPos.z
+  );
+
+  // PLAYER SYNCHRONIZATION
+
+  const now=Date.now();
+
+  if(currentRoom&&myUid&&now-lastSend>250){
+
+   lastSend=now;
+
+   update(
+    ref(db,`rooms/${currentRoom}/players/${myUid}`),
+    {
+     x:playerPos.x,
+     z:playerPos.z,
+     yaw,
+     nick:myNick,
+     role:myRole,
+     online:true
+    }
+   ).catch(error=>{
+    hudStatus("Ошибка синхронизации");
+    console.error(error);
+   });
+  }
+
+  // REMOTE PLAYERS
+
+  Object.values(remoteMeshes).forEach(object=>{
+
+   const data=object.userData.remote;
+
+   if(!data)return;
+
+   object.position.x+=(data.x-object.position.x)*.25;
+   object.position.z+=(data.z-object.position.z)*.25;
+
+  });
+ }
+
  renderer.render(scene,camera);
 }
+
+// REMOTE PLAYER
+
 function makeRemote(id,data){
+
  if(id===myUid)return;
- let obj=remoteMeshes[id];
- if(!obj){obj=new THREE.Mesh(new THREE.CapsuleGeometry(.32,.75,4,8),new THREE.MeshStandardMaterial({color:data.role==="monster"?0xb32136:0x7c9cad}));obj.position.y=.8;scene.add(obj);remoteMeshes[id]=obj}
- obj.userData.remote=data;obj.position.x=data.x||0;obj.position.z=data.z||0;
+
+ if(!remoteMeshes[id]){
+
+  const mesh=new THREE.Mesh(
+   new THREE.CapsuleGeometry(.32,.75,4,8),
+   new THREE.MeshStandardMaterial({
+    color:data.role==="monster"?0xb32136:0x7c9cad
+   })
+  );
+
+  mesh.position.y=.8;
+
+  scene.add(mesh);
+
+  remoteMeshes[id]=mesh;
+ }
+
+ const object=remoteMeshes[id];
+
+ object.userData.remote=data;
+
+ object.material.color.set(
+  data.role==="monster"?0xb32136:0x7c9cad
+ );
 }
-function clearRemotes(){Object.values(remoteMeshes).forEach(o=>scene.remove(o));remoteMeshes={}}
-async function connect(){
- try{
-  if(firebaseConfig.appId.startsWith("ВСТАВЬ")) throw new Error("Нужно вставить точный appId из настроек Firebase.");
-  app=initializeApp(firebaseConfig);auth=getAuth(app);db=getDatabase(app);
-  const cred=await signInAnonymously(auth);myUid=cred.user.uid;
-  status("Firebase подключён. Введи ник и создай комнату.");
- }catch(e){status("Ошибка Firebase: "+e.message)}
+
+function clearRemotes(){
+
+ Object.values(remoteMeshes).forEach(object=>{
+  scene.remove(object);
+  object.geometry.dispose();
+  object.material.dispose();
+ });
+
+ remoteMeshes={};
 }
+
+// ROOM CODE
+
+function generateCode(){
+
+ const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+ let code="";
+
+ for(let i=0;i<6;i++){
+
+  code+=chars[Math.floor(Math.random()*chars.length)];
+ }
+
+ return code;
+}
+
+// CREATE ROOM
+
 async function createRoom(){
- if(!db||!myUid)return status("Сначала исправь Firebase config и обнови страницу.");
- myNick=$("nick").value.trim().slice(0,16);if(!myNick)return status("Введи ник.");
+
+ if(!db||!myUid){
+  return status("Firebase ещё не подключён.");
+ }
+
+ myNick=$("nick").value.trim().slice(0,16);
+
+ if(!myNick){
+  return status("Введи ник.");
+ }
+
  try{
-  let code=Math.random().toString(36).slice(2,8).toUpperCase();
-  const roomRef=ref(db,`rooms/${code}`);
-  await set(roomRef,{host:myUid,status:"waiting",createdAt:Date.now(),players:{[myUid]:{nick:myNick,x:0,z:0,role:"survivor",online:true}}});
-  currentRoom=code;await onDisconnect(ref(db,`rooms/${code}/players/${myUid}`)).remove();
-  enterGame();watchRoom();status("");
- }catch(e){status("Не удалось создать комнату: "+e.message)}
-}
-async function joinRoom(){
- if(!db||!myUid)return status("Сначала исправь Firebase config и обнови страницу.");
- myNick=$("nick").value.trim().slice(0,16);const code=$("roomCode").value.trim().toUpperCase();
- if(!myNick)return status("Введи ник.");if(!/^[A-Z0-9]{6}$/.test(code))return status("Введи 6-значный код комнаты.");
- try{
-  const roomRef=ref(db,`rooms/${code}`),snap=await get(roomRef);
-  if(!snap.exists())return status("Комната не найдена.");
-  const data=snap.val(),count=Object.keys(data.players||{}).length;
-  if(count>=8)return status("Комната заполнена (максимум 8 игроков).");
-  if(data.status==="playing")return status("Игра уже началась.");
-  currentRoom=code;
-  await set(ref(db,`rooms/${code}/players/${myUid}`),{nick:myNick,x:0,z:0,role:"survivor",online:true});
-  await onDisconnect(ref(db,`rooms/${code}/players/${myUid}`)).remove();
-  enterGame();watchRoom();status("");
- }catch(e){status("Не удалось войти: "+e.message)}
-}
-function enterGame(){
- $("menu").style.display="none";$("hud").style.display="block";$("roomLabel").textContent="Комната: "+currentRoom;
- started=true;playerPos.x=0;playerPos.z=0;
-}
-function watchRoom(){
- if(roomListener)roomListener();if(playersListener)playersListener();
- roomListener=onValue(ref(db,`rooms/${currentRoom}`),snap=>{
-  const data=snap.val();if(!data)return;
-  $("role").textContent=data.status==="playing"?(myRole==="monster"?"РОЛЬ: МОНСТР":"РОЛЬ: ВЫЖИВШИЙ"):"Ожидание игроков";
-  const players=data.players||{};
-  if(data.status==="playing"&&players[myUid]?.role)myRole=players[myUid].role;
-  if(data.status==="waiting"&&Object.keys(players).length>=2&&data.host===myUid){
-   $("role").textContent="Игроков: "+Object.keys(players).length+" · Нажми СТАРТ";
-   showStartButton();
+
+  status("Создание комнаты...");
+
+  let code=null;
+
+  for(let attempt=0;attempt<5;attempt++){
+
+   const candidate=generateCode();
+
+   const roomRef=ref(db,`rooms/${candidate}`);
+
+   const result=await runTransaction(
+    roomRef,
+    current=>{
+
+     if(current!==null)return;
+
+     return {
+      host:myUid,
+      status:"waiting",
+      createdAt:Date.now(),
+      players:{
+       [myUid]:{
+        nick:myNick,
+        x:0,
+        z:0,
+        role:"survivor",
+        online:true
+       }
+      }
+     };
+    },
+    {applyLocally:false}
+   );
+
+   if(result.committed){
+    code=candidate;
+    break;
+   }
   }
- });
- playersListener=onValue(ref(db,`rooms/${currentRoom}/players`),snap=>{
-  const players=snap.val()||{};Object.entries(players).forEach(([id,p])=>makeRemote(id,p));
-  Object.keys(remoteMeshes).forEach(id=>{if(!players[id]){scene.remove(remoteMeshes[id]);delete remoteMeshes[id]}});
- });
+
+  if(!code){
+   return status("Не удалось создать уникальную комнату.");
+  }
+
+  currentRoom=code;
+
+  await onDisconnect(
+   ref(db,`rooms/${code}/players/${myUid}`)
+  ).remove();
+
+  enterGame();
+
+  watchRoom();
+
+ }catch(error){
+
+  console.error(error);
+
+  status("Ошибка создания: "+error.message);
+ }
 }
+
+// JOIN ROOM
+
+async function joinRoom(){
+
+ if(!db||!myUid){
+  return status("Firebase ещё не подключён.");
+ }
+
+ myNick=$("nick").value.trim().slice(0,16);
+
+ const code=$("roomCode").value.trim().toUpperCase();
+
+ if(!myNick)return status("Введи ник.");
+
+ if(!/^[A-Z0-9]{6}$/.test(code)){
+  return status("Код должен содержать 6 символов.");
+ }
+
+ try{
+
+  status("Поиск комнаты...");
+
+  const roomRef=ref(db,`rooms/${code}`);
+
+  const result=await runTransaction(
+   roomRef,
+   current=>{
+
+    if(!current)return;
+
+    if(current.status!=="waiting")return;
+
+    if(!current.players)current.players={};
+
+    if(current.players[myUid])return current;
+
+    const count=Object.keys(current.players).length;
+
+    if(count>=8)return;
+
+    current.players[myUid]={
+     nick:myNick,
+     x:0,
+     z:0,
+     role:"survivor",
+     online:true
+    };
+
+    return current;
+   },
+   {applyLocally:false}
+  );
+
+  if(!result.committed){
+
+   const check=await get(roomRef);
+
+   if(!check.exists()){
+    return status("Комната не найдена.");
+   }
+
+   const data=check.val();
+
+   if(data.status==="playing"){
+    return status("Игра уже началась.");
+   }
+
+   return status("Комната заполнена или недоступна.");
+  }
+
+  currentRoom=code;
+
+  await onDisconnect(
+   ref(db,`rooms/${code}/players/${myUid}`)
+  ).remove();
+
+  enterGame();
+
+  watchRoom();
+
+ }catch(error){
+
+  console.error(error);
+
+  status("Ошибка входа: "+error.message);
+ }
+}
+
+// ENTER GAME
+
+function enterGame(){
+
+ $("menu").style.display="none";
+
+ $("hud").style.display="block";
+
+ $("roomLabel").textContent="Комната: "+currentRoom;
+
+ $("role").textContent="Ожидание игроков";
+
+ hudStatus("Firebase подключён");
+
+ started=true;
+
+ playerPos.x=0;
+ playerPos.z=0;
+
+ myRole="survivor";
+}
+
+// WATCH ROOM
+
+function watchRoom(){
+
+ if(roomListener)roomListener();
+
+ if(playersListener)playersListener();
+
+ roomListener=onValue(
+  ref(db,`rooms/${currentRoom}`),
+
+  snap=>{
+
+   const data=snap.val();
+
+   if(!data){
+
+    hudStatus("Комната закрыта");
+
+    return;
+   }
+
+   const players=data.players||{};
+
+   if(data.status==="playing"){
+
+    myRole=players[myUid]?.role||"survivor";
+
+    $("role").textContent=
+     myRole==="monster"?"РОЛЬ: МОНСТР":"РОЛЬ: ВЫЖИВШИЙ";
+
+    $("startGame")?.remove();
+
+   }else{
+
+    $("role").textContent=
+     "Игроков: "+Object.keys(players).length;
+
+    if(data.host===myUid&&Object.keys(players).length>=2){
+
+     showStartButton();
+
+    }else{
+
+     $("startGame")?.remove();
+    }
+   }
+
+   hudStatus("Онлайн · Игроков: "+Object.keys(players).length);
+
+  },
+
+  error=>{
+
+   console.error(error);
+
+   hudStatus("Ошибка комнаты: "+error.message);
+  }
+ );
+
+ playersListener=onValue(
+  ref(db,`rooms/${currentRoom}/players`),
+
+  snap=>{
+
+   const players=snap.val()||{};
+
+   Object.entries(players).forEach(([id,data])=>{
+    makeRemote(id,data);
+   });
+
+   Object.keys(remoteMeshes).forEach(id=>{
+
+    if(!players[id]){
+
+     scene.remove(remoteMeshes[id]);
+
+     remoteMeshes[id].geometry.dispose();
+     remoteMeshes[id].material.dispose();
+
+     delete remoteMeshes[id];
+    }
+   });
+  },
+
+  error=>{
+
+   console.error(error);
+
+   hudStatus("Ошибка игроков");
+  }
+ );
+}
+
+// START BUTTON
+
 function showStartButton(){
+
  if($("startGame"))return;
- const b=document.createElement("button");b.id="startGame";b.textContent="СТАРТ (от 2 игроков)";
- b.style.cssText="position:absolute;top:105px;left:50%;transform:translateX(-50%);width:auto;pointer-events:auto;padding:12px 18px";
- $("hud").appendChild(b);b.onclick=startGame;
+
+ const button=document.createElement("button");
+
+ button.id="startGame";
+
+ button.textContent="СТАРТ · 2 ИГРОКА";
+
+ $("hud").appendChild(button);
+
+ button.onclick=startGame;
 }
+
+// START GAME
+
 async function startGame(){
- const snap=await get(ref(db,`rooms/${currentRoom}`));if(!snap.exists())return;
- const data=snap.val();if(data.host!==myUid)return;
- const ids=Object.keys(data.players||{});if(ids.length<2)return;
- const monster=ids[Math.floor(Math.random()*ids.length)];
- const updates={status:"playing"};
- ids.forEach(id=>updates[`players/${id}/role`]=id===monster?"monster":"survivor");
- await update(ref(db,`rooms/${currentRoom}`),updates);
- $("startGame")?.remove();
+
+ try{
+
+  const roomRef=ref(db,`rooms/${currentRoom}`);
+
+  const snap=await get(roomRef);
+
+  if(!snap.exists())return;
+
+  const data=snap.val();
+
+  if(data.host!==myUid)return;
+
+  const ids=Object.keys(data.players||{});
+
+  if(ids.length<2){
+
+   hudStatus("Нужно минимум 2 игрока");
+
+   return;
+  }
+
+  const monster=ids[
+   Math.floor(Math.random()*ids.length)
+  ];
+
+  const updates={
+   status:"playing"
+  };
+
+  ids.forEach(id=>{
+
+   updates[`players/${id}/role`]=
+    id===monster?"monster":"survivor";
+  });
+
+  await update(roomRef,updates);
+
+  $("startGame")?.remove();
+
+ }catch(error){
+
+  console.error(error);
+
+  hudStatus("Ошибка старта: "+error.message);
+ }
 }
+
+// LEAVE GAME
+
 async function leaveGame(){
- if(currentRoom&&myUid){try{await remove(ref(db,`rooms/${currentRoom}/players/${myUid}`))}catch{}}
- if(roomListener)roomListener();if(playersListener)playersListener();
- currentRoom=null;started=false;clearRemotes();$("hud").style.display="none";$("menu").style.display="flex";$("role").textContent="Ожидание";
+
+ if(currentRoom&&myUid){
+
+  try{
+
+   const roomRef=ref(db,`rooms/${currentRoom}`);
+
+   await runTransaction(roomRef,current=>{
+
+    if(!current)return;
+
+    if(current.players){
+     delete current.players[myUid];
+    }
+
+    const remaining=Object.keys(
+     current.players||{}
+    );
+
+    if(remaining.length===0)return null;
+
+    if(current.host===myUid){
+     current.host=remaining[0];
+    }
+
+    return current;
+   });
+
+  }catch(error){
+
+   console.error(error);
+  }
+ }
+
+ if(roomListener)roomListener();
+
+ if(playersListener)playersListener();
+
+ roomListener=null;
+ playersListener=null;
+
+ currentRoom=null;
+
+ started=false;
+
+ clearRemotes();
+
+ $("startGame")?.remove();
+
+ $("hud").style.display="none";
+
+ $("menu").style.display="flex";
+
+ $("role").textContent="Ожидание";
+
+ status("Ты вышел из комнаты.");
 }
-$("create").onclick=createRoom;$("join").onclick=joinRoom;$("exit").onclick=leaveGame;
-$("flash").onclick=()=>{flashlightOn=!flashlightOn;flashLight.visible=flashlightOn;$("flash").textContent=flashlightOn?"СВЕТ":"СВЕТ OFF"};
-addEventListener("keydown",e=>{keys[e.key.toLowerCase()]=true;updateKeys()});
-addEventListener("keyup",e=>{keys[e.key.toLowerCase()]=false;updateKeys()});
-function updateKeys(){moveX=(keys.d||keys.arrowright?1:0)-(keys.a||keys.arrowleft?1:0);moveY=(keys.w||keys.arrowup?1:0)-(keys.s||keys.arrowdown?1:0)}
-const joy=$("joystick"),stick=$("stick");let joyPointer=null;
-joy.addEventListener("pointerdown",e=>{joyPointer=e.pointerId;joy.setPointerCapture(e.pointerId);moveJoy(e)});
-joy.addEventListener("pointermove",e=>{if(e.pointerId===joyPointer)moveJoy(e)});
-function moveJoy(e){const r=joy.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=e.clientX-cx,dy=e.clientY-cy;const max=42,len=Math.hypot(dx,dy);if(len>max){dx=dx/len*max;dy=dy/len*max}stick.style.transform=`translate(${dx}px,${dy}px)`;moveX=dx/max;moveY=dy/max}
-function resetJoy(){joyPointer=null;stick.style.transform="";moveX=0;moveY=0}
-joy.addEventListener("pointerup",resetJoy);joy.addEventListener("pointercancel",resetJoy);
-let lookPointer=null,lastX=0,lastY=0;
-$("look").addEventListener("pointerdown",e=>{lookPointer=e.pointerId;lastX=e.clientX;lastY=e.clientY;$("look").setPointerCapture(e.pointerId)});
-$("look").addEventListener("pointermove",e=>{if(e.pointerId!==lookPointer)return;const dx=e.clientX-lastX,dy=e.clientY-lastY;lastX=e.clientX;lastY=e.clientY;yaw-=dx*.006;pitch=Math.max(-1.1,Math.min(1.1,pitch-dy*.006)});
-$("look").addEventListener("pointerup",()=>lookPointer=null);$("look").addEventListener("pointercancel",()=>lookPointer=null);
-makeWorld();connect();
+
+// CONTROLS
+
+$("create").onclick=createRoom;
+
+$("join").onclick=joinRoom;
+
+$("exit").onclick=leaveGame;
+
+$("flash").onclick=()=>{
+
+ flashlightOn=!flashlightOn;
+
+ if(flashLight){
+  flashLight.visible=flashlightOn;
+ }
+
+ $("flash").textContent=
+  flashlightOn?"СВЕТ":"СВЕТ OFF";
+};
+
+// KEYBOARD
+
+addEventListener("keydown",event=>{
+
+ keys[event.key.toLowerCase()]=true;
+
+ updateKeys();
+});
+
+addEventListener("keyup",event=>{
+
+ keys[event.key.toLowerCase()]=false;
+
+ updateKeys();
+});
+
+function updateKeys(){
+
+ moveX=
+  (keys.d||keys.arrowright?1:0)-
+  (keys.a||keys.arrowleft?1:0);
+
+ moveY=
+  (keys.s||keys.arrowdown?1:0)-
+  (keys.w||keys.arrowup?1:0);
+}
+
+// JOYSTICK
+
+const joy=$("joystick");
+const stick=$("stick");
+
+let joyPointer=null;
+
+joy.addEventListener("pointerdown",event=>{
+
+ joyPointer=event.pointerId;
+
+ joy.setPointerCapture(event.pointerId);
+
+ moveJoy(event);
+});
+
+joy.addEventListener("pointermove",event=>{
+
+ if(event.pointerId===joyPointer){
+  moveJoy(event);
+ }
+});
+
+function moveJoy(event){
+
+ const rect=joy.getBoundingClientRect();
+
+ const cx=rect.left+rect.width/2;
+ const cy=rect.top+rect.height/2;
+
+ let dx=event.clientX-cx;
+ let dy=event.clientY-cy;
+
+ const max=42;
+ const length=Math.hypot(dx,dy);
+
+ if(length>max){
+
+  dx=dx/length*max;
+  dy=dy/length*max;
+ }
+
+ stick.style.transform=
+  `translate(${dx}px,${dy}px)`;
+
+ moveX=dx/max;
+ moveY=dy/max;
+}
+
+function resetJoy(){
+
+ joyPointer=null;
+
+ stick.style.transform="";
+
+ moveX=0;
+ moveY=0;
+}
+
+joy.addEventListener("pointerup",resetJoy);
+
+joy.addEventListener("pointercancel",resetJoy);
+
+// CAMERA LOOK
+
+let lookPointer=null;
+
+let lastX=0,lastY=0;
+
+$("look").addEventListener("pointerdown",event=>{
+
+ lookPointer=event.pointerId;
+
+ lastX=event.clientX;
+ lastY=event.clientY;
+
+ $("look").setPointerCapture(event.pointerId);
+});
+
+$("look").addEventListener("pointermove",event=>{
+
+ if(event.pointerId!==lookPointer)return;
+
+ const dx=event.clientX-lastX;
+ const dy=event.clientY-lastY;
+
+ lastX=event.clientX;
+ lastY=event.clientY;
+
+ yaw-=dx*.006;
+
+ pitch=Math.max(
+  -1.1,
+  Math.min(1.1,pitch-dy*.006)
+ );
+});
+
+$("look").addEventListener("pointerup",()=>{
+ lookPointer=null;
+});
+
+$("look").addEventListener("pointercancel",()=>{
+ lookPointer=null;
+});
+
+// INITIALIZE
+
+const firebaseReady=await connectFirebase();
+
+init3D();
+
+if(!firebaseReady){
+
+ status("Firebase не подключён. Проверь настройки.");
+}
+
 </script>
 </body>
 </html>
